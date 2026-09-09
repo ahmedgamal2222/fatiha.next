@@ -1,0 +1,15 @@
+﻿
+@font-face {
+    font-family: '18 Khebrat Musamim Regular';
+    src: url('/Fonts/18KhebratMusamimRegular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+h2, h4, div, span {
+    font-family: '18 Khebrat Musamim Regular', sans-serif;
+}
+
+body {
+    font-family: '18 Khebrat Musamim Regular', sans-serif;
+}
