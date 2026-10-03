@@ -43,7 +43,7 @@ export function About() {
         <div className="fh-center">
           <span className="fh-eyebrow">
             <i className="fas fa-mosque"></i>
-            {t("About Fatiha.ID Platform")}
+            Fatiha.ID
           </span>
           <h2 className="fh-heading">{t("About Fatiha.ID Platform")}</h2>
           <p className="fh-subheading">

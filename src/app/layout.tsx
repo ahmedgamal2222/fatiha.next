@@ -12,22 +12,13 @@ export const metadata: Metadata = {
   icons: { icon: "/Logo.png" },
 };
 
-// أنماط قالب أنغولار الأصلي (منسوخة إلى public) لمطابقة الشكل تماماً
+// أنماط أساسية فقط: Bootstrap (شبكة/مكوّنات) + Font Awesome (أيقونات) + Swiper (الكاروسيل).
+// أُزيلت ملفات القالب القديمة (Global.css/site.css/style.css/styles.css...) لأنها كانت
+// تُبهت التصميم وتتعارض مع نظام التصميم الاحترافي الجديد في globals.css.
 const TEMPLATE_CSS = [
-  "https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css",
+  "https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css",
   "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css",
   "https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css",
-  "/css/Global.css",
-  "/css/site.css",
-  "/css/manage-audio.css",
-  "/assets/css/lightgallery.min.css",
-  "/assets/css/select2.min.css",
-  "/assets/css/slick.css",
-  "/assets/css/jquery-ui.min.css",
-  "/assets/css/animate.min.css",
-  "/assets/css/animated-headline.css",
-  "/assets/css/style.css",
-  "/styles.css",
 ];
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -37,8 +28,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {TEMPLATE_CSS.map((href) => (
           <link key={href} rel="stylesheet" href={href} />
         ))}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Poppins:wght@400;500;600;700;800&display=swap"
           rel="stylesheet"
         />
       </head>
@@ -49,11 +42,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Footer />
         </Providers>
 
-        {/* مكتبات القالب: jQuery + Bootstrap bundle + Swiper + تأثير الماء (ripples) */}
-        <Script src="https://code.jquery.com/jquery-3.6.4.min.js" strategy="beforeInteractive" />
+        {/* مكتبات أساسية: Bootstrap (القوائم المنسدلة) + Swiper (الكاروسيل) */}
         <Script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" strategy="afterInteractive" />
         <Script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js" strategy="afterInteractive" />
-        <Script src="/assets/js/ripples.min.js" strategy="afterInteractive" />
       </body>
     </html>
   );
