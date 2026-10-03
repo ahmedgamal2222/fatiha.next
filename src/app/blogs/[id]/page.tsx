@@ -15,8 +15,7 @@ interface Blog {
 export default function BlogDetailPage() {
   const params = useParams();
   const id = params?.id as string;
-  const { lang } = useI18n();
-  const ar = lang === "ar";
+  const { t } = useI18n();
   const [blog, setBlog] = useState<Blog | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -29,8 +28,8 @@ export default function BlogDetailPage() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  if (loading) return <div className="container py-5 min-vh-100">{ar ? "جارٍ التحميل..." : "Loading..."}</div>;
-  if (!blog) return <div className="container py-5 min-vh-100">{ar ? "لا توجد بيانات" : "No data"}</div>;
+  if (loading) return <div className="container py-5 min-vh-100">{t("Loading...")}</div>;
+  if (!blog) return <div className="container py-5 min-vh-100">{t("No data")}</div>;
 
   return (
     <div className="container py-5 min-vh-100 bg-light">
@@ -40,7 +39,7 @@ export default function BlogDetailPage() {
             <h1 className="fw-bold text-primary">{blog.title}</h1>
             <p className="text-muted small">
               <i className="fas fa-eye me-1"></i>
-              {blog.reads} {ar ? "قراءة" : "Reads"}
+              {blog.reads} {t("Reads")}
             </p>
             <hr />
             <div dangerouslySetInnerHTML={{ __html: blog.body }} />

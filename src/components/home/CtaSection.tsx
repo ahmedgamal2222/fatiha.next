@@ -1,27 +1,44 @@
 "use client";
 
+import Link from "next/link";
 import { useI18n } from "@/context/I18nContext";
+import { useAuth } from "@/context/AuthContext";
 
 export function CtaSection() {
-  const { lang } = useI18n();
+  const { t } = useI18n();
+  const { isAuthed, user } = useAuth();
+  const isAdmin = user?.role === "Admin";
+
   return (
-    <div className="cs-dark__bg">
-      <div className="container">
-        <div className="cs-cta cs-style3 cs-color1">
-          <div className="cs-cta__img">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="https://cdn-icons-png.flaticon.com/256/9957/9957795.png" alt="Certificate" />
+    <section className="fh-cta">
+      <div className="fh-container">
+        <div className="fh-cta__card">
+          <div className="fh-cta__icon">
+            <i className="fas fa-award"></i>
           </div>
-          <div className="cs-cta__text">
-            <h2 className="cs-cta__title">
-              {lang === "ar"
-                ? "مُجازونا المعتمدون متاحون على مدار الساعة لمساعدتك على تلاوة سورة الفاتحة وفهمها ومنحك الشهادة."
-                : "Our certified instructors are available 24/7 to help you recite, understand, and certify you with Surat Al-Fatiha."}
+          <div className="fh-cta__body">
+            <h2 className="fh-cta__title">
+              {t(
+                "Our certified instructors are available 24/7 to help you recite, understand, and certify you with Surat Al-Fatiha."
+              )}
             </h2>
-            <div className="cs-cta__subtitle"></div>
+            <div className="fh-hero__actions" style={{ justifyContent: "center", marginTop: 20 }}>
+              {isAuthed && !isAdmin && (
+                <Link href="/fatiha-requests" className="fh-btn fh-btn--primary">
+                  <i className="fas fa-file-signature"></i>
+                  {t("Apply for Fatiha")}
+                </Link>
+              )}
+              {!isAuthed && (
+                <Link href="/register" className="fh-btn fh-btn--primary">
+                  <i className="fas fa-user-plus"></i>
+                  {t("Register")}
+                </Link>
+              )}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

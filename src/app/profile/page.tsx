@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useI18n } from "@/context/I18nContext";
 import { api } from "@/lib/api";
+import { CertificateButton } from "@/components/CertificateButton";
 
 interface PointsData {
   total: number;
@@ -18,8 +19,7 @@ interface Certificate {
 
 export default function ProfilePage() {
   const { user, loading, refresh } = useAuth();
-  const { lang } = useI18n();
-  const ar = lang === "ar";
+  const { t } = useI18n();
   const router = useRouter();
   const [points, setPoints] = useState<PointsData | null>(null);
   const [certs, setCerts] = useState<Certificate[]>([]);
@@ -42,18 +42,18 @@ export default function ProfilePage() {
     form.append("file", file);
     try {
       await api.upload("/api/account/profile/image", form);
-      setMsg(ar ? "تم تحديث الصورة" : "Image updated");
+      setMsg(t("Image updated"));
       await refresh();
     } catch {
-      setMsg(ar ? "فشل رفع الصورة" : "Upload failed");
+      setMsg(t("Upload failed"));
     }
   }
 
-  if (loading || !user) return <div className="container py-5 min-vh-100">{ar ? "جارٍ التحميل..." : "Loading..."}</div>;
+  if (loading || !user) return <div className="container py-5 min-vh-100">{t("Loading...")}</div>;
 
   return (
     <div className="container py-5 min-vh-100 bg-light">
-      <h2 className="fw-bold text-primary mb-4">{ar ? "الملف الشخصي" : "Profile"}</h2>
+      <h2 className="fw-bold text-primary mb-4">{t("Profile")}</h2>
       {msg && <div className="alert alert-success">{msg}</div>}
 
       <div className="row g-4">
@@ -77,11 +77,11 @@ export default function ProfilePage() {
                 </div>
               </div>
               <hr />
-              <label className="form-label fw-semibold small">{ar ? "تغيير الصورة" : "Change image"}</label>
+              <label className="form-label fw-semibold small">{t("Change image")}</label>
               <input type="file" accept="image/*" onChange={onImage} className="form-control" />
               <div className="mt-3">
                 <div className="d-flex justify-content-between small text-muted mb-1">
-                  <span>{ar ? "اكتمال الملف" : "Completion"}</span>
+                  <span>{t("Completion")}</span>
                   <span>{user.profileCompletionPercentage ?? 0}%</span>
                 </div>
                 <div className="progress" style={{ height: 8 }}>
@@ -95,16 +95,16 @@ export default function ProfilePage() {
         <div className="col-lg-7">
           <div className="card shadow-sm border-0 rounded-4 mb-4">
             <div className="card-body">
-              <h5 className="fw-bold">{ar ? "النقاط" : "Points"}</h5>
+              <h5 className="fw-bold">{t("Points")}</h5>
               <div className="display-6 fw-bold text-primary">{points?.total ?? 0}</div>
-              <p className="text-muted small mb-0">{ar ? "إجمالي النقاط" : "Total points"}</p>
+              <p className="text-muted small mb-0">{t("Total points")}</p>
             </div>
           </div>
           <div className="card shadow-sm border-0 rounded-4">
             <div className="card-body">
-              <h5 className="fw-bold">{ar ? "الشهادات" : "Certificates"}</h5>
+              <h5 className="fw-bold">{t("Certificates")}</h5>
               {certs.length === 0 ? (
-                <p className="text-muted mb-0">{ar ? "لا توجد بيانات" : "No data"}</p>
+                <p className="text-muted mb-0">{t("No data")}</p>
               ) : (
                 <ul className="list-group list-group-flush">
                   {certs.map((c) => (
@@ -112,11 +112,7 @@ export default function ProfilePage() {
                       <span>
                         #{c.id} — {new Date(c.dateOfIssue * 1000).toLocaleDateString()}
                       </span>
-                      {c.pdfUrl && (
-                        <a href={c.pdfUrl} target="_blank" rel="noreferrer" className="btn btn-sm btn-outline-primary">
-                          PDF
-                        </a>
-                      )}
+                      <CertificateButton certificateId={c.id} />
                     </li>
                   ))}
                 </ul>

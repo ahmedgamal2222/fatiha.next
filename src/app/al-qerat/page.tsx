@@ -12,8 +12,7 @@ interface Qerat {
 }
 
 export default function AlQeratPage() {
-  const { lang } = useI18n();
-  const ar = lang === "ar";
+  const { t } = useI18n();
   const [items, setItems] = useState<Qerat[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -27,11 +26,11 @@ export default function AlQeratPage() {
 
   return (
     <div className="container py-5 min-vh-100 bg-light">
-      <h2 className="fw-bold text-primary mb-4">{ar ? "القراءات العشر" : "The Ten Qiraat"}</h2>
+      <h2 className="fw-bold text-primary mb-4">{t("The Ten Qiraat")}</h2>
       {loading ? (
-        <p className="text-muted">{ar ? "جارٍ التحميل..." : "Loading..."}</p>
+        <p className="text-muted">{t("Loading...")}</p>
       ) : items.length === 0 ? (
-        <p className="text-muted">{ar ? "لا توجد بيانات" : "No data"}</p>
+        <p className="text-muted">{t("No data")}</p>
       ) : (
         <div className="row g-4">
           {items.map((q) => (

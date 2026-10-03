@@ -16,8 +16,7 @@ interface Blog {
 const PAGE_SIZE = 9;
 
 export default function BlogsPage() {
-  const { lang } = useI18n();
-  const ar = lang === "ar";
+  const { t } = useI18n();
   const [all, setAll] = useState<Blog[]>([]);
   const [searchTerm, setSearch] = useState("");
   const [applied, setApplied] = useState("");
@@ -51,7 +50,7 @@ export default function BlogsPage() {
               setPage(1);
             }
           }}
-          placeholder={ar ? "ابحث في المدوّنة" : "Search Blogs"}
+          placeholder={t("Search Blogs")}
           className="form-control form-control-lg shadow-sm"
         />
       </div>
@@ -64,13 +63,13 @@ export default function BlogsPage() {
                 <h5 className="card-title text-truncate mb-3 fw-bold text-primary">{blog.title}</h5>
                 <p className="card-text text-muted small mb-4">{stripHtml(blog.body, 150)}...</p>
                 <div className="mt-auto d-flex justify-content-between align-items-center small text-muted">
-                  <span className="badge bg-primary-subtle text-primary">{blog.category || (ar ? "غير مصنّف" : "Uncategorized")}</span>
+                  <span className="badge bg-primary-subtle text-primary">{blog.category || (t("Uncategorized"))}</span>
                   <span>
-                    {blog.reads} {ar ? "قراءة" : "Reads"}
+                    {blog.reads} {t("Reads")}
                   </span>
                 </div>
                 <Link href={`/blogs/${blog.id}`} className="stretched-link text-decoration-none mt-3 text-primary fw-semibold small">
-                  {ar ? "اقرأ المزيد" : "Read More"} →
+                  {t("Read More")} →
                 </Link>
               </div>
             </div>

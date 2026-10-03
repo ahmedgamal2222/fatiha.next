@@ -2,12 +2,16 @@
 
 import { I18nProvider } from "@/context/I18nContext";
 import { AuthProvider } from "@/context/AuthContext";
+import { LanguageModal } from "@/components/LanguageModal";
 import { ReactNode } from "react";
 
 export function Providers({ children }: { children: ReactNode }) {
   return (
     <I18nProvider>
-      <AuthProvider>{children}</AuthProvider>
+      <AuthProvider>
+        {children}
+        <LanguageModal />
+      </AuthProvider>
     </I18nProvider>
   );
 }

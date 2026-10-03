@@ -16,8 +16,7 @@ interface StaticPage {
 export default function PageViewer() {
   const params = useParams();
   const id = params?.id as string;
-  const { lang } = useI18n();
-  const ar = lang === "ar";
+  const { t } = useI18n();
   const [page, setPage] = useState<StaticPage | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -26,8 +25,8 @@ export default function PageViewer() {
     api.get<StaticPage>(`/api/pages/${id}`, false).then((r) => setPage(r.data ?? null)).catch(() => setPage(null)).finally(() => setLoading(false));
   }, [id]);
 
-  if (loading) return <div className="container py-5 min-vh-100">{ar ? "جارٍ التحميل..." : "Loading..."}</div>;
-  if (!page) return <div className="container py-5 min-vh-100">{ar ? "الصفحة غير موجودة" : "Page not found"}</div>;
+  if (loading) return <div className="container py-5 min-vh-100">{t("Loading...")}</div>;
+  if (!page) return <div className="container py-5 min-vh-100">{t("Page not found")}</div>;
 
   return (
     <div className="container py-5 min-vh-100 bg-light">

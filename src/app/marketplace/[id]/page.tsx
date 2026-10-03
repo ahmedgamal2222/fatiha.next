@@ -22,8 +22,7 @@ interface Product {
 export default function ProductDetailsPage() {
   const params = useParams();
   const id = params?.id as string;
-  const { lang } = useI18n();
-  const ar = lang === "ar";
+  const { t } = useI18n();
   const [p, setP] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -32,8 +31,8 @@ export default function ProductDetailsPage() {
     api.get<Product>(`/api/marketplace/${id}`, false).then((r) => setP(r.data ?? null)).catch(() => setP(null)).finally(() => setLoading(false));
   }, [id]);
 
-  if (loading) return <div className="container py-5 min-vh-100">{ar ? "جارٍ التحميل..." : "Loading..."}</div>;
-  if (!p) return <div className="container py-5 min-vh-100">{ar ? "المنتج غير موجود" : "Product not found"}</div>;
+  if (loading) return <div className="container py-5 min-vh-100">{t("Loading...")}</div>;
+  if (!p) return <div className="container py-5 min-vh-100">{t("Product not found")}</div>;
 
   return (
     <div className="container py-5 min-vh-100 bg-light">

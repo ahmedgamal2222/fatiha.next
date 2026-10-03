@@ -21,8 +21,7 @@ interface Book {
 export default function BookDetailsPage() {
   const params = useParams();
   const id = params?.id as string;
-  const { lang } = useI18n();
-  const ar = lang === "ar";
+  const { t } = useI18n();
   const [b, setB] = useState<Book | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -41,8 +40,8 @@ export default function BookDetailsPage() {
     }
   }
 
-  if (loading) return <div className="container py-5 min-vh-100">{ar ? "جارٍ التحميل..." : "Loading..."}</div>;
-  if (!b) return <div className="container py-5 min-vh-100">{ar ? "الكتاب غير موجود" : "Book not found"}</div>;
+  if (loading) return <div className="container py-5 min-vh-100">{t("Loading...")}</div>;
+  if (!b) return <div className="container py-5 min-vh-100">{t("Book not found")}</div>;
 
   return (
     <div className="container py-5 min-vh-100 bg-light">
@@ -62,7 +61,7 @@ export default function BookDetailsPage() {
           {b.description && <p style={{ whiteSpace: "pre-wrap" }}>{b.description}</p>}
           <button className="btn btn-primary mt-3" onClick={download}>
             <i className="fas fa-download me-2"></i>
-            {ar ? "تحميل / عرض الكتاب" : "Download / View"}
+            {t("Download / View")}
           </button>
         </div>
       </div>

@@ -10,6 +10,9 @@ interface Product {
   title: string;
   price: number;
   currencyCode?: string | null;
+  marketCategoryId?: number;
+  description?: string | null;
+  imageUrl?: string | null;
 }
 interface Category {
   id: number;
@@ -19,11 +22,12 @@ interface Category {
 }
 
 function Inner() {
-  const { lang } = useI18n();
+  const { t, lang } = useI18n();
   const ar = lang === "ar";
   const [items, setItems] = useState<Product[]>([]);
   const [cats, setCats] = useState<Category[]>([]);
   const [form, setForm] = useState({ title: "", marketCategoryId: 0, price: 0, description: "", imageUrl: "", currencyCode: "USD" });
+  const [editId, setEditId] = useState<number | null>(null);
   const [msg, setMsg] = useState("");
 
   const load = useCallback(() => {
@@ -35,52 +39,82 @@ function Inner() {
     load();
   }, [load]);
 
-  async function create(e: React.FormEvent) {
+  function resetForm() {
+    setForm({ title: "", marketCategoryId: 0, price: 0, description: "", imageUrl: "", currencyCode: "USD" });
+    setEditId(null);
+  }
+
+  function startEdit(p: Product) {
+    setForm({
+      title: p.title,
+      marketCategoryId: p.marketCategoryId ?? 0,
+      price: p.price,
+      description: p.description ?? "",
+      imageUrl: p.imageUrl ?? "",
+      currencyCode: p.currencyCode ?? "USD",
+    });
+    setEditId(p.id);
+    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  async function save(e: React.FormEvent) {
     e.preventDefault();
     setMsg("");
+    const payload = {
+      ...form,
+      price: Number(form.price),
+      marketCategoryId: Number(form.marketCategoryId) || (cats[0]?.id ?? 1),
+    };
     try {
-      await api.post("/api/marketplace", {
-        ...form,
-        price: Number(form.price),
-        marketCategoryId: Number(form.marketCategoryId) || (cats[0]?.id ?? 1),
-      });
-      setForm({ title: "", marketCategoryId: 0, price: 0, description: "", imageUrl: "", currencyCode: "USD" });
-      setMsg(ar ? "تمت الإضافة" : "Created");
+      if (editId) {
+        await api.put(`/api/marketplace/${editId}`, payload);
+        setMsg(t("Updated successfully"));
+      } else {
+        await api.post("/api/marketplace", payload);
+        setMsg(t("Created successfully"));
+      }
+      resetForm();
       load();
     } catch {
-      setMsg(ar ? "فشل الإنشاء" : "Create failed");
+      setMsg(t("Operation failed"));
     }
   }
   async function remove(id: number) {
-    if (!confirm(ar ? "حذف المنتج؟" : "Delete product?")) return;
+    if (!confirm(t("Delete product?"))) return;
     await api.del(`/api/marketplace/${id}`).catch(() => {});
+    if (editId === id) resetForm();
     load();
   }
 
   return (
     <div className="container py-5 min-vh-100 bg-light">
-      <h2 className="fw-bold text-primary mb-4">{ar ? "إدارة المتجر" : "Manage Marketplace"}</h2>
+      <h2 className="fw-bold text-primary mb-4">{t("Manage Marketplace")}</h2>
       {msg && <div className="alert alert-info">{msg}</div>}
       <div className="row g-4">
         <div className="col-lg-5">
           <div className="card shadow-sm border-0 rounded-4">
             <div className="card-body">
-              <h5 className="fw-bold mb-3">{ar ? "منتج جديد" : "New product"}</h5>
-              <form onSubmit={create}>
-                <input className="form-control mb-2" placeholder={ar ? "الاسم" : "Title"} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
+              <h5 className="fw-bold mb-3">{editId ? t("Edit") : t("New product")}</h5>
+              <form onSubmit={save}>
+                <input className="form-control mb-2" placeholder={t("Title")} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
                 <select className="form-select mb-2" value={form.marketCategoryId} onChange={(e) => setForm({ ...form, marketCategoryId: Number(e.target.value) })}>
-                  <option value={0}>{ar ? "التصنيف" : "Category"}</option>
+                  <option value={0}>{t("Category")}</option>
                   {cats.map((c) => (
                     <option key={c.id} value={c.id}>{c.name || (ar ? c.nameAr : c.nameEn)}</option>
                   ))}
                 </select>
                 <div className="input-group mb-2">
-                  <input type="number" step="0.01" className="form-control" placeholder={ar ? "السعر" : "Price"} value={form.price} onChange={(e) => setForm({ ...form, price: Number(e.target.value) })} required />
+                  <input type="number" step="0.01" className="form-control" placeholder={t("Price")} value={form.price} onChange={(e) => setForm({ ...form, price: Number(e.target.value) })} required />
                   <input className="form-control" style={{ maxWidth: 90 }} value={form.currencyCode} onChange={(e) => setForm({ ...form, currencyCode: e.target.value.toUpperCase().slice(0, 3) })} />
                 </div>
-                <input className="form-control mb-2" placeholder={ar ? "رابط الصورة" : "Image URL"} value={form.imageUrl} onChange={(e) => setForm({ ...form, imageUrl: e.target.value })} />
-                <textarea className="form-control mb-2" rows={3} placeholder={ar ? "الوصف" : "Description"} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
-                <button className="btn btn-primary w-100">{ar ? "إضافة" : "Create"}</button>
+                <input className="form-control mb-2" placeholder={t("Image URL")} value={form.imageUrl} onChange={(e) => setForm({ ...form, imageUrl: e.target.value })} />
+                <textarea className="form-control mb-2" rows={3} placeholder={t("Description")} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+                <div className="d-flex gap-2">
+                  <button className="btn btn-primary flex-grow-1">{editId ? t("Update") : t("Create")}</button>
+                  {editId && (
+                    <button type="button" className="btn btn-outline-secondary" onClick={resetForm}>{t("Cancel")}</button>
+                  )}
+                </div>
               </form>
             </div>
           </div>
@@ -94,9 +128,14 @@ function Inner() {
                     <span className="text-truncate">
                       {p.title} — <span className="text-muted small">{p.price} {p.currencyCode || "USD"}</span>
                     </span>
-                    <button className="btn btn-sm btn-outline-danger" onClick={() => remove(p.id)}>
-                      <i className="fas fa-trash"></i>
-                    </button>
+                    <span className="d-flex gap-2">
+                      <button className="btn btn-sm btn-outline-primary" onClick={() => startEdit(p)}>
+                        <i className="fas fa-pen"></i>
+                      </button>
+                      <button className="btn btn-sm btn-outline-danger" onClick={() => remove(p.id)}>
+                        <i className="fas fa-trash"></i>
+                      </button>
+                    </span>
                   </li>
                 ))}
               </ul>

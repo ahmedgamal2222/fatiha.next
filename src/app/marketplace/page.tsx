@@ -18,8 +18,7 @@ interface Product {
 }
 
 export default function MarketplacePage() {
-  const { lang } = useI18n();
-  const ar = lang === "ar";
+  const { t } = useI18n();
   const [items, setItems] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -33,14 +32,14 @@ export default function MarketplacePage() {
 
   return (
     <div className="container py-5 min-vh-100 bg-light">
-      <h2 className="fw-bold text-primary mb-4">{ar ? "متجر الفاتحة" : "Fatiha Marketplace"}</h2>
+      <h2 className="fw-bold text-primary mb-4">{t("Fatiha Marketplace")}</h2>
 
       {loading ? (
-        <p className="text-muted">{ar ? "جارٍ التحميل..." : "Loading..."}</p>
+        <p className="text-muted">{t("Loading...")}</p>
       ) : items.length === 0 ? (
         <div className="text-center py-5 text-muted">
           <i className="fas fa-store fa-3x mb-3"></i>
-          <p>{ar ? "لا توجد منتجات متاحة حالياً." : "No products available at the moment."}</p>
+          <p>{t("No products available at the moment.")}</p>
         </div>
       ) : (
         <div className="row g-4">

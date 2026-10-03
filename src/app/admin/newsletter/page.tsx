@@ -12,15 +12,14 @@ interface Subscriber {
 }
 
 const LANGUAGES = [
-  { id: 1, name: "English" },
-  { id: 2, name: "العربية" },
-  { id: 3, name: "中文" },
-  { id: 6, name: "Français" },
+  { id: 1, label: "English" },
+  { id: 2, label: "Arabic" },
+  { id: 3, label: "Chinese" },
+  { id: 6, label: "French" },
 ];
 
 function NewsletterInner() {
-  const { lang } = useI18n();
-  const ar = lang === "ar";
+  const { t } = useI18n();
   const [subs, setSubs] = useState<Subscriber[]>([]);
   const [subject, setSubject] = useState("");
   const [content, setContent] = useState("");
@@ -40,11 +39,11 @@ function NewsletterInner() {
     setBusy(true);
     try {
       await api.post("/api/newsletter", { subject, content, languageId });
-      setMsg(ar ? "تم حفظ/إرسال النشرة بنجاح" : "Newsletter saved/sent successfully");
+      setMsg(t("Newsletter saved/sent successfully"));
       setSubject("");
       setContent("");
     } catch {
-      setError(ar ? "فشل الإرسال" : "Send failed");
+      setError(t("Send failed"));
     } finally {
       setBusy(false);
     }
@@ -52,7 +51,7 @@ function NewsletterInner() {
 
   return (
     <div className="container py-5 min-vh-100 bg-light">
-      <h2 className="fw-bold text-primary mb-4">{ar ? "النشرة البريدية" : "Newsletter"}</h2>
+      <h2 className="fw-bold text-primary mb-4">{t("Newsletter")}</h2>
       <div className="row g-4">
         <div className="col-lg-8">
           <div className="card shadow-sm border-0 rounded-4">
@@ -61,26 +60,26 @@ function NewsletterInner() {
               {error && <div className="alert alert-danger">{error}</div>}
               <form onSubmit={send}>
                 <div className="mb-3">
-                  <label className="form-label fw-semibold small">{ar ? "اللغة" : "Language"}</label>
+                  <label className="form-label fw-semibold small">{t("Language")}</label>
                   <select className="form-select" value={languageId} onChange={(e) => setLanguageId(Number(e.target.value))}>
                     {LANGUAGES.map((l) => (
                       <option key={l.id} value={l.id}>
-                        {l.name}
+                        {t(l.label)}
                       </option>
                     ))}
                   </select>
                 </div>
                 <div className="mb-3">
-                  <label className="form-label fw-semibold small">{ar ? "الموضوع" : "Subject"}</label>
+                  <label className="form-label fw-semibold small">{t("Subject")}</label>
                   <input className="form-control" value={subject} onChange={(e) => setSubject(e.target.value)} required />
                 </div>
                 <div className="mb-3">
-                  <label className="form-label fw-semibold small">{ar ? "المحتوى" : "Content"}</label>
+                  <label className="form-label fw-semibold small">{t("Content")}</label>
                   <textarea className="form-control" rows={8} value={content} onChange={(e) => setContent(e.target.value)} required />
                 </div>
                 <button className="btn btn-primary" disabled={busy}>
                   <i className="fas fa-paper-plane me-2"></i>
-                  {busy ? (ar ? "جارٍ الإرسال..." : "Sending...") : ar ? "إرسال" : "Send"}
+                  {busy ? (t("Sending...")) : t("Send")}
                 </button>
               </form>
             </div>
@@ -91,7 +90,7 @@ function NewsletterInner() {
             <div className="card-body text-center">
               <i className="fas fa-users fa-2x text-primary mb-2"></i>
               <div className="display-6 fw-bold">{subs.length}</div>
-              <p className="text-muted mb-0">{ar ? "المشتركون" : "Subscribers"}</p>
+              <p className="text-muted mb-0">{t("Subscribers")}</p>
             </div>
           </div>
         </div>

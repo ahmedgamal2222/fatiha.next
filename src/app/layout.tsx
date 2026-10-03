@@ -4,6 +4,7 @@ import "./globals.css";
 import { Providers } from "./providers";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { MainShell } from "@/components/MainShell";
 
 export const metadata: Metadata = {
   title: "Fatiha.id",
@@ -44,14 +45,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <Providers>
           <Navbar />
-          <main>{children}</main>
+          <MainShell>{children}</MainShell>
           <Footer />
         </Providers>
 
-        {/* مكتبات القالب: jQuery + Bootstrap bundle + Swiper */}
+        {/* مكتبات القالب: jQuery + Bootstrap bundle + Swiper + تأثير الماء (ripples) */}
         <Script src="https://code.jquery.com/jquery-3.6.4.min.js" strategy="beforeInteractive" />
         <Script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" strategy="afterInteractive" />
         <Script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js" strategy="afterInteractive" />
+        <Script src="/assets/js/ripples.min.js" strategy="afterInteractive" />
       </body>
     </html>
   );

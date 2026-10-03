@@ -8,9 +8,8 @@ import { useI18n } from "@/context/I18nContext";
 /** يحمي صفحات الأدمن: يعيد التوجيه لغير الأدمن. */
 export function AdminGuard({ children }: { children: React.ReactNode }) {
   const { user, loading, isAdmin } = useAuth();
-  const { lang } = useI18n();
+  const { t } = useI18n();
   const router = useRouter();
-  const ar = lang === "ar";
 
   useEffect(() => {
     if (loading) return;
@@ -19,7 +18,7 @@ export function AdminGuard({ children }: { children: React.ReactNode }) {
   }, [loading, user, isAdmin, router]);
 
   if (loading || !user || !isAdmin) {
-    return <div className="container py-5 min-vh-100">{ar ? "جارٍ التحميل..." : "Loading..."}</div>;
+    return <div className="container py-5 min-vh-100">{t("Loading...")}</div>;
   }
   return <>{children}</>;
 }

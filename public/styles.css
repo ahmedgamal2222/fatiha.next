@@ -5267,6 +5267,142 @@ ul.page-numbers {
     background-color: #263a5d; }
     ul.page-numbers .page-numbers:hover {
       background-color: #5e2ced; }
+/* ═══════════════════════ إصلاحات الواجهة المحوّلة (F:\Fatiha-web) ═══════════════════════
+   (مضافة يدوياً — لا تُستبدل عند تحديث القالب) */
+
+/* ── 1) الناف بار لا يغطي المحتوى في الصفحات الداخلية: خلفية صلبة + ظل ── */
+.cs-site__header.cs-style1:not(.cs-nav--home) {
+  background-color: #ffffff;
+  box-shadow: 0 10px 10px -10px rgba(33, 43, 53, 0.1);
+}
+
+/* ── 2) عنوان الصفحات المطابق للأصل (h2) ── */
+.cs-orig-h2 {
+  font-family: "18 Khebrat Musamim Regular", sans-serif;
+  padding: 20px;
+  color: #ffffff;
+  background-color: #263a5d;
+  text-align: center;
+  font-weight: 500;
+  line-height: 1.25em;
+}
+
+/* ── 3) عناصر التسجيل الصوتي (مطابقة لـ fatiha-request / authorized-user-form) ── */
+.audio-record {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  padding: 10px 10px 20px 10px;
+}
+.audio-record #recordButton,
+.audio-record #stopButton {
+  margin-top: 10px;
+  width: 50%;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 30px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  font-weight: bold;
+  font-size: 18px;
+}
+.audio-record #recordButton {
+  background: radial-gradient(circle, rgba(25, 49, 65, 1) 0%, rgba(49, 107, 107, 1) 100%);
+}
+.audio-record #stopButton {
+  background: radial-gradient(circle, rgba(6, 26, 93, 1) 0%, rgba(53, 56, 75, 1) 100%);
+}
+.audio-record #stopButton:hover,
+.audio-record #recordButton:hover {
+  opacity: 0.9;
+}
+.button-animate {
+  animation: pulse 1s infinite;
+}
+@keyframes pulse {
+  0% { box-shadow: 0 0 3px 1px #7eda88; }
+  100% { box-shadow: 0 0 3px 10px #7eda88; }
+}
+.recording-message {
+  margin-top: 10px;
+  color: #000;
+  font-weight: bold;
+}
+.playback audio {
+  width: 100%;
+}
+.preview-image {
+  max-width: 200px;
+  margin-top: 10px;
+}
+.stylish-select {
+  border-radius: 8px;
+  border: 2px solid #007bff;
+  padding: 10px;
+  font-size: 16px;
+  background: #f8f9fa;
+  color: #333;
+  box-shadow: 0 4px 6px rgba(0, 123, 255, 0.2);
+  transition: all 0.3s ease-in-out;
+  min-height: 100px;
+  max-height: 180px;
+  overflow-y: auto;
+  resize: none;
+  appearance: none;
+}
+
+/* ── 4) حقول النماذج المطابقة للأصل (ضمن صفحتي طلب الفاتحة والإجازة فقط) ── */
+.cs-fatiha-page .form-group label {
+  display: block;
+  margin-bottom: 10px;
+  margin-top: 10px;
+  font-size: 16px;
+  color: #000;
+  opacity: 0.9;
+}
+.cs-fatiha-page .form-group {
+  margin-bottom: 20px;
+}
+.cs-fatiha-page textarea,
+.cs-fatiha-page select,
+.cs-fatiha-page input:not([type="file"]) {
+  border: 2px solid #ddd;
+  background-color: #fff;
+  color: #000;
+  opacity: 0.85;
+}
+.cs-fatiha-page form {
+  border-radius: 8px;
+  padding: 20px;
+}
+.cs-fatiha-page .form-control:focus {
+  border-color: #263a5d;
+  box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);
+}
+.cs-fatiha-page .btn-primary {
+  background-color: #263a5d;
+  color: #fff;
+  border-color: #263a5d;
+}
+.cs-fatiha-page .btn-danger {
+  background-color: #d9534f;
+  color: #fff;
+}
+
+/* ── 5) خلايا الإجراءات في جدول طلباتي (btn-placeholder) ── */
+.btn-placeholder {
+  display: inline-block;
+  width: 38px;
+}
+.header-container {
+  background-color: #263a5d;
+  color: #fff;
+  border-radius: 0.375rem;
+}
     ul.page-numbers .page-numbers i {
       margin-left: 8px; }
     ul.page-numbers .page-numbers.current {

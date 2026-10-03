@@ -17,8 +17,7 @@ interface Book {
 }
 
 export default function BooksPage() {
-  const { lang } = useI18n();
-  const ar = lang === "ar";
+  const { t } = useI18n();
   const [items, setItems] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -41,14 +40,14 @@ export default function BooksPage() {
 
   return (
     <div className="container py-5 min-vh-100 bg-light">
-      <h2 className="fw-bold text-primary mb-4">{ar ? "مكتبة الفاتحة" : "Fatiha Library"}</h2>
+      <h2 className="fw-bold text-primary mb-4">{t("Fatiha Library")}</h2>
 
       {loading ? (
-        <p className="text-muted">{ar ? "جارٍ التحميل..." : "Loading..."}</p>
+        <p className="text-muted">{t("Loading...")}</p>
       ) : items.length === 0 ? (
         <div className="text-center py-5 text-muted">
           <i className="fas fa-book fa-3x mb-3"></i>
-          <p>{ar ? "لا توجد كتب متاحة حالياً." : "No books available at the moment."}</p>
+          <p>{t("No books available at the moment.")}</p>
         </div>
       ) : (
         <div className="row g-4">
@@ -74,7 +73,7 @@ export default function BooksPage() {
                       {b.downloads}
                     </span>
                     <button className="btn btn-primary btn-sm" onClick={() => download(b.id)}>
-                      {ar ? "عرض التفاصيل" : "View Details"}
+                      {t("View Details")}
                     </button>
                   </div>
                 </div>

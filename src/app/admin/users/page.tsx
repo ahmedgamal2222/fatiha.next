@@ -19,9 +19,8 @@ interface AdminUser {
 const ROLES = ["User", "Admin", "Authorized"];
 
 function UsersInner() {
-  const { lang } = useI18n();
+  const { t } = useI18n();
   const { refresh } = useAuth();
-  const ar = lang === "ar";
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [q, setQ] = useState("");
   const [loading, setLoading] = useState(true);
@@ -44,7 +43,7 @@ function UsersInner() {
     load(q);
   }
   async function remove(id: string) {
-    if (!confirm(ar ? "تعطيل هذا المستخدم؟" : "Disable this user?")) return;
+    if (!confirm(t("Disable this user?"))) return;
     await api.del(`/api/account/admin/users/${id}`).catch(() => {});
     load(q);
   }
@@ -59,31 +58,31 @@ function UsersInner() {
 
   return (
     <div className="container py-5 min-vh-100 bg-light">
-      <h2 className="fw-bold text-primary mb-4">{ar ? "إدارة المستخدمين" : "Manage Users"}</h2>
+      <h2 className="fw-bold text-primary mb-4">{t("Manage Users")}</h2>
       <div className="input-group mb-4" style={{ maxWidth: 420 }}>
         <input
           className="form-control"
-          placeholder={ar ? "بحث بالبريد أو الاسم" : "Search by email or name"}
+          placeholder={t("Search by email or name")}
           value={q}
           onChange={(e) => setQ(e.target.value)}
           onKeyUp={(e) => e.key === "Enter" && load(q)}
         />
         <button className="btn btn-primary" onClick={() => load(q)}>
-          {ar ? "بحث" : "Search"}
+          {t("Search")}
         </button>
       </div>
 
       {loading ? (
-        <p className="text-muted">{ar ? "جارٍ التحميل..." : "Loading..."}</p>
+        <p className="text-muted">{t("Loading...")}</p>
       ) : (
         <div className="table-responsive">
           <table className="table table-hover align-middle bg-white rounded-4 overflow-hidden shadow-sm">
             <thead className="table-light">
               <tr>
-                <th>{ar ? "المستخدم" : "User"}</th>
-                <th>{ar ? "البريد" : "Email"}</th>
-                <th>{ar ? "الدور" : "Role"}</th>
-                <th className="text-end">{ar ? "إجراءات" : "Actions"}</th>
+                <th>{t("User")}</th>
+                <th>{t("Email")}</th>
+                <th>{t("Role")}</th>
+                <th className="text-end">{t("Actions")}</th>
               </tr>
             </thead>
             <tbody>
@@ -101,13 +100,13 @@ function UsersInner() {
                     <select className="form-select form-select-sm" style={{ width: 130 }} value={u.role} onChange={(e) => changeRole(u.id, e.target.value)}>
                       {ROLES.map((r) => (
                         <option key={r} value={r}>
-                          {r}
+                          {t(r)}
                         </option>
                       ))}
                     </select>
                   </td>
                   <td className="text-end">
-                    <button className="btn btn-sm btn-outline-secondary me-2" onClick={() => impersonate(u.id)} title={ar ? "دخول كالمستخدم" : "Impersonate"}>
+                    <button className="btn btn-sm btn-outline-secondary me-2" onClick={() => impersonate(u.id)} title={t("Impersonate")}>
                       <i className="fas fa-user-secret"></i>
                     </button>
                     <button className="btn btn-sm btn-outline-danger" onClick={() => remove(u.id)}>

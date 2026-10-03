@@ -15,8 +15,7 @@ interface AuthorizedUser {
 }
 
 export default function AuthorizedUsersPage() {
-  const { lang } = useI18n();
-  const ar = lang === "ar";
+  const { t } = useI18n();
   const [items, setItems] = useState<AuthorizedUser[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -27,17 +26,17 @@ export default function AuthorizedUsersPage() {
   return (
     <div className="container py-5 min-vh-100 bg-light">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2 className="fw-bold text-primary mb-0">{ar ? "المُجازون" : "Certified Instructors"}</h2>
+        <h2 className="fw-bold text-primary mb-0">{t("Certified Instructors")}</h2>
         <Link href="/authorized-users/apply" className="btn btn-primary">
           <i className="fas fa-plus me-2"></i>
-          {ar ? "تقديم طلب" : "Apply"}
+          {t("Apply")}
         </Link>
       </div>
 
       {loading ? (
-        <p className="text-muted">{ar ? "جارٍ التحميل..." : "Loading..."}</p>
+        <p className="text-muted">{t("Loading...")}</p>
       ) : items.length === 0 ? (
-        <p className="text-muted">{ar ? "لا توجد بيانات" : "No data"}</p>
+        <p className="text-muted">{t("No data")}</p>
       ) : (
         <div className="row g-4">
           {items.map((u) => (
@@ -56,9 +55,9 @@ export default function AuthorizedUsersPage() {
                     />
                     <p className="text-muted small mb-2">{u.briefOverview?.slice(0, 90) || ""}</p>
                     <div className="d-flex justify-content-center gap-2">
-                      <span className="badge bg-primary-subtle text-primary">{u.points} {ar ? "نقطة" : "pts"}</span>
+                      <span className="badge bg-primary-subtle text-primary">{u.points} {t("pts")}</span>
                       <span className={`badge ${u.isAvailable ? "bg-success" : "bg-secondary"}`}>
-                        {u.isAvailable ? (ar ? "متاح" : "Available") : ar ? "غير متاح" : "Unavailable"}
+                        {u.isAvailable ? (t("Available")) : t("Unavailable")}
                       </span>
                     </div>
                   </div>

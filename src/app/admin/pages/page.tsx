@@ -10,13 +10,14 @@ interface StaticPage {
   id: number;
   title: string;
   languageId?: number;
+  content?: string;
 }
 
 function Inner() {
-  const { lang } = useI18n();
-  const ar = lang === "ar";
+  const { t } = useI18n();
   const [items, setItems] = useState<StaticPage[]>([]);
   const [form, setForm] = useState({ title: "", content: "", languageId: 2 });
+  const [editId, setEditId] = useState<number | null>(null);
   const [msg, setMsg] = useState("");
 
   const load = useCallback(() => {
@@ -27,41 +28,63 @@ function Inner() {
     load();
   }, [load]);
 
-  async function create(e: React.FormEvent) {
+  function resetForm() {
+    setForm({ title: "", content: "", languageId: 2 });
+    setEditId(null);
+  }
+
+  function startEdit(p: StaticPage) {
+    setForm({ title: p.title, content: p.content ?? "", languageId: p.languageId ?? 2 });
+    setEditId(p.id);
+    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  async function save(e: React.FormEvent) {
     e.preventDefault();
     setMsg("");
     try {
-      await api.post("/api/pages", form);
-      setForm({ title: "", content: "", languageId: 2 });
-      setMsg(ar ? "تمت الإضافة" : "Created");
+      if (editId) {
+        await api.put(`/api/pages/${editId}`, form);
+        setMsg(t("Updated successfully"));
+      } else {
+        await api.post("/api/pages", form);
+        setMsg(t("Created successfully"));
+      }
+      resetForm();
       load();
     } catch {
-      setMsg(ar ? "فشل الإنشاء" : "Create failed");
+      setMsg(t("Operation failed"));
     }
   }
   async function remove(id: number) {
-    if (!confirm(ar ? "حذف الصفحة؟" : "Delete page?")) return;
+    if (!confirm(t("Delete page?"))) return;
     await api.del(`/api/pages/${id}`).catch(() => {});
+    if (editId === id) resetForm();
     load();
   }
 
   return (
     <div className="container py-5 min-vh-100 bg-light">
-      <h2 className="fw-bold text-primary mb-4">{ar ? "الصفحات الثابتة" : "Static Pages"}</h2>
+      <h2 className="fw-bold text-primary mb-4">{t("Static Pages")}</h2>
       {msg && <div className="alert alert-info">{msg}</div>}
       <div className="row g-4">
         <div className="col-lg-5">
           <div className="card shadow-sm border-0 rounded-4">
             <div className="card-body">
-              <h5 className="fw-bold mb-3">{ar ? "صفحة جديدة" : "New page"}</h5>
-              <form onSubmit={create}>
-                <input className="form-control mb-2" placeholder={ar ? "العنوان" : "Title"} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
+              <h5 className="fw-bold mb-3">{editId ? t("Edit") : t("New page")}</h5>
+              <form onSubmit={save}>
+                <input className="form-control mb-2" placeholder={t("Title")} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
                 <select className="form-select mb-2" value={form.languageId} onChange={(e) => setForm({ ...form, languageId: Number(e.target.value) })}>
-                  <option value={1}>English</option>
-                  <option value={2}>العربية</option>
+                  <option value={1}>{t("English")}</option>
+                  <option value={2}>{t("Arabic")}</option>
                 </select>
-                <textarea className="form-control mb-2" rows={8} placeholder={ar ? "المحتوى (HTML مسموح)" : "Content (HTML allowed)"} value={form.content} onChange={(e) => setForm({ ...form, content: e.target.value })} required />
-                <button className="btn btn-primary w-100">{ar ? "إضافة" : "Create"}</button>
+                <textarea className="form-control mb-2" rows={8} placeholder={t("Content (HTML allowed)")} value={form.content} onChange={(e) => setForm({ ...form, content: e.target.value })} required />
+                <div className="d-flex gap-2">
+                  <button className="btn btn-primary flex-grow-1">{editId ? t("Update") : t("Create")}</button>
+                  {editId && (
+                    <button type="button" className="btn btn-outline-secondary" onClick={resetForm}>{t("Cancel")}</button>
+                  )}
+                </div>
               </form>
             </div>
           </div>
@@ -75,9 +98,14 @@ function Inner() {
                     <Link href={`/page/${p.id}`} className="text-decoration-none text-truncate">
                       {p.title}
                     </Link>
-                    <button className="btn btn-sm btn-outline-danger" onClick={() => remove(p.id)}>
-                      <i className="fas fa-trash"></i>
-                    </button>
+                    <span className="d-flex gap-2">
+                      <button className="btn btn-sm btn-outline-primary" onClick={() => startEdit(p)}>
+                        <i className="fas fa-pen"></i>
+                      </button>
+                      <button className="btn btn-sm btn-outline-danger" onClick={() => remove(p.id)}>
+                        <i className="fas fa-trash"></i>
+                      </button>
+                    </span>
                   </li>
                 ))}
               </ul>

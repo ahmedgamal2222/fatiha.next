@@ -3,13 +3,15 @@
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { useI18n } from "@/context/I18nContext";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 export function Navbar() {
-  const { t, lang, setLang } = useI18n();
+  const { t } = useI18n();
   const { user, isAuthed, logout } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   const isAdmin = user?.role === "Admin";
+  const isHome = pathname === "/";
 
   async function handleLogout() {
     await logout();
@@ -17,7 +19,7 @@ export function Navbar() {
   }
 
   return (
-    <header className="cs-site__header cs-style1">
+    <header className={`cs-site__header cs-style1${isHome ? " cs-nav--home" : ""}`}>
       <div className="cs-main__header">
         <div className="container">
           <div className="cs-main__header__in">
@@ -49,14 +51,14 @@ export function Navbar() {
                     <ul className="navbar-nav ms-auto cs-nav__list">
                       <li className="nav-item">
                         <Link className="nav-link" href="/">
-                          {t("home")}
+                          {t("Home")}
                         </Link>
                       </li>
 
                       {isAuthed && isAdmin && (
                         <li className="nav-item">
                           <Link className="nav-link" href="/admin">
-                            {lang === "ar" ? "لوحة التحكم" : "Admin panel"}
+                            {t("Admin panel")}
                           </Link>
                         </li>
                       )}
@@ -72,35 +74,35 @@ export function Navbar() {
                             data-bs-toggle="dropdown"
                             aria-expanded="false"
                           >
-                            {lang === "ar" ? "الفاتحة" : "Fatiha"}
+                            {t("Fathia")}
                           </a>
                           <ul className="dropdown-menu" aria-labelledby="fatihaDropdown">
                             <li>
                               <Link className="dropdown-item" href="/fatiha-requests">
-                                {lang === "ar" ? "طلبات الفاتحة" : "Fatiha Request"}
+                                {t("Fatiha Request")}
                               </Link>
                             </li>
                             <li>
                               <Link className="dropdown-item" href="/books">
                                 <i className="fas fa-book-open me-2"></i>
-                                {lang === "ar" ? "مكتبة الفاتحة" : "Fatiha Library"}
+                                {t("Fatiha Library")}
                               </Link>
                             </li>
                             <li>
                               <Link className="dropdown-item" href="/blogs">
                                 <i className="fas fa-blog me-2"></i>
-                                {lang === "ar" ? "مدوّنة الفاتحة" : "Fatiha Blog"}
+                                {t("Fatiha Blog")}
                               </Link>
                             </li>
                             <li>
                               <Link className="dropdown-item" href="/marketplace">
                                 <i className="fas fa-store me-2"></i>
-                                {lang === "ar" ? "متجر الفاتحة" : "Fatiha Marketplace"}
+                                {t("Fatiha Marketplace")}
                               </Link>
                             </li>
                             <li>
                               <Link className="dropdown-item" href="/fatiha-requests">
-                                {lang === "ar" ? "تقديم طلب" : "Apply"}
+                                {t("Apply")}
                               </Link>
                             </li>
                           </ul>
@@ -118,17 +120,17 @@ export function Navbar() {
                             data-bs-toggle="dropdown"
                             aria-expanded="false"
                           >
-                            {lang === "ar" ? "المُجاز" : "MJAZ"}
+                            {t("MJAZ")}
                           </a>
                           <ul className="dropdown-menu" aria-labelledby="mjazDropdown">
                             <li>
                               <Link className="dropdown-item" href="/authorized-users">
-                                {lang === "ar" ? "الطلبات" : "Requests"}
+                                {t("Requests")}
                               </Link>
                             </li>
                             <li>
                               <Link className="dropdown-item" href="/authorized-users/apply">
-                                {lang === "ar" ? "تقديم طلب" : "Apply"}
+                                {t("Apply")}
                               </Link>
                             </li>
                           </ul>
@@ -138,14 +140,14 @@ export function Navbar() {
                       {!isAuthed && (
                         <li className="nav-item">
                           <Link className="nav-link" href="/register">
-                            {t("register")}
+                            {t("Register")}
                           </Link>
                         </li>
                       )}
                       {!isAuthed && (
                         <li className="nav-item">
                           <Link className="nav-link" href="/login">
-                            {lang === "ar" ? "تسجيل الدخول" : "Log in"}
+                            {t("Log in")}
                           </Link>
                         </li>
                       )}
@@ -161,7 +163,7 @@ export function Navbar() {
                             aria-expanded="false"
                           >
                             <i className="fas fa-cog me-1"></i>
-                            {lang === "ar" ? "الإعدادات" : "Settings"}
+                            {t("Settings")}
                           </a>
                           <ul className="dropdown-menu dropdown-menu-end">
                             {isAdmin && (
@@ -169,31 +171,31 @@ export function Navbar() {
                                 <li>
                                   <Link className="dropdown-item" href="/admin/newsletter">
                                     <i className="fas fa-envelope me-2"></i>
-                                    {lang === "ar" ? "إرسال نشرة" : "Send Newsletter"}
+                                    {t("Send Newsletter")}
                                   </Link>
                                 </li>
                                 <li>
                                   <Link className="dropdown-item" href="/admin/pages">
                                     <i className="fas fa-file-alt me-2"></i>
-                                    {lang === "ar" ? "إدارة الصفحات" : "Manage Static Pages"}
+                                    {t("Manage Static Pages")}
                                   </Link>
                                 </li>
                                 <li>
                                   <Link className="dropdown-item" href="/admin/books">
                                     <i className="fas fa-book me-2"></i>
-                                    {lang === "ar" ? "إدارة المكتبة" : "Manage Fatiha Library"}
+                                    {t("Manage Fatiha Library")}
                                   </Link>
                                 </li>
                                 <li>
                                   <Link className="dropdown-item" href="/admin/blogs">
                                     <i className="fas fa-blog me-2"></i>
-                                    {lang === "ar" ? "إدارة المدوّنة" : "Manage Fatiha Blog"}
+                                    {t("Manage Fatiha Blog")}
                                   </Link>
                                 </li>
                                 <li>
                                   <Link className="dropdown-item" href="/admin/marketplace">
                                     <i className="fas fa-store me-2"></i>
-                                    {lang === "ar" ? "إدارة المتجر" : "Manage Fatiha Marketplace"}
+                                    {t("Manage Fatiha Marketplace")}
                                   </Link>
                                 </li>
                               </>
@@ -201,7 +203,7 @@ export function Navbar() {
                             <li>
                               <Link className="dropdown-item" href="/profile">
                                 <i className="fas fa-user-edit me-2"></i>
-                                {lang === "ar" ? "تحديث الملف" : "Update Profile"}
+                                {t("Update Profile")}
                               </Link>
                             </li>
                             <li>
@@ -210,38 +212,12 @@ export function Navbar() {
                             <li>
                               <button className="dropdown-item text-danger" onClick={handleLogout} style={btnStyle}>
                                 <i className="fas fa-sign-out-alt me-2"></i>
-                                {lang === "ar" ? "تسجيل الخروج" : "Log out"}
+                                {t("Log out")}
                               </button>
                             </li>
                           </ul>
                         </li>
                       )}
-
-                      {/* اللغة */}
-                      <li className="nav-item dropdown">
-                        <a
-                          className="nav-link dropdown-toggle"
-                          href="#"
-                          role="button"
-                          data-bs-toggle="dropdown"
-                          aria-expanded="false"
-                        >
-                          <i className="fas fa-language me-1"></i>
-                          {lang === "ar" ? "اللغة" : "Languages"}
-                        </a>
-                        <ul className="dropdown-menu dropdown-menu-end">
-                          <li>
-                            <button className="dropdown-item" onClick={() => setLang("ar")} style={btnStyle}>
-                              العربية
-                            </button>
-                          </li>
-                          <li>
-                            <button className="dropdown-item" onClick={() => setLang("en")} style={btnStyle}>
-                              English
-                            </button>
-                          </li>
-                        </ul>
-                      </li>
                     </ul>
                   </div>
                 </div>

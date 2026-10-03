@@ -8,7 +8,7 @@ import { ApiError } from "@/lib/api";
 
 export default function RegisterPage() {
   const { register } = useAuth();
-  const { lang } = useI18n();
+  const { t, lang } = useI18n();
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -23,29 +23,29 @@ export default function RegisterPage() {
     setError("");
     setSuccess("");
     if (password !== confirmPassword) {
-      setError(ar ? "كلمتا المرور غير متطابقتين" : "Passwords do not match");
+      setError(t("Passwords do not match"));
       return;
     }
     setLoading(true);
     try {
       await register({ email, password, preferredCulture: ar ? "ar-SA" : "en-US" });
-      setSuccess(ar ? "تم إنشاء الحساب بنجاح" : "Account created successfully");
+      setSuccess(t("Account created successfully"));
       router.push("/");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : ar ? "فشل إنشاء الحساب" : "Registration failed");
+      setError(err instanceof ApiError ? err.message : t("Registration failed"));
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div className="container-fluid" style={{ marginTop: "8rem", marginBottom: "8rem" }}>
+    <div className="container-fluid" style={{ marginTop: "2rem", marginBottom: "8rem" }}>
       <main role="main" className="pb-3">
-        <h1>{ar ? "التسجيل" : "Register"}</h1>
+        <h1>{t("Register")}</h1>
         <div className="row">
           <div className="col-md-4">
             <form onSubmit={onSubmit}>
-              <h2>{ar ? "إنشاء حساب جديد" : "Create a new account"}</h2>
+              <h2>{t("Create a new account")}</h2>
               <hr />
 
               {successMessage && <div className="alert alert-success">{successMessage}</div>}
@@ -60,7 +60,7 @@ export default function RegisterPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                 />
-                <label>{ar ? "البريد الإلكتروني" : "Email"}</label>
+                <label>{t("Email")}</label>
               </div>
 
               <div className="form-floating mb-3">
@@ -73,7 +73,7 @@ export default function RegisterPage() {
                   required
                   minLength={6}
                 />
-                <label>{ar ? "كلمة المرور" : "Password"}</label>
+                <label>{t("Password")}</label>
               </div>
 
               <div className="form-floating mb-3">
@@ -85,11 +85,11 @@ export default function RegisterPage() {
                   onChange={(e) => setConfirm(e.target.value)}
                   required
                 />
-                <label>{ar ? "تأكيد كلمة المرور" : "Confirm Password"}</label>
+                <label>{t("Confirm Password")}</label>
               </div>
 
               <button type="submit" className="w-100 btn btn-lg btn-primary" disabled={loading}>
-                {loading ? (ar ? "جارٍ التسجيل..." : "Registering...") : ar ? "التسجيل" : "Register"}
+                {loading ? (t("Registering...")) : t("Register")}
               </button>
             </form>
           </div>
