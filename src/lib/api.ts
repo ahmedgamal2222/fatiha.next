@@ -3,7 +3,7 @@
  * يمرّر رمز الجلسة عبر ترويسة Authorization (Bearer) ويعتمد الكوكيز أيضاً.
  */
 
-export const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8787";
+export const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://fatiha-api.info1703.workers.dev";
 
 // قاعدة تخزين الملفات (DigitalOcean Spaces) — مطابقة لمشروع أنغولار
 export const STORAGE_URL =
