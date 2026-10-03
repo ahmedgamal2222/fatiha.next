@@ -41,7 +41,7 @@ export default function AuthorizedUsersPage() {
         <div className="row g-4">
           {items.map((u) => (
             <div className="col-12 col-sm-6 col-lg-4" key={u.id}>
-              <Link href={`/authorized-users/${u.id}`} className="text-decoration-none">
+              <Link href={`/authorized-users/view?id=${u.id}`} className="text-decoration-none">
                 <div className="card h-100 shadow-sm border-0 rounded-4">
                   <div className="card-body text-center">
                     {/* eslint-disable-next-line @next/next/no-img-element */}

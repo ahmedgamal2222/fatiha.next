@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { api } from "@/lib/api";
 import { useI18n } from "@/context/I18nContext";
 
@@ -18,15 +18,18 @@ interface Book {
   downloads: number;
 }
 
-export default function BookDetailsPage() {
-  const params = useParams();
-  const id = params?.id as string;
+function BookDetail() {
+  const searchParams = useSearchParams();
+  const id = searchParams.get("id");
   const { t } = useI18n();
   const [b, setB] = useState<Book | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!id) return;
+    if (!id) {
+      setLoading(false);
+      return;
+    }
     api.get<Book>(`/api/books/${id}`, false).then((r) => setB(r.data ?? null)).catch(() => setB(null)).finally(() => setLoading(false));
   }, [id]);
 
@@ -66,5 +69,13 @@ export default function BookDetailsPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function BookDetailsPage() {
+  return (
+    <Suspense fallback={<div className="container py-5 min-vh-100" />}>
+      <BookDetail />
+    </Suspense>
   );
 }

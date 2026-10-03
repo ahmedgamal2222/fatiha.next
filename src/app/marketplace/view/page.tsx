@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { api } from "@/lib/api";
 import { useI18n } from "@/context/I18nContext";
 
@@ -19,15 +19,18 @@ interface Product {
   tags?: { name: string }[];
 }
 
-export default function ProductDetailsPage() {
-  const params = useParams();
-  const id = params?.id as string;
+function ProductDetail() {
+  const searchParams = useSearchParams();
+  const id = searchParams.get("id");
   const { t } = useI18n();
   const [p, setP] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!id) return;
+    if (!id) {
+      setLoading(false);
+      return;
+    }
     api.get<Product>(`/api/marketplace/${id}`, false).then((r) => setP(r.data ?? null)).catch(() => setP(null)).finally(() => setLoading(false));
   }, [id]);
 
@@ -54,8 +57,8 @@ export default function ProductDetailsPage() {
           <div className="fs-3 fw-bold mb-3">{p.price} {p.currencyCode || "USD"}</div>
           {p.tags && p.tags.length > 0 && (
             <div className="mb-3 d-flex gap-2 flex-wrap">
-              {p.tags.map((t, i) => (
-                <span key={i} className="badge bg-primary-subtle text-primary">{t.name}</span>
+              {p.tags.map((tag, i) => (
+                <span key={i} className="badge bg-primary-subtle text-primary">{tag.name}</span>
               ))}
             </div>
           )}
@@ -63,5 +66,13 @@ export default function ProductDetailsPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ProductDetailsPage() {
+  return (
+    <Suspense fallback={<div className="container py-5 min-vh-100" />}>
+      <ProductDetail />
+    </Suspense>
   );
 }

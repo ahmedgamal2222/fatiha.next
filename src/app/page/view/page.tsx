@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { api } from "@/lib/api";
 import { useI18n } from "@/context/I18nContext";
 
@@ -13,15 +13,18 @@ interface StaticPage {
   html?: string | null;
 }
 
-export default function PageViewer() {
-  const params = useParams();
-  const id = params?.id as string;
+function PageContent() {
+  const searchParams = useSearchParams();
+  const id = searchParams.get("id");
   const { t } = useI18n();
   const [page, setPage] = useState<StaticPage | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!id) return;
+    if (!id) {
+      setLoading(false);
+      return;
+    }
     api.get<StaticPage>(`/api/pages/${id}`, false).then((r) => setPage(r.data ?? null)).catch(() => setPage(null)).finally(() => setLoading(false));
   }, [id]);
 
@@ -39,5 +42,13 @@ export default function PageViewer() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function PageViewer() {
+  return (
+    <Suspense fallback={<div className="container py-5 min-vh-100" />}>
+      <PageContent />
+    </Suspense>
   );
 }

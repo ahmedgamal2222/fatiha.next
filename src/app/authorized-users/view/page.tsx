@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { api } from "@/lib/api";
 import { useI18n } from "@/context/I18nContext";
 
@@ -24,15 +24,18 @@ interface Detail {
 const ATTAINMENTS = ["Bachelor", "Master", "PostDoctorate", "HighSchool", "None", "Other"];
 const POSITIONS = ["Student", "EntryLevel", "Junior", "Intermediate", "Senior", "Managerial", "Executive", "Other"];
 
-export default function AuthorizedUserDetailsPage() {
-  const params = useParams();
-  const id = params?.id as string;
+function AuthorizedUserDetail() {
+  const searchParams = useSearchParams();
+  const id = searchParams.get("id");
   const { t } = useI18n();
   const [u, setU] = useState<Detail | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!id) return;
+    if (!id) {
+      setLoading(false);
+      return;
+    }
     api.get<Detail>(`/api/authorized-users/${id}`, false).then((r) => setU(r.data ?? null)).catch(() => setU(null)).finally(() => setLoading(false));
   }, [id]);
 
@@ -79,5 +82,13 @@ export default function AuthorizedUserDetailsPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AuthorizedUserDetailsPage() {
+  return (
+    <Suspense fallback={<div className="container py-5 min-vh-100" />}>
+      <AuthorizedUserDetail />
+    </Suspense>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { api } from "@/lib/api";
 import { useI18n } from "@/context/I18nContext";
 
@@ -12,15 +12,18 @@ interface Blog {
   reads: number;
 }
 
-export default function BlogDetailPage() {
-  const params = useParams();
-  const id = params?.id as string;
+function BlogDetail() {
+  const searchParams = useSearchParams();
+  const id = searchParams.get("id");
   const { t } = useI18n();
   const [blog, setBlog] = useState<Blog | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!id) return;
+    if (!id) {
+      setLoading(false);
+      return;
+    }
     api
       .get<Blog>(`/api/blogs/${id}`, false)
       .then((r) => setBlog(r.data ?? null))
@@ -47,5 +50,13 @@ export default function BlogDetailPage() {
         </article>
       </div>
     </div>
+  );
+}
+
+export default function BlogDetailPage() {
+  return (
+    <Suspense fallback={<div className="container py-5 min-vh-100" />}>
+      <BlogDetail />
+    </Suspense>
   );
 }

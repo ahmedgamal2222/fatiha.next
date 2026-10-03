@@ -45,7 +45,7 @@ export default function MarketplacePage() {
         <div className="row g-4">
           {items.map((p) => (
             <div className="col-12 col-sm-6 col-lg-3" key={p.id}>
-              <Link href={`/marketplace/${p.id}`} className="text-decoration-none">
+              <Link href={`/marketplace/view?id=${p.id}`} className="text-decoration-none">
                 <div className="card h-100 shadow-sm border-0 rounded-4">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img

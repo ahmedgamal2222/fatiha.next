@@ -68,7 +68,7 @@ export default function BlogsPage() {
                     {blog.reads} {t("Reads")}
                   </span>
                 </div>
-                <Link href={`/blogs/${blog.id}`} className="stretched-link text-decoration-none mt-3 text-primary fw-semibold small">
+                <Link href={`/blogs/view?id=${blog.id}`} className="stretched-link text-decoration-none mt-3 text-primary fw-semibold small">
                   {t("Read More")} →
                 </Link>
               </div>

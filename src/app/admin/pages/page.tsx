@@ -95,7 +95,7 @@ function Inner() {
               <ul className="list-group list-group-flush">
                 {items.map((p) => (
                   <li key={p.id} className="list-group-item d-flex justify-content-between align-items-center px-0">
-                    <Link href={`/page/${p.id}`} className="text-decoration-none text-truncate">
+                    <Link href={`/page/view?id=${p.id}`} className="text-decoration-none text-truncate">
                       {p.title}
                     </Link>
                     <span className="d-flex gap-2">
