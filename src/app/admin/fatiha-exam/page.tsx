@@ -118,7 +118,7 @@ function Inner() {
               <div className="col-md-4">
                 <label className="fh-label">{t("Language")}</label>
                 <select className="form-select" value={genLang} onChange={(e) => setGenLang(Number(e.target.value))}>
-                  {languages.map((l) => (<option key={l.id} value={l.languageName}>{LANGUAGE_NAMES[l.languageName] ?? `#${l.languageName}`}</option>))}
+                  {languages.map((l) => (<option key={l.id} value={l.id}>{LANGUAGE_NAMES[l.languageName] ?? `#${l.languageName}`}</option>))}
                   {languages.length === 0 && Object.entries(LANGUAGE_NAMES).map(([id, name]) => (<option key={id} value={id}>{name}</option>))}
                 </select>
               </div>
@@ -153,7 +153,7 @@ function Inner() {
                   <div className="mb-3">
                     <label className="fh-label">{t("Language")}</label>
                     <select className="form-select" value={form.languageId} onChange={(e) => setForm({ ...form, languageId: Number(e.target.value) })}>
-                      {languages.map((l) => (<option key={l.id} value={l.languageName}>{LANGUAGE_NAMES[l.languageName] ?? `#${l.languageName}`}</option>))}
+                      {languages.map((l) => (<option key={l.id} value={l.id}>{LANGUAGE_NAMES[l.languageName] ?? `#${l.languageName}`}</option>))}
                       {languages.length === 0 && Object.entries(LANGUAGE_NAMES).map(([id, name]) => (<option key={id} value={id}>{name}</option>))}
                     </select>
                   </div>

@@ -1463,3 +1463,61 @@ html[dir="rtl"] .fh-auth__field input { padding: 13px 42px 13px 14px; }
   .fh-auth__card { grid-template-columns: 1fr; max-width: 460px; }
   .fh-auth__brand { display: none; }
 }
+
+/* ─────────────── مسار الطلب (stepper) ─────────────── */
+.fh-steps {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  overflow-x: auto;
+  padding: 4px 0;
+}
+.fh-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex: 1 1 0;
+  min-width: 72px;
+  position: relative;
+  text-align: center;
+}
+.fh-step::before {
+  content: "";
+  position: absolute;
+  top: 16px;
+  inset-inline-start: calc(-50% + 16px);
+  width: calc(100% - 32px);
+  height: 2px;
+  background: var(--border);
+  z-index: 0;
+}
+.fh-step:first-child::before { display: none; }
+.fh-step__dot {
+  position: relative;
+  z-index: 1;
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--surface-2);
+  border: 2px solid var(--border);
+  color: var(--muted);
+  font-size: 0.82rem;
+  transition: all 0.2s ease;
+}
+.fh-step__label { font-size: 0.72rem; color: var(--muted); font-weight: 600; }
+.fh-step--done .fh-step__dot {
+  background: var(--primary); border-color: var(--primary); color: #fff;
+}
+.fh-step--done::before { background: var(--primary); }
+.fh-step--done .fh-step__label { color: var(--heading); }
+.fh-step--active .fh-step__dot {
+  box-shadow: 0 0 0 4px rgba(11, 122, 110, 0.18);
+  background: var(--primary-light); border-color: var(--primary-light);
+}
+.fh-actionbar {
+  background: var(--surface-2);
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  padding: 12px 16px;
+}
