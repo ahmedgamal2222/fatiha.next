@@ -201,6 +201,12 @@ export function Navbar() {
                                   </Link>
                                 </li>
                                 <li>
+                                  <Link className="dropdown-item" href="/admin/fatiha-exam">
+                                    <i className="fas fa-circle-question me-2"></i>
+                                    {t("Manage Exam Questions")}
+                                  </Link>
+                                </li>
+                                <li>
                                   <Link className="dropdown-item" href="/admin/users">
                                     <i className="fas fa-users me-2"></i>
                                     {t("Manage Users")}
