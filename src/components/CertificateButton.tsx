@@ -16,11 +16,19 @@ interface CertData {
   applicantName: { arabic: string; english: string };
   sheikhName: { arabic: string; english: string };
   alQeratName: string;
-  dateOfIssue: number;
+  dateOfIssue: number | string;
 }
 
 const VERIFY_BASE = "https://fatiha.id/verify";
 const TEMPLATE = "/Cert.jpeg";
+
+/** يحلّل التاريخ من رقم (ثوانٍ/ملّي) أو سلسلة ISO بشكل آمن. */
+function parseDate(v?: number | string | null): Date | null {
+  if (v === null || v === undefined || v === "") return null;
+  if (typeof v === "number") return new Date(v < 1e12 ? v * 1000 : v);
+  const d = new Date(v);
+  return isNaN(d.getTime()) ? null : d;
+}
 
 // نصوص الشهادة حسب اللغة
 const L: Record<string, { title: string; presented: string; forRecite: string; instructor: string; date: string; no: string }> = {
@@ -101,7 +109,8 @@ export function CertificateButton({ certificateId }: { certificateId: number }) 
       }
 
       // التاريخ ورقم الشهادة
-      const dateStr = new Date((data.dateOfIssue || 0) * 1000).toLocaleDateString(lang === "ar" ? "ar-EG" : "en-GB", {
+      const issued = parseDate(data.dateOfIssue);
+      const dateStr = (issued ?? new Date()).toLocaleDateString(lang === "ar" ? "ar-EG" : "en-GB", {
         day: "2-digit", month: "2-digit", year: "numeric",
       });
       ctx.font = "22px Arial, 'Segoe UI', sans-serif";

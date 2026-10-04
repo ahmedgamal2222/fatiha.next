@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { useI18n } from "@/context/I18nContext";
 import { api } from "@/lib/api";
@@ -13,7 +14,7 @@ interface PointsData {
 }
 interface Certificate {
   id: number;
-  dateOfIssue: number;
+  dateOfIssue: number | string;
   pdfUrl: string | null;
 }
 interface ProfileData {
@@ -45,6 +46,19 @@ function toDateInput(ts?: number | null): string {
   return d.toISOString().slice(0, 10);
 }
 
+/** يحلّل التاريخ من رقم (ثوانٍ/ملّي) أو سلسلة ISO بشكل آمن. */
+function parseDate(v?: number | string | null): Date | null {
+  if (v === null || v === undefined || v === "") return null;
+  if (typeof v === "number") return new Date(v < 1e12 ? v * 1000 : v);
+  const d = new Date(v);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+function fmtDate(v: number | string | null | undefined, ar: boolean): string {
+  const d = parseDate(v);
+  return d ? d.toLocaleDateString(ar ? "ar-EG" : "en-US", { day: "2-digit", month: "2-digit", year: "numeric" }) : "—";
+}
+
 export default function ProfilePage() {
   const { user, loading, refresh } = useAuth();
   const { t, lang } = useI18n();
@@ -58,6 +72,7 @@ export default function ProfilePage() {
   const [countries, setCountries] = useState<Country[]>([]);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [form, setForm] = useState<ProfileData>({});
+  const profileComplete = !!(user?.nameAr || user?.nameEn);
 
   useEffect(() => {
     if (!loading && !user) router.push("/login");
@@ -159,21 +174,42 @@ export default function ProfilePage() {
             <div className="fh-card mb-4">
               <div className="fh-card__head"><i className="fas fa-star"></i><h3>{t("Points")}</h3></div>
               <div className="fh-card__body">
-                <div className="display-6 fw-bold text-primary">{points?.total ?? 0}</div>
-                <p className="text-muted small mb-0">{t("Total points")}</p>
+                <div className="d-flex align-items-baseline gap-2">
+                  <span className="display-6 fw-bold text-primary">{points?.total ?? 0}</span>
+                  <span className="text-muted">{t("points")}</span>
+                </div>
+                <p className="text-muted small mb-0">
+                  {points && points.total > 0
+                    ? t("Earned from qualified Fatiha requests.")
+                    : t("Qualify a Fatiha request to earn points.")}
+                </p>
               </div>
             </div>
 
             <div className="fh-card">
-              <div className="fh-card__head"><i className="fas fa-certificate"></i><h3>{t("Certificates")}</h3></div>
+              <div className="fh-card__head">
+                <i className="fas fa-certificate"></i><h3>{t("Certificates")}</h3>
+                {certs.length > 0 && <span className="badge bg-primary-subtle text-primary ms-auto">{certs.length}</span>}
+              </div>
               <div className="fh-card__body">
                 {certs.length === 0 ? (
-                  <p className="text-muted mb-0">{t("No data")}</p>
+                  <div className="text-center py-3">
+                    <i className="fas fa-award text-muted mb-2" style={{ fontSize: "2.2rem", opacity: 0.4 }}></i>
+                    <p className="text-muted small mb-2">{t("No certificates yet. Pass the qualifying exam to earn your first certificate.")}</p>
+                    <Link href="/fatiha-requests" className="btn btn-sm btn-outline-primary">
+                      <i className="fas fa-graduation-cap me-1" />{t("Go to my requests")}
+                    </Link>
+                  </div>
+                ) : !profileComplete ? (
+                  <div className="alert alert-warning rounded-4 mb-0 py-2 small">
+                    <i className="fas fa-triangle-exclamation me-1" />
+                    {t("Add your name below to enable certificate download.")}
+                  </div>
                 ) : (
                   <ul className="list-group list-group-flush">
                     {certs.map((c) => (
-                      <li key={c.id} className="list-group-item d-flex justify-content-between align-items-center px-0">
-                        <span>#{c.id} — {new Date(c.dateOfIssue * 1000).toLocaleDateString(ar ? "ar-EG" : "en-US")}</span>
+                      <li key={c.id} className="list-group-item d-flex justify-content-between align-items-center px-0 flex-wrap gap-2">
+                        <span><i className="fas fa-certificate text-primary me-2" />#{c.id} — {fmtDate(c.dateOfIssue, ar)}</span>
                         <CertificateButton certificateId={c.id} />
                       </li>
                     ))}

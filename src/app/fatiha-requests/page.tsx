@@ -77,6 +77,7 @@ export default function FatihaRequestsPage() {
 
   const filtered = items.filter((r) => !search.trim() || r.requestLetter.toLowerCase().includes(search.toLowerCase()));
   const qualifiedItems = items.filter((r) => r.status === 3 || r.isApproved);
+  const pendingExamItems = items.filter((r) => !(r.status === 3 || r.isApproved) && r.status !== 2);
   const showProfileBanner = qualifiedItems.length > 0 && !profileComplete;
 
   function currentStep(r: FatihaRequest): number {
@@ -125,9 +126,11 @@ export default function FatihaRequestsPage() {
           <Link href="/fatiha-requests/new" className="btn btn-primary">
             <i className="fas fa-plus me-1"></i>{t("New Request")}
           </Link>
-          <Link href="/fatiha-exam" className="btn btn-outline-primary">
-            <i className="fas fa-graduation-cap me-1"></i>{t("Take Qualifying Exam")}
-          </Link>
+          {pendingExamItems.length > 0 && (
+            <Link href="/fatiha-exam" className="btn btn-outline-primary">
+              <i className="fas fa-graduation-cap me-1"></i>{t("Take Qualifying Exam")}
+            </Link>
+          )}
           {items.length > 3 && (
             <div className="position-relative ms-auto" style={{ minWidth: 220 }}>
               <i className="fas fa-search position-absolute text-muted" style={{ top: 11, insetInlineStart: 12 }}></i>
