@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { api } from "@/lib/api";
+import { api, API_URL } from "@/lib/api";
 import { useI18n } from "@/context/I18nContext";
 
 interface Qerat {
@@ -9,6 +9,12 @@ interface Qerat {
   qeratName: string;
   description?: string | null;
   audioFile?: string | null;
+}
+
+function audioSrc(key?: string | null): string | null {
+  if (!key) return null;
+  if (/^https?:\/\//i.test(key)) return key;
+  return API_URL + "/files/" + key.replace(/^\/+/, "");
 }
 
 export default function AlQeratPage() {
@@ -25,27 +31,36 @@ export default function AlQeratPage() {
   }, []);
 
   return (
-    <div className="container py-5 min-vh-100 bg-light">
-      <h2 className="fw-bold text-primary mb-4">{t("The Ten Qiraat")}</h2>
-      {loading ? (
-        <p className="text-muted">{t("Loading...")}</p>
-      ) : items.length === 0 ? (
-        <p className="text-muted">{t("No data")}</p>
-      ) : (
-        <div className="row g-4">
-          {items.map((q) => (
-            <div className="col-12 col-md-6" key={q.id}>
-              <div className="card h-100 shadow-sm border-0 rounded-4">
-                <div className="card-body">
-                  <h5 className="fw-bold">{q.qeratName}</h5>
-                  {q.description && <p className="text-muted small">{q.description}</p>}
-                  {q.audioFile && <audio controls src={q.audioFile} className="w-100 mt-2" />}
-                </div>
-              </div>
-            </div>
-          ))}
+    <div className="fh-page">
+      <header className="fh-page__header">
+        <div className="fh-container">
+          <span className="fh-page__icon"><i className="fas fa-book-quran"></i></span>
+          <h1 className="fh-page__title">{t("Ten Recitations (Al-Qerat)")}</h1>
+          <p className="fh-page__subtitle">{t("Listen to each of the ten canonical recitations of Surah Al-Fatiha.")}</p>
         </div>
-      )}
+      </header>
+
+      <div className="fh-container">
+        {loading ? (
+          <div className="fh-empty"><i className="fas fa-spinner fa-spin"></i><p>{t("Loading...")}</p></div>
+        ) : items.length === 0 ? (
+          <div className="fh-empty"><i className="fas fa-book-open"></i><p>{t("No data")}</p></div>
+        ) : (
+          <div className="fh-qerat-grid">
+            {items.map((q, i) => (
+              <div className="fh-qerat" key={q.id}>
+                <div className="fh-qerat__name">
+                  <i className="fas fa-star-and-crescent"></i>
+                  <span>{q.qeratName}</span>
+                  <span className="badge bg-primary-subtle text-primary ms-auto">{i + 1}</span>
+                </div>
+                {q.description && <p className="text-muted small mb-2">{q.description}</p>}
+                {audioSrc(q.audioFile) && <audio controls src={audioSrc(q.audioFile)!} className="w-100 mt-1" />}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

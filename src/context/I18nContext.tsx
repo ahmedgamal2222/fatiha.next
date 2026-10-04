@@ -27,7 +27,7 @@ export const LANGUAGES: LangDef[] = [
 ];
 
 // واجهة الترجمة عبر الـ API الجديد (نفس بنية مسار المشروع الأصلي)
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://fatiha-api.info1703.workers.dev";
+const API_BASE =  "https://fatiha-api.info1703.workers.dev";
 const TRANSLATION_API = `${API_BASE}/api/Language/GetTranslation`;
 
 // احتياطي محلي لبعض المفاتيح الأساسية عند تعذّر تحميل الترجمة

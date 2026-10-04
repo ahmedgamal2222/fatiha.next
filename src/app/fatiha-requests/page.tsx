@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
-import Link from "next/link";
 import { api, API_URL } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import { useI18n } from "@/context/I18nContext";
@@ -25,7 +24,8 @@ interface Qerat {
 }
 
 const STATUS_TEXT: Record<number, string> = { 0: "Open", 1: "Processing", 2: "Closed", 3: "Qualified" };
-const STATUS_ICON: Record<number, string> = { 0: "fas fa-folder-open text-primary", 1: "fas fa-spinner text-warning", 2: "fas fa-lock text-secondary", 3: "fas fa-award text-success" };
+const STATUS_CLASS: Record<number, string> = { 0: "fh-status--open", 1: "fh-status--processing", 2: "fh-status--closed", 3: "fh-status--qualified" };
+const STATUS_ICON: Record<number, string> = { 0: "fas fa-folder-open", 1: "fas fa-spinner", 2: "fas fa-lock", 3: "fas fa-award" };
 
 export default function FatihaRequestsPage() {
   const { user, loading } = useAuth();
@@ -35,6 +35,7 @@ export default function FatihaRequestsPage() {
   const [items, setItems] = useState<FatihaRequest[]>([]);
   const [qerats, setQerats] = useState<Qerat[]>([]);
   const [requestLetter, setLetter] = useState("");
+  const [search, setSearch] = useState("");
   const [selectedQeratId, setSelectedQeratId] = useState<number>(0);
   const [selectedQeratAudioUrl, setSelectedQeratAudioUrl] = useState<string | null>(null);
   const [audioResult, setAudioResult] = useState<AudioRecordResult | null>(null);
@@ -112,86 +113,133 @@ export default function FatihaRequestsPage() {
     catch (err: any) { setError(err.message || (t("Delete failed"))); }
   }
 
+  const filtered = items.filter((r) => !search.trim() || r.requestLetter.toLowerCase().includes(search.toLowerCase()));
+
   return (
-    <div className="container py-4 min-vh-100 bg-light" style={{ marginTop: 80, marginBottom: 40 }}>
-      <h2 className="shadow p-3 mb-4 rounded text-center" style={{ backgroundColor: "#263a5d", color: "white", fontFamily: '"18 Khebrat Musamim Regular", sans-serif', fontSize: "1.6rem", lineHeight: "1.25em" }}>
-        {t("Fatiha Requests")}
-      </h2>
-      <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-        <input type="text" className="form-control" placeholder={t("Search...")} value={requestLetter} onChange={(e) => setLetter(e.target.value)} style={{ maxWidth: 320 }} />
-        <Link href="/fatiha-hero" className="btn btn-outline-secondary"><i className="fas fa-home me-1" /> {t("Home")}</Link>
-      </div>
-      <div className="mb-4">
-        <h5 className="mb-3">{t("My Requests")}</h5>
-        {items.length === 0 ? (
-          <p className="text-muted fst-italic">{t("No requests yet")}</p>
-        ) : (
-          <div className="list-group">
-            {items.map((r) => (
-              <div key={r.id} className="list-group-item list-group-item-action shadow-sm rounded">
-                <div className="d-flex justify-content-between align-items-start w-100">
-                  <div className="flex-grow-1">
-                    <div className="d-flex align-items-center gap-2 mb-1">
-                      <i className={STATUS_ICON[r.status as keyof typeof STATUS_ICON] ?? "fas fa-question"} style={{ fontSize: "1.1rem" }} />
-                      <span className="fw-bold">{r.requestLetter.slice(0, 80)}{r.requestLetter.length > 80 ? "\u2026" : ""}</span>
-                    </div>
-                    <div className="text-muted small mb-1">
-                      {(t("Qerat: ")) + (r.alQeratName ?? "\u2014")} &middot; {new Date(r.dateOfRecord).toLocaleDateString(ar ? "ar-EG" : "en-US")} &middot; {(t("Status: ")) + t(STATUS_TEXT[r.status] ?? "Unknown")}
-                      {r.isApproved && <span className="badge bg-success ms-1">{t("Approved")}</span>}
-                    </div>
-                  </div>
-                  <div className="d-flex flex-column gap-1">
-                    <button className="btn btn-sm btn-outline-primary" onClick={() => toggleExpand(r.id)}>{expandedId === r.id ? (t("Hide")) : (t("Details"))}</button>
-                    <button className="btn btn-sm btn-outline-danger" onClick={() => deleteRequest(r.id)}><i className="fas fa-trash me-1" /> {t("Delete")}</button>
-                  </div>
-                </div>
+    <div className="fh-page">
+      <header className="fh-page__header">
+        <div className="fh-container">
+          <span className="fh-page__icon"><i className="fas fa-file-signature"></i></span>
+          <h1 className="fh-page__title">{t("Fatiha Requests")}</h1>
+          <p className="fh-page__subtitle">{t("Apply for your Al-Fatiha Ijazah and track the status of your requests.")}</p>
+        </div>
+      </header>
+
+      <div className="fh-container">
+        {success && <div className="alert alert-success rounded-4"><i className="fas fa-check-circle me-2" /> {success}</div>}
+        {error && <div className="alert alert-danger rounded-4"><i className="fas fa-exclamation-circle me-2" /> {error}</div>}
+
+        <div className="row g-4">
+          {/* قائمة الطلبات */}
+          <div className="col-lg-7">
+            <div className="fh-card">
+              <div className="fh-card__head">
+                <i className="fas fa-list-check"></i>
+                <h3>{t("My Requests")}</h3>
+                <span className="badge bg-primary-subtle text-primary ms-auto">{items.length}</span>
               </div>
-            ))}
+              <div className="fh-card__body">
+                {items.length > 3 && (
+                  <div className="mb-3 position-relative">
+                    <i className="fas fa-search position-absolute text-muted" style={{ top: 14, insetInlineStart: 14 }}></i>
+                    <input
+                      type="text"
+                      className="form-control"
+                      style={{ paddingInlineStart: 40 }}
+                      placeholder={t("Search...")}
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                    />
+                  </div>
+                )}
+                {filtered.length === 0 ? (
+                  <div className="fh-empty">
+                    <i className="fas fa-inbox"></i>
+                    <p className="mb-0">{t("No requests yet")}</p>
+                  </div>
+                ) : (
+                  filtered.map((r) => (
+                    <div key={r.id} className="fh-req">
+                      <div className="fh-req__main">
+                        <div className="fh-req__title">
+                          <i className={`${STATUS_ICON[r.status] ?? "fas fa-question"} text-primary`} />
+                          <span className="text-truncate">
+                            {r.requestLetter.slice(0, 80)}{r.requestLetter.length > 80 ? "\u2026" : ""}
+                          </span>
+                        </div>
+                        <div className="fh-req__meta">
+                          <span><i className="fas fa-book-quran me-1"></i>{r.alQeratName ?? "\u2014"}</span>
+                          <span><i className="fas fa-calendar me-1"></i>{new Date(r.dateOfRecord).toLocaleDateString(ar ? "ar-EG" : "en-US")}</span>
+                          <span className={`fh-status ${STATUS_CLASS[r.status] ?? "fh-status--closed"}`}>
+                            {t(STATUS_TEXT[r.status] ?? "Unknown")}
+                          </span>
+                        </div>
+                        {expandedId === r.id && (
+                          <div className="mt-3 pt-3 border-top">
+                            <p className="mb-2" style={{ whiteSpace: "pre-wrap" }}>{r.requestLetter}</p>
+                            {audioSrc(r.audioRecord) && <audio controls src={audioSrc(r.audioRecord)!} className="w-100 mt-2" />}
+                          </div>
+                        )}
+                      </div>
+                      <div className="fh-req__actions">
+                        <button className="btn btn-sm btn-outline-primary" onClick={() => toggleExpand(r.id)}>
+                          {expandedId === r.id ? t("Hide") : t("Details")}
+                        </button>
+                        <button className="btn btn-sm btn-outline-danger" onClick={() => deleteRequest(r.id)}>
+                          <i className="fas fa-trash" />
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
           </div>
-        )}
-      </div>
-      <div className="card shadow-sm border-0 rounded-4 mt-4">
-        <div className="card-body p-4">
-          <h5 className="mb-3">{t("New Fatiha Request")}</h5>
-          <form onSubmit={submitRequest}>
-            <div className="mb-3">
-              <label className="form-label fw-semibold">{t("Request Letter")} *</label>
-              <textarea className="form-control" rows={4} required value={requestLetter} onChange={(e) => setLetter(e.target.value)} placeholder={t("Write your Fatiha request text here...")} />
-            </div>
-            <div className="mb-3">
-              <label className="form-label fw-semibold">{t("Qirat (Quran Recitation)")} *</label>
-              <select className="form-control" value={selectedQeratId} onChange={(e) => onQeratSelected(Number(e.target.value))} required>
-                <option value={0} disabled>{t("Select a Qirat...")}</option>
-                {qerats.map((q) => (<option key={q.id} value={q.id}>{q.qeratName}</option>))}
-              </select>
-            </div>
-            {selectedQeratAudioUrl && (
-              <div className="mb-3 p-2 bg-light rounded border">
-                <label className="form-label small fw-semibold">{t("Selected Qirat Preview")}</label>
-                <audio controls src={selectedQeratAudioUrl} className="w-100" />
+
+          {/* نموذج طلب جديد */}
+          <div className="col-lg-5">
+            <div className="fh-card">
+              <div className="fh-card__head">
+                <i className="fas fa-plus-circle"></i>
+                <h3>{t("New Fatiha Request")}</h3>
               </div>
-            )}
-            <AudioRecorder onResult={handleAudioResult} onClear={handleClearAudio} required />
-            {audioResult && (
-              <div className="mt-2">
-                <button type="button" className="btn btn-sm btn-outline-danger ms-2" onClick={handleClearAudio}>{t("Remove recording")}</button>
-              </div>
-            )}
-            <div className="d-flex justify-content-between align-items-center mt-4 gap-2">
-              <div />
-              <div className="d-flex gap-2">
-                <button type="button" className="btn btn-outline-secondary" onClick={() => { setLetter(""); setSelectedQeratId(0); setSelectedQeratAudioUrl(null); setAudioResult(null); setError(""); setSuccess(""); }}>{t("Cancel")}</button>
-                <button type="submit" className="btn btn-primary px-4" disabled={busy}>
-                  {busy ? <span className="spinner-border spinner-border-sm me-2" /> : <i className="fas fa-paper-plane me-1" />}
-                  {t("Submit Request")}
-                </button>
+              <div className="fh-card__body">
+                <form onSubmit={submitRequest}>
+                  <div className="mb-3">
+                    <label className="fh-label">{t("Request Letter")} <span className="req">*</span></label>
+                    <textarea className="form-control" rows={4} required value={requestLetter} onChange={(e) => setLetter(e.target.value)} placeholder={t("Write your Fatiha request text here...")} />
+                  </div>
+                  <div className="mb-3">
+                    <label className="fh-label">{t("Qirat (Quran Recitation)")} <span className="req">*</span></label>
+                    <select className="form-select" value={selectedQeratId} onChange={(e) => onQeratSelected(Number(e.target.value))} required>
+                      <option value={0} disabled>{t("Select a Qirat...")}</option>
+                      {qerats.map((q) => (<option key={q.id} value={q.id}>{q.qeratName}</option>))}
+                    </select>
+                    {selectedQeratAudioUrl && (
+                      <div className="fh-media-box mt-2">
+                        <label className="fh-label mb-2">{t("Selected Qirat Preview")}</label>
+                        <audio controls src={selectedQeratAudioUrl} className="w-100" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="mb-3">
+                    <AudioRecorder onResult={handleAudioResult} onClear={handleClearAudio} required />
+                  </div>
+                  <div className="d-flex gap-2 mt-4">
+                    <button type="submit" className="btn btn-primary flex-grow-1" disabled={busy}>
+                      {busy ? <span className="spinner-border spinner-border-sm me-2" /> : <i className="fas fa-paper-plane me-1" />}
+                      {t("Submit Request")}
+                    </button>
+                    <button type="button" className="btn btn-outline-secondary" onClick={() => { setLetter(""); setSelectedQeratId(0); setSelectedQeratAudioUrl(null); setAudioResult(null); setError(""); setSuccess(""); }}>
+                      {t("Cancel")}
+                    </button>
+                  </div>
+                </form>
               </div>
             </div>
-          </form>
+          </div>
         </div>
       </div>
-      {success && <div className="alert alert-success mt-3 rounded-4" style={{ maxWidth: 600, marginLeft: "auto", marginRight: "auto" }}><i className="fas fa-check-circle me-2" /> {success}</div>}
-      {error && <div className="alert alert-danger mt-3 rounded-4" style={{ maxWidth: 600, marginLeft: "auto", marginRight: "auto" }}><i className="fas fa-exclamation-circle me-2" /> {error}</div>}
     </div>
   );
 }
