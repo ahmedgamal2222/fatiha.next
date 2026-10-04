@@ -114,8 +114,11 @@ export function AudioRecorder({ onResult, onClear, required }: AudioRecorderProp
   );
 
   return (
-    <div className="form-group">
-      <label>{t("Audio recording")}{required ? " *" : ""}</label>
+    <div className="form-group fh-recorder">
+      <label className="fh-label">
+        <i className="fas fa-microphone-lines me-2 text-primary"></i>
+        {t("Audio recording")}{required ? <span className="req"> *</span> : ""}
+      </label>
       <div className="audio-record">
         {!isRecording ? (
           <button
@@ -124,7 +127,7 @@ export function AudioRecorder({ onResult, onClear, required }: AudioRecorderProp
             onClick={startRecording}
             disabled={isRecording}
           >
-            <i className="fa-solid fa-microphone me-2"></i>
+            <i className={`fa-solid ${hasRecorded ? "fa-rotate-right" : "fa-microphone"}`}></i>
             {hasRecorded ? t("Redo Recording") : t("Start Recording")}
           </button>
         ) : (
@@ -135,44 +138,46 @@ export function AudioRecorder({ onResult, onClear, required }: AudioRecorderProp
             onClick={stopRecording}
             disabled={!isRecording}
           >
-            <i className="fa-solid fa-stop me-2"></i>
+            <i className="fa-solid fa-stop"></i>
             {t("Stop Recording")}
           </button>
         )}
+
+        <button
+          type="button"
+          className="fh-recorder__upload"
+          onClick={() => fileRef.current?.click()}
+        >
+          <i className="fa-solid fa-file-audio"></i>
+          {hasRecorded ? t("Upload an audio file instead") : t("Or upload an audio file")}
+        </button>
       </div>
 
       {message && <div className="recording-message">{message}</div>}
-      {recorderError && <div className="alert alert-danger">{recorderError}</div>}
+      {recorderError && <div className="alert alert-danger mt-2 rounded-4">{recorderError}</div>}
 
-      <div className="playback mt-2">
-        {audioUrl && <audio src={audioUrl} controls className="w-100" />}
-      </div>
+      {audioUrl && (
+        <div className="fh-media-box mt-3">
+          <div className="d-flex justify-content-between align-items-center mb-2">
+            <label className="fh-label mb-0"><i className="fas fa-headphones me-1"></i>{t("Preview")}</label>
+            <button
+              type="button"
+              className="btn btn-sm btn-outline-danger"
+              onClick={() => {
+                setAudioUrl(null);
+                setHasRecorded(false);
+                if (fileRef.current) fileRef.current.value = "";
+                onClear?.();
+              }}
+            >
+              <i className="fas fa-trash me-1"></i>{t("Remove recording")}
+            </button>
+          </div>
+          <audio src={audioUrl} controls className="w-100" />
+        </div>
+      )}
 
-      <div className="mt-2">
-        <span
-          className="text-primary"
-          role="button"
-          onClick={() => fileRef.current?.click()}
-          style={{ cursor: "pointer", textDecoration: "underline" }}
-        >
-          🎵 {hasRecorded ? t("Upload an audio file instead") : t("Or upload an audio file")}
-        </span>
-        {audioUrl && (
-          <button
-            type="button"
-            className="btn btn-sm btn-outline-danger ms-2"
-            onClick={() => {
-              setAudioUrl(null);
-              setHasRecorded(false);
-              if (fileRef.current) fileRef.current.value = "";
-              onClear?.();
-            }}
-          >
-            {t("Remove recording")}
-          </button>
-        )}
-        <input ref={fileRef} type="file" accept="audio/*" className="hidden" onChange={onFileSelected} style={{ display: "none" }} />
-      </div>
+      <input ref={fileRef} type="file" accept="audio/*" className="hidden" onChange={onFileSelected} style={{ display: "none" }} />
     </div>
   );
 }

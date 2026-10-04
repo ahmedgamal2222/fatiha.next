@@ -169,6 +169,36 @@ export function Navbar() {
                             {isAdmin && (
                               <>
                                 <li>
+                                  <Link className="dropdown-item" href="/admin">
+                                    <i className="fas fa-gauge-high me-2"></i>
+                                    {t("Admin panel")}
+                                  </Link>
+                                </li>
+                                <li>
+                                  <Link className="dropdown-item" href="/admin/fatiha-requests">
+                                    <i className="fas fa-clipboard-check me-2"></i>
+                                    {t("Manage Fatiha Requests")}
+                                  </Link>
+                                </li>
+                                <li>
+                                  <Link className="dropdown-item" href="/admin/authorized-users">
+                                    <i className="fas fa-user-graduate me-2"></i>
+                                    {t("Ijazah Applications")}
+                                  </Link>
+                                </li>
+                                <li>
+                                  <Link className="dropdown-item" href="/admin/al-qerat">
+                                    <i className="fas fa-book-quran me-2"></i>
+                                    {t("Manage Recitations")}
+                                  </Link>
+                                </li>
+                                <li>
+                                  <Link className="dropdown-item" href="/admin/users">
+                                    <i className="fas fa-users me-2"></i>
+                                    {t("Manage Users")}
+                                  </Link>
+                                </li>
+                                <li>
                                   <Link className="dropdown-item" href="/admin/newsletter">
                                     <i className="fas fa-envelope me-2"></i>
                                     {t("Send Newsletter")}
@@ -198,6 +228,7 @@ export function Navbar() {
                                     {t("Manage Fatiha Marketplace")}
                                   </Link>
                                 </li>
+                                <li><hr className="dropdown-divider" /></li>
                               </>
                             )}
                             <li>

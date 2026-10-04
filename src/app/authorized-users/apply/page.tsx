@@ -108,113 +108,135 @@ export default function ApplyPage() {
   }
 
   return (
-    <div className="container shadow-lg mb-5 bg-body rounded" style={{ marginTop: 100, marginBottom: 80, padding: 20 }}>
-      <h2 className="shadow p-3 mb-5 rounded text-center" style={{ backgroundColor: "#263a5d", color: "white", fontFamily: '"18 Khebrat Musamim Regular", sans-serif', padding: 20, textAlign: "center", fontWeight: 500, lineHeight: "1.25em" }}>
-        {t("Apply to become an Authorized User")}
-      </h2>
-      <form onSubmit={onSubmit} encType="multipart/form-data" style={{ padding: "1.3rem" }}>
-        <div className="form-group">
-          <label>{t("Audio recording")} *</label>
-          <AudioRecorder onResult={handleAudioResult} onClear={handleClearAudio} required />
+    <div className="fh-page">
+      <header className="fh-page__header">
+        <div className="fh-container">
+          <span className="fh-page__icon"><i className="fas fa-user-graduate"></i></span>
+          <h1 className="fh-page__title">{t("Apply to become an Authorized User")}</h1>
+          <p className="fh-page__subtitle">{t("Share your recitation, qualifications and background to become a certified instructor.")}</p>
         </div>
-        <div className="form-group">
-          <label>{t("Description")}</label>
-          <textarea className="form-control" rows={4} value={description} onChange={(e) => setDescription(e.target.value)} />
-        </div>
-        <div className="form-group">
-          <label>{t("Brief Overview")}</label>
-          <textarea className="form-control" rows={4} value={briefOverview} onChange={(e) => setBriefOverview(e.target.value)} />
-        </div>
-        <div className="form-group">
-          <label>{t("Academic Qualifications")}</label>
-          <textarea className="form-control" rows={4} value={academicQualifications} onChange={(e) => setAcademicQualifications(e.target.value)} />
-        </div>
+      </header>
 
+      <div className="fh-container" style={{ maxWidth: 860 }}>
+        {success && <div className="alert alert-success rounded-4"><i className="fas fa-check-circle me-2" />{success}</div>}
+        {error && <div className="alert alert-danger rounded-4"><i className="fas fa-exclamation-circle me-2" />{error}</div>}
 
-        <div className="form-group">
-          <label>{t("Academic Attainment")}</label>
-          <select className="form-control" value={academicAttainment} onChange={(e) => setAcademicAttainment(e.target.value)}>
-            <option value="">{t("Select...")}</option>
-            {ACADEMIC_ATTAINMENTS.map((a) => (<option key={a} value={a}>{t(a)}</option>))}
-          </select>
-        </div>
-        <div className="form-group">
-          <label>{t("Current Position")}</label>
-          <select className="form-control" value={currentPosition} onChange={(e) => setCurrentPosition(e.target.value)}>
-            <option value="">{t("Select...")}</option>
-            {CURRENT_POSITIONS.map((p) => (<option key={p} value={p}>{t(p)}</option>))}
-          </select>
-        </div>
-        <div className="form-group">
-          <label>{t("CV")}</label>
-          <input type="file" className="form-control" onChange={onCvFileChange} accept="application/pdf" />
-        </div>
-        <div className="form-group">
-          <label>{t("Your Image")}</label>
-          <input type="file" className="form-control" onChange={onProfileImgChange} accept="image/*" />
-          {imagePreview && <img src={imagePreview} alt="Preview" className="preview-image" style={{ maxWidth: 200, marginTop: 10 }} />}
-        </div>
-        <div className="row">
-          <div className="form-group col-6">
-            <label>{t("Facebook")}</label>
-            <input type="text" className="form-control" value={facebook} onChange={(e) => setFacebook(e.target.value)} maxLength={300} />
+        <form onSubmit={onSubmit} encType="multipart/form-data">
+          {/* التسجيل الصوتي */}
+          <div className="fh-card mb-4">
+            <div className="fh-card__head"><i className="fas fa-microphone-lines"></i><h3>{t("Recitation Recording")}</h3></div>
+            <div className="fh-card__body">
+              <AudioRecorder onResult={handleAudioResult} onClear={handleClearAudio} required />
+            </div>
           </div>
-          <div className="form-group col-6">
-            <label>{t("Twitter")}</label>
-            <input type="text" className="form-control" value={twitter} onChange={(e) => setTwitter(e.target.value)} maxLength={300} />
+
+          {/* المعلومات الأساسية */}
+          <div className="fh-card mb-4">
+            <div className="fh-card__head"><i className="fas fa-id-card"></i><h3>{t("About You")}</h3></div>
+            <div className="fh-card__body">
+              <div className="mb-3">
+                <label className="fh-label">{t("Description")}</label>
+                <textarea className="form-control" rows={3} value={description} onChange={(e) => setDescription(e.target.value)} placeholder={t("Tell us about yourself...")} />
+              </div>
+              <div className="mb-3">
+                <label className="fh-label">{t("Brief Overview")}</label>
+                <textarea className="form-control" rows={3} value={briefOverview} onChange={(e) => setBriefOverview(e.target.value)} />
+              </div>
+              <div className="mb-0">
+                <label className="fh-label">{t("Academic Qualifications")}</label>
+                <textarea className="form-control" rows={3} value={academicQualifications} onChange={(e) => setAcademicQualifications(e.target.value)} />
+              </div>
+            </div>
           </div>
-          <div className="form-group col-6">
-            <label>{t("LinkedIn")}</label>
-            <input type="text" className="form-control" value={linkedIn} onChange={(e) => setLinkedIn(e.target.value)} maxLength={300} />
+
+          {/* المؤهلات والملفات */}
+          <div className="fh-card mb-4">
+            <div className="fh-card__head"><i className="fas fa-graduation-cap"></i><h3>{t("Qualifications & Files")}</h3></div>
+            <div className="fh-card__body">
+              <div className="row g-3">
+                <div className="col-md-6">
+                  <label className="fh-label">{t("Academic Attainment")}</label>
+                  <select className="form-select" value={academicAttainment} onChange={(e) => setAcademicAttainment(e.target.value)}>
+                    <option value="">{t("Select...")}</option>
+                    {ACADEMIC_ATTAINMENTS.map((a) => (<option key={a} value={a}>{t(a)}</option>))}
+                  </select>
+                </div>
+                <div className="col-md-6">
+                  <label className="fh-label">{t("Current Position")}</label>
+                  <select className="form-select" value={currentPosition} onChange={(e) => setCurrentPosition(e.target.value)}>
+                    <option value="">{t("Select...")}</option>
+                    {CURRENT_POSITIONS.map((p) => (<option key={p} value={p}>{t(p)}</option>))}
+                  </select>
+                </div>
+                <div className="col-md-6">
+                  <label className="fh-label">{t("AlQerat")} <span className="req">*</span></label>
+                  <select className="form-select" value={alQeratId} onChange={(e) => setAlQeratId(Number(e.target.value))}>
+                    <option value={0} disabled>{t("Select a Qerat...")}</option>
+                    {qerats.map((q) => (<option key={q.id} value={q.id}>{q.qeratName}</option>))}
+                  </select>
+                </div>
+                <div className="col-md-6">
+                  <label className="fh-label">{t("CV")}</label>
+                  <input type="file" className="form-control" onChange={onCvFileChange} accept="application/pdf" />
+                </div>
+                <div className="col-md-6">
+                  <label className="fh-label">{t("Your Image")}</label>
+                  <input type="file" className="form-control" onChange={onProfileImgChange} accept="image/*" />
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  {imagePreview && <img src={imagePreview} alt="Preview" className="rounded-3 border mt-2" style={{ maxWidth: 140 }} />}
+                </div>
+                <div className="col-md-3">
+                  <label className="fh-label">{t("Gender")}</label>
+                  <select className="form-select" value={String(gender)} onChange={(e) => setGender(e.target.value === "true")}>
+                    <option value="true">{t("Male")}</option>
+                    <option value="false">{t("Female")}</option>
+                  </select>
+                </div>
+                <div className="col-md-3">
+                  <label className="fh-label">{t("Date of Birth")}</label>
+                  <input type="date" className="form-control" value={dateOfBirth} onChange={(e) => setDateOfBirth(e.target.value)} />
+                </div>
+              </div>
+
+              <div className="mt-3">
+                <label className="fh-label"><i className="fas fa-globe me-2 text-primary"></i>{t("Spoken Languages")}</label>
+                <div className="d-flex flex-wrap gap-2">
+                  {SPOKEN_LANGUAGES.map((l) => {
+                    const active = languageList.includes(l.name);
+                    return (
+                      <button key={l.id} type="button" onClick={() => toggleLanguage(l.name)}
+                        className={`btn btn-sm ${active ? "btn-primary" : "btn-outline-primary"}`}>
+                        {active && <i className="fas fa-check me-1" />}{t(l.label)}
+                      </button>
+                    );
+                  })}
+                </div>
+                <div className="fh-hint">{t("Click the languages you speak to select or deselect them.")}</div>
+              </div>
+            </div>
           </div>
-          <div className="form-group col-6">
-            <label>{t("TikTok")}</label>
-            <input type="text" className="form-control" value={tiktok} onChange={(e) => setTiktok(e.target.value)} maxLength={300} />
+
+          {/* روابط التواصل */}
+          <div className="fh-card mb-4">
+            <div className="fh-card__head"><i className="fas fa-share-nodes"></i><h3>{t("Social Links")}</h3></div>
+            <div className="fh-card__body">
+              <div className="row g-3">
+                <div className="col-md-6"><label className="fh-label">{t("Facebook")}</label><input type="text" className="form-control" value={facebook} onChange={(e) => setFacebook(e.target.value)} maxLength={300} /></div>
+                <div className="col-md-6"><label className="fh-label">{t("Twitter")}</label><input type="text" className="form-control" value={twitter} onChange={(e) => setTwitter(e.target.value)} maxLength={300} /></div>
+                <div className="col-md-6"><label className="fh-label">{t("LinkedIn")}</label><input type="text" className="form-control" value={linkedIn} onChange={(e) => setLinkedIn(e.target.value)} maxLength={300} /></div>
+                <div className="col-md-6"><label className="fh-label">{t("TikTok")}</label><input type="text" className="form-control" value={tiktok} onChange={(e) => setTiktok(e.target.value)} maxLength={300} /></div>
+                <div className="col-md-6"><label className="fh-label">{t("Instagram")}</label><input type="text" className="form-control" value={instagram} onChange={(e) => setInstagram(e.target.value)} maxLength={300} /></div>
+                <div className="col-md-6"><label className="fh-label">{t("Website")}</label><input type="text" className="form-control" value={website} onChange={(e) => setWebsite(e.target.value)} maxLength={300} /></div>
+              </div>
+            </div>
           </div>
-        </div>
-        <div className="row">
-          <div className="form-group col-6">
-            <label>{t("Gender")}</label>
-            <select className="form-control" value={String(gender)} onChange={(e) => setGender(e.target.value === "true")}>
-              <option value="true">{t("Male")}</option>
-              <option value="false">{t("Female")}</option>
-            </select>
-          </div>
-          <div className="form-group col-6">
-            <label>{t("Date of Birth")}</label>
-            <input type="date" className="form-control" value={dateOfBirth} onChange={(e) => setDateOfBirth(e.target.value)} />
-          </div>
-        </div>
-        <div className="language-instructions">
-          <p>{t("Press Ctrl (Windows) or Cmd (Mac) and click on languages you speak. Click again to remove.")}</p>
-        </div>
-        <div className="form-group">
-          <label className="fw-bold mb-2 d-flex align-items-center">
-            <i className="fas fa-globe me-2 text-primary"></i> {t("Spoken Languages")}
-          </label>
-          <select className="form-control stylish-select" multiple value={languageList} onChange={(e) => {
-            const options = Array.from(e.target.selectedOptions, (o) => o.value);
-            setLanguageList(options);
-          }} style={{ minHeight: 100, maxHeight: 180 }}>
-            {SPOKEN_LANGUAGES.map((l) => (<option key={l.id} value={l.name}>{t(l.label)}</option>))}
-          </select>
-        </div>
-        <div className="form-group">
-          <label>{t("AlQerat")}</label>
-          <select className="form-control" value={alQeratId} onChange={(e) => setAlQeratId(Number(e.target.value))}>
-            <option value={0} disabled>{t("Select a Qerat...")}</option>
-            {qerats.map((q) => (<option key={q.id} value={q.id}>{q.qeratName}</option>))}
-          </select>
-        </div>
-        <div className="form-group">
-          <button type="submit" className="btn btn-danger" disabled={busy} style={{ background: "linear-gradient(135deg, #dc3545, #ff6b6b)", color: "white", fontSize: 18, padding: "12px 30px", borderRadius: 8, border: "none" }}>
-            {busy ? <span className="spinner-border spinner-border-sm me-2" /> : null}
+
+          <button type="submit" className="btn btn-primary btn-lg w-100" disabled={busy}>
+            {busy ? <span className="spinner-border spinner-border-sm me-2" /> : <i className="fas fa-paper-plane me-2" />}
             {t("Submit")}
           </button>
-        </div>
-        {success && <div className="alert alert-success"><i className="fas fa-check-circle me-2" />{success}</div>}
-        {error && <div className="alert alert-danger"><i className="fas fa-exclamation-circle me-2" />{error}</div>}
-      </form>
+        </form>
+      </div>
     </div>
   );
 }
