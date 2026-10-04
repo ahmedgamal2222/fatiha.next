@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { AdminGuard } from "@/components/AdminGuard";
 import { api, API_URL } from "@/lib/api";
 import { useI18n } from "@/context/I18nContext";
+import { CommentsThread } from "@/components/CommentsThread";
 
 interface FatihaRequest {
   id: number;
@@ -178,6 +179,8 @@ function Inner() {
                             <audio controls src={audioSrc(r.audioRecord)!} className="w-100" />
                           </div>
                         )}
+                        <h6 className="fw-bold mt-3 mb-2"><i className="fas fa-comments me-1 text-primary" />{t("Comments")}</h6>
+                        <CommentsThread requestId={r.id} />
                       </div>
                     )}
                   </div>

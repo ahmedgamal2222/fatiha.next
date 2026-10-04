@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { useI18n } from "@/context/I18nContext";
 import { useRouter, usePathname } from "next/navigation";
+import { NotificationBell } from "@/components/NotificationBell";
 
 export function Navbar() {
   const { t } = useI18n();
@@ -149,6 +150,13 @@ export function Navbar() {
                           <Link className="nav-link" href="/login">
                             {t("Log in")}
                           </Link>
+                        </li>
+                      )}
+
+                      {/* جرس الإشعارات */}
+                      {isAuthed && (
+                        <li className="nav-item d-flex align-items-center">
+                          <NotificationBell />
                         </li>
                       )}
 

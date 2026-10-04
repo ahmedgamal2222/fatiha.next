@@ -1278,3 +1278,100 @@ html[dir="rtl"] .fh-admin-card:hover .fh-admin-card__arrow { transform: scaleX(-
   background: rgba(11, 122, 110, 0.06) !important;
   transform: none !important;
 }
+
+/* ─────────────── سلسلة التعليقات ─────────────── */
+.fh-comments__list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; }
+.fh-comment {
+  display: flex;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface-2);
+  position: relative;
+}
+.fh-comment--mine { background: rgba(11, 122, 110, 0.07); border-color: rgba(11, 122, 110, 0.25); }
+.fh-comment__avatar {
+  flex-shrink: 0;
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 1rem;
+  background: var(--primary);
+}
+.fh-comment__body { flex-grow: 1; min-width: 0; }
+.fh-comment__head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 3px; }
+.fh-comment__author { font-weight: 800; color: var(--heading); font-size: 0.92rem; }
+.fh-comment__time { color: var(--muted); font-size: 0.76rem; }
+.fh-comment__text { margin: 2px 0 0; color: var(--text); white-space: pre-wrap; word-break: break-word; }
+.fh-comment__del {
+  border: none; background: transparent; color: #dc2626;
+  cursor: pointer; align-self: flex-start; padding: 4px; opacity: 0.6;
+  transition: opacity 0.2s ease;
+}
+.fh-comment__del:hover { opacity: 1; }
+.fh-comments__form {
+  border-top: 1px solid var(--border);
+  padding-top: 14px;
+}
+
+/* ─────────────── الاختبار ─────────────── */
+.fh-exam-q {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px 20px;
+  background: var(--surface);
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-sm);
+}
+.fh-exam-q__title { font-weight: 800; color: var(--heading); margin-bottom: 12px; display: flex; gap: 8px; }
+.fh-exam-q__num {
+  flex-shrink: 0;
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--primary); color: #fff;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 0.82rem; font-weight: 800;
+}
+.fh-exam-opt {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 14px; margin-bottom: 8px;
+  border: 1.5px solid var(--border); border-radius: 11px;
+  cursor: pointer; transition: border-color 0.15s ease, background 0.15s ease;
+}
+.fh-exam-opt:hover { border-color: var(--primary-light); background: rgba(11, 122, 110, 0.04); }
+.fh-exam-opt--selected { border-color: var(--primary); background: rgba(11, 122, 110, 0.08); font-weight: 700; }
+.fh-exam-opt input { accent-color: var(--primary); width: 17px; height: 17px; }
+
+/* ─────────────── جرس الإشعارات ─────────────── */
+.fh-bell { position: relative; }
+.fh-bell__btn {
+  position: relative; background: transparent; border: none; cursor: pointer;
+  color: inherit; font-size: 1.1rem; padding: 6px 8px; line-height: 1;
+}
+.fh-bell__badge {
+  position: absolute; top: -2px; inset-inline-end: -2px;
+  min-width: 18px; height: 18px; padding: 0 5px;
+  border-radius: 999px; background: #dc2626; color: #fff;
+  font-size: 0.68rem; font-weight: 800;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.fh-bell__menu {
+  position: absolute; inset-inline-end: 0; top: calc(100% + 10px);
+  width: 340px; max-width: 90vw; max-height: 440px; overflow-y: auto;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+  box-shadow: var(--shadow-lg); z-index: 1200; padding: 8px;
+}
+.fh-bell__head {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 10px 10px; border-bottom: 1px solid var(--border); margin-bottom: 6px;
+}
+.fh-bell__head h6 { margin: 0; font-weight: 800; }
+.fh-noti {
+  display: block; padding: 11px 12px; border-radius: 10px;
+  text-decoration: none; color: inherit; transition: background 0.15s ease;
+}
+.fh-noti:hover { background: var(--surface-2); }
+.fh-noti--unread { background: rgba(11, 122, 110, 0.06); }
+.fh-noti__title { font-weight: 700; font-size: 0.9rem; color: var(--heading); margin: 0 0 2px; }
+.fh-noti__msg { font-size: 0.82rem; color: var(--muted); margin: 0; }
+.fh-noti__time { font-size: 0.72rem; color: var(--muted); }
