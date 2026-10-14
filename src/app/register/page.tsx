@@ -7,6 +7,9 @@ import { useAuth } from "@/context/AuthContext";
 import { useI18n } from "@/context/I18nContext";
 import { ApiError } from "@/lib/api";
 import { AuthShell } from "@/components/AuthShell";
+import { GoogleSignInButton } from "@/components/GoogleSignInButton";
+import { googleErrorMessage } from "@/lib/google-auth";
+import { useQueryParam } from "@/lib/query";
 
 function passwordStrength(pw: string): { pct: number; color: string; label: string } {
   let score = 0;
@@ -34,6 +37,10 @@ export default function RegisterPage() {
   const [showPw, setShowPw] = useState(false);
   const [errorMessage, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  // خطأ عائد من تدفّق Google (‎/register?error=google_cancelled ...)
+  const urlError = useQueryParam("error");
+  const returnedErrorKey = googleErrorMessage(urlError);
+  const nextPath = useQueryParam("next") || "/";
 
   const strength = passwordStrength(password);
 
@@ -44,7 +51,7 @@ export default function RegisterPage() {
     setLoading(true);
     try {
       await register({ email, password, nameAr: nameAr || undefined, preferredCulture: ar ? "ar-SA" : "en-US" });
-      router.push("/");
+      router.push(nextPath);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : t("Registration failed"));
     } finally {
@@ -61,7 +68,12 @@ export default function RegisterPage() {
       footer={<>{t("Already have an account?")} <Link href="/login">{t("Log in")}</Link></>}
     >
       <form onSubmit={onSubmit}>
-        {errorMessage && <div className="alert alert-danger rounded-4 py-2"><i className="fas fa-circle-exclamation me-2" />{errorMessage}</div>}
+        {(errorMessage || returnedErrorKey) && (
+          <div className="alert alert-danger rounded-4 py-2">
+            <i className="fas fa-circle-exclamation me-2" />
+            {errorMessage || t(returnedErrorKey!)}
+          </div>
+        )}
 
         <div className="fh-auth__field">
           <i className="fas fa-user"></i>
@@ -99,6 +111,8 @@ export default function RegisterPage() {
           {loading ? <span className="spinner-border spinner-border-sm me-2" /> : <i className="fas fa-user-plus me-2" />}
           {loading ? t("Registering...") : t("Create account")}
         </button>
+
+        <GoogleSignInButton next={nextPath} />
       </form>
     </AuthShell>
   );

@@ -1457,6 +1457,24 @@ html[dir="rtl"] .fh-auth__field input { padding: 13px 42px 13px 14px; }
 .fh-auth__links a:hover { text-decoration: underline; }
 .fh-auth__foot { text-align: center; margin-top: 22px; color: var(--muted); font-size: 0.92rem; }
 .fh-auth__foot a { color: var(--primary); font-weight: 700; text-decoration: none; }
+/* ── تسجيل الدخول عبر Google ── */
+.fh-divider { display: flex; align-items: center; gap: 12px; margin: 20px 0; color: var(--muted); font-size: 0.85rem; }
+.fh-divider::before, .fh-divider::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+.fh-google-btn {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  width: 100%; padding: 12px 16px; border-radius: 12px;
+  border: 1.5px solid var(--border); background: #fff; color: #1f2937;
+  font-weight: 700; font-size: 0.97rem; cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.05s ease;
+}
+.fh-google-btn:hover:not(:disabled) { border-color: #d1d5db; box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08); }
+.fh-google-btn:active:not(:disabled) { transform: translateY(1px); }
+.fh-google-btn:disabled { opacity: 0.75; cursor: progress; }
+.fh-google-btn svg { flex: none; }
+.fh-auth__status { text-align: center; padding: 12px 0 4px; }
+.fh-auth__status-icon { font-size: 2.6rem; margin-bottom: 14px; }
+.fh-auth__status-icon.ok { color: #15803d; }
+.fh-auth__status-icon.err { color: #dc2626; }
 .fh-strength { height: 6px; border-radius: 999px; background: var(--border); overflow: hidden; margin-top: 8px; }
 .fh-strength__bar { height: 100%; width: 0; transition: width 0.25s ease, background 0.25s ease; }
 @media (max-width: 767px) {

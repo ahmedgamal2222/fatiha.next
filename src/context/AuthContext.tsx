@@ -14,6 +14,7 @@ export interface CurrentUser {
   countryId?: number | null;
   jobCode?: string | null;
   profileImageUrl?: string | null;
+  avatarUrl?: string | null;
   profileCompletionPercentage?: number;
   impersonating?: boolean;
 }

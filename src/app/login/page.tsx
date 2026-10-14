@@ -7,6 +7,9 @@ import { useAuth } from "@/context/AuthContext";
 import { useI18n } from "@/context/I18nContext";
 import { ApiError } from "@/lib/api";
 import { AuthShell } from "@/components/AuthShell";
+import { GoogleSignInButton } from "@/components/GoogleSignInButton";
+import { googleErrorMessage } from "@/lib/google-auth";
+import { useQueryParam } from "@/lib/query";
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -17,6 +20,10 @@ export default function LoginPage() {
   const [showPw, setShowPw] = useState(false);
   const [errorMessage, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  // خطأ عائد من تدفّق Google (‎/login?error=google_cancelled ...)
+  const urlError = useQueryParam("error");
+  const returnedErrorKey = googleErrorMessage(urlError);
+  const nextPath = useQueryParam("next") || "/";
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -24,7 +31,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await login(email, password);
-      router.push("/");
+      router.push(nextPath);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : t("Invalid login attempt"));
     } finally {
@@ -41,7 +48,12 @@ export default function LoginPage() {
       footer={<>{t("New here?")} <Link href="/register">{t("Create an account")}</Link></>}
     >
       <form onSubmit={onSubmit}>
-        {errorMessage && <div className="alert alert-danger rounded-4 py-2"><i className="fas fa-circle-exclamation me-2" />{errorMessage}</div>}
+        {(errorMessage || returnedErrorKey) && (
+          <div className="alert alert-danger rounded-4 py-2">
+            <i className="fas fa-circle-exclamation me-2" />
+            {errorMessage || t(returnedErrorKey!)}
+          </div>
+        )}
 
         <div className="fh-auth__field">
           <i className="fas fa-envelope"></i>
@@ -67,6 +79,8 @@ export default function LoginPage() {
           {loading ? <span className="spinner-border spinner-border-sm me-2" /> : <i className="fas fa-right-to-bracket me-2" />}
           {loading ? t("Logging in...") : t("Log in")}
         </button>
+
+        <GoogleSignInButton next={nextPath} />
       </form>
     </AuthShell>
   );
