@@ -31,13 +31,23 @@ export function AudioRecorder({ onResult, onClear, required }: AudioRecorderProp
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+  const mimeRef = useRef("audio/webm");
+  const audioUrlRef = useRef<string | null>(null);
+  // الأحدث فقط: نتجنّب استدعاءات قديمة عند الضغط المتكرر
+  const onResultRef = useRef(onResult);
+  onResultRef.current = onResult;
   const fileRef = useRef<HTMLInputElement | null>(null);
 
-  // تنظيف عند الإزالة
+  // تنظيف عند الإزالة: إيقاف الميكروفون وتحرير أي رابط مؤقت
   useEffect(() => {
+    const live = { mediaRecorderRef, streamRef, audioUrlRef };
     return () => {
-      mediaRecorderRef.current?.stop();
-      streamRef.current?.getTracks().forEach((t) => t.stop());
+      try { live.mediaRecorderRef.current?.stop(); } catch { /* ignore */ }
+      live.streamRef.current?.getTracks().forEach((t) => { try { t.stop(); } catch { /* ignore */ } });
+      if (live.audioUrlRef.current) { try { URL.revokeObjectURL(live.audioUrlRef.current); } catch { /* ignore */ } }
+      live.mediaRecorderRef.current = null;
+      live.streamRef.current = null;
+      live.audioUrlRef.current = null;
     };
   }, []);
 
@@ -45,6 +55,36 @@ export function AudioRecorder({ onResult, onClear, required }: AudioRecorderProp
     setMessage(m);
     setTimeout(() => setMessage(""), 2500);
   }, []);
+
+  function stopStream() {
+    streamRef.current?.getTracks().forEach((t) => { try { t.stop(); } catch { /* ignore */ } });
+    streamRef.current = null;
+  }
+
+  /** صيغة مدعومة فعلياً — Safari مثلاً لا يقبل webm. */
+  function pickMime(): string {
+    const MR = window.MediaRecorder as unknown as { isTypeSupported?: (t: string) => boolean } | undefined;
+    const candidates = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4", "audio/mpeg"];
+    for (const c of candidates) {
+      try { if (MR?.isTypeSupported?.(c)) return c; } catch { /* ignore */ }
+    }
+    return "";
+  }
+
+  function extFor(mime: string): string {
+    if (mime.includes("mp4")) return "m4a";
+    if (mime.includes("mpeg")) return "mp3";
+    if (mime.includes("ogg") || mime.includes("oga")) return "ogg";
+    return "webm";
+  }
+
+  function setPreview(url: string | null) {
+    if (audioUrlRef.current && audioUrlRef.current !== url) {
+      try { URL.revokeObjectURL(audioUrlRef.current); } catch { /* ignore */ }
+    }
+    audioUrlRef.current = url;
+    setAudioUrl(url);
+  }
 
   const startRecording = useCallback(async () => {
     try {
@@ -56,30 +96,43 @@ export function AudioRecorder({ onResult, onClear, required }: AudioRecorderProp
         nav.mediaDevices?.getUserMedia?.bind(nav.mediaDevices) ??
         (typeof nav.getUserMedia === "function" ? nav.getUserMedia.bind(nav) : null);
       if (!getUserMedia) {
-        setError(t("Microphone is not supported in this browser — upload an audio file instead."));
+        if (!window.isSecureContext) {
+          setError(t("Microphone requires a secure connection (HTTPS) or localhost — upload an audio file instead."));
+        } else {
+          setError(t("Microphone is not supported in this browser — upload an audio file instead."));
+        }
+        fileRef.current?.click();
         return;
       }
       const stream = await getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream);
+      const mime = pickMime();
+      const recorder = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream);
       chunksRef.current = [];
+      mimeRef.current = recorder.mimeType || mime || "audio/webm";
       recorder.ondataavailable = (e) => {
-        chunksRef.current.push(e.data);
+        if (e.data && e.data.size > 0) chunksRef.current.push(e.data);
       };
       recorder.onstop = () => {
         if (chunksRef.current.length > 0) {
-          const blob = new Blob(chunksRef.current, { type: "audio/wav" });
+          const type = mimeRef.current || "audio/webm";
+          const blob = new Blob(chunksRef.current, { type });
           const url = URL.createObjectURL(blob);
-          setAudioUrl(url);
+          setPreview(url);
           setHasRecorded(true);
-          onResult({ blob, url, name: `recording-${Date.now()}.wav` });
+          onResultRef.current({ blob, url, name: `recording-${Date.now()}.${extFor(type)}` });
+        } else {
+          setError(t("No audio was captured — please try again."));
+          setRecording(false);
         }
-        stream.getTracks().forEach((t) => t.stop());
+        stream.getTracks().forEach((t) => { try { t.stop(); } catch { /* ignore */ } });
         streamRef.current = null;
         showMsg(t("Recording stopped..."));
       };
       recorder.onerror = () => {
         setError(t("Recording failed — try uploading an audio file."));
         setRecording(false);
+        stream.getTracks().forEach((t) => { try { t.stop(); } catch { /* ignore */ } });
+        streamRef.current = null;
       };
       mediaRecorderRef.current = recorder;
       streamRef.current = stream;
@@ -88,13 +141,17 @@ export function AudioRecorder({ onResult, onClear, required }: AudioRecorderProp
       setError(null);
       showMsg(t("Recording started..."));
     } catch {
-      setError(t("Microphone access was denied — try uploading an audio file."));
+      if (!window.isSecureContext) {
+        setError(t("Microphone requires a secure connection (HTTPS) or localhost — upload an audio file instead."));
+      } else {
+        setError(t("Microphone access was denied — try uploading an audio file."));
+      }
     }
-  }, [onResult, showMsg, t]);
+  }, [showMsg, t]);
 
   const stopRecording = useCallback(() => {
     if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop();
+      try { mediaRecorderRef.current.stop(); } catch { /* ignore */ }
       setRecording(false);
     }
   }, [isRecording]);
@@ -104,13 +161,13 @@ export function AudioRecorder({ onResult, onClear, required }: AudioRecorderProp
       const file = e.target.files?.[0];
       if (!file) return;
       const url = URL.createObjectURL(file);
-      setAudioUrl(url);
+      setPreview(url);
       setHasRecorded(true);
       setRecording(false);
       setError(null);
-      onResult({ blob: file, url, name: file.name || "audio.wav" });
+      onResultRef.current({ blob: file, url, name: file.name || "audio.wav" });
     },
-    [onResult]
+    []
   );
 
   return (

@@ -30,11 +30,14 @@ export function CommentsThread({ requestId }: { requestId: number }) {
   const [text, setText] = useState("");
   const [audio, setAudio] = useState<Blob | null>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [audioName, setAudioName] = useState("comment.wav");
   const [recording, setRecording] = useState(false);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
   const recorderRef = useRef<MediaRecorder | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+  const mimeRef = useRef("audio/webm");
   const fileRef = useRef<HTMLInputElement | null>(null);
 
   const isAdmin = user?.role === "Admin";
@@ -46,31 +49,101 @@ export function CommentsThread({ requestId }: { requestId: number }) {
 
   useEffect(() => { load(); }, [load]);
 
+  // تنظيف التسجيل عند الخروج من المكوّن (إيقاف الميكروفون + تحرير الروابط المؤقتة)
+  useEffect(() => {
+    const live = { recorderRef, streamRef };
+    return () => {
+      try { live.recorderRef.current?.stop(); } catch { /* ignore */ }
+      live.streamRef.current?.getTracks().forEach((tr) => { try { tr.stop(); } catch { /* ignore */ } });
+      live.recorderRef.current = null;
+      live.streamRef.current = null;
+    };
+  }, []);
+
+  function stopStream() {
+    streamRef.current?.getTracks().forEach((tr) => { try { tr.stop(); } catch { /* ignore */ } });
+    streamRef.current = null;
+  }
+
+  /** يختار صيغة تسجيل مدعومة (Safari لا يدعم webm) بدل الادّعاء الكاذب بأنها wav. */
+  function pickMime(): string {
+    const MR = window.MediaRecorder as unknown as { isTypeSupported?: (t: string) => boolean } | undefined;
+    const candidates = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4", "audio/mpeg"];
+    for (const c of candidates) {
+      try { if (MR?.isTypeSupported?.(c)) return c; } catch { /* ignore */ }
+    }
+    return "";
+  }
+
+  function extFor(mime: string): string {
+    if (mime.includes("mp4")) return "m4a";
+    if (mime.includes("mpeg")) return "mp3";
+    if (mime.includes("ogg") || mime.includes("oga")) return "ogg";
+    return "webm";
+  }
+
   async function startRec() {
     try {
+      setErr("");
+      if (!("mediaDevices" in navigator) || !navigator.mediaDevices?.getUserMedia) {
+        if (!window.isSecureContext) {
+          setErr(t("Microphone requires a secure connection (HTTPS) or localhost — try uploading an audio file."));
+        } else {
+          setErr(t("Microphone is not supported in this browser — upload an audio file instead."));
+        }
+        fileRef.current?.click();
+        return;
+      }
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const rec = new MediaRecorder(stream);
+      const mime = pickMime();
+      const rec = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream);
       chunksRef.current = [];
-      rec.ondataavailable = (e) => chunksRef.current.push(e.data);
+      mimeRef.current = rec.mimeType || mime || "audio/webm";
+      rec.ondataavailable = (e) => { if (e.data && e.data.size > 0) chunksRef.current.push(e.data); };
+      rec.onerror = () => {
+        setErr(t("Recording failed — try uploading an audio file."));
+        setRecording(false);
+        stopStream();
+      };
       rec.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: "audio/wav" });
-        setAudio(blob);
-        setAudioUrl(URL.createObjectURL(blob));
-        stream.getTracks().forEach((tr) => tr.stop());
+        if (chunksRef.current.length > 0) {
+          const type = mimeRef.current || "audio/webm";
+          const blob = new Blob(chunksRef.current, { type });
+          if (audioUrl) { try { URL.revokeObjectURL(audioUrl); } catch { /* ignore */ } }
+          setAudio(blob);
+          setAudioUrl(URL.createObjectURL(blob));
+          setAudioName(`comment-${Date.now()}.${extFor(type)}`);
+        } else {
+          setErr(t("No audio was captured — please try again."));
+        }
+        stopStream();
       };
       recorderRef.current = rec;
+      streamRef.current = stream;
       rec.start();
       setRecording(true);
-    } catch { setErr(t("Microphone access was denied — try uploading an audio file.")); }
+    } catch {
+      if (!window.isSecureContext) {
+        setErr(t("Microphone requires a secure connection (HTTPS) or localhost — try uploading an audio file."));
+      } else {
+        setErr(t("Microphone access was denied — try uploading an audio file."));
+      }
+    }
   }
-  function stopRec() { recorderRef.current?.stop(); setRecording(false); }
+  function stopRec() { try { recorderRef.current?.stop(); } catch { /* ignore */ } setRecording(false); }
   function onFile(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0];
     if (!f) return;
-    setAudio(f); setAudioUrl(URL.createObjectURL(f));
+    if (audioUrl) { try { URL.revokeObjectURL(audioUrl); } catch { /* ignore */ } }
+    setAudio(f);
+    setAudioUrl(URL.createObjectURL(f));
+    setAudioName(f.name || `comment-${Date.now()}.wav`);
   }
   function clearAudio() {
-    setAudio(null); setAudioUrl(null);
+    setAudio(null);
+    if (audioUrl) { try { URL.revokeObjectURL(audioUrl); } catch { /* ignore */ } }
+    setAudioUrl(null);
+    setAudioName("comment.wav");
     if (fileRef.current) fileRef.current.value = "";
   }
 
@@ -81,11 +154,16 @@ export function CommentsThread({ requestId }: { requestId: number }) {
     try {
       const form = new FormData();
       if (text.trim()) form.append("comment", text.trim());
-      if (audio) form.append("audioRecord", audio, `comment-${Date.now()}.wav`);
-      await api.post(`/api/fatiha-requests/${requestId}/comments`, form);
+      if (audio) form.append("audioRecord", audio, audioName);
+      const res = await api.post(`/api/fatiha-requests/${requestId}/comments`, form);
+      if (!res.success) throw new Error(res.message || "failed");
       setText(""); clearAudio();
-      load();
-    } catch { setErr(t("Operation failed")); }
+      await load();
+    } catch (err) {
+      setErr(err instanceof Error && err.message && err.message !== "failed"
+        ? err.message
+        : t("Operation failed"));
+    }
     finally { setBusy(false); }
   }
 

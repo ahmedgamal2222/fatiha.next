@@ -19,8 +19,18 @@ interface CertData {
   dateOfIssue: number | string;
 }
 
-const VERIFY_BASE = "https://fatiha.id/verify";
+// قاعدة رابط التحقق المطبوع في رمز QR.
+// تُشتقّ من نطاق الموقع الحالي افتراضياً (لتعمل على أي دومين)، ويمكن تثبيتها
+// عبر NEXT_PUBLIC_VERIFY_BASE (مثال: https://fatiha.id/verify).
 const TEMPLATE = "/Cert.jpeg";
+
+/** يبني رابط صفحة التحقق للشهادة — بنمط استعلام لأن المشروع تصدير ساكن. */
+function verifyUrl(certificateId: number): string {
+  const base =
+    process.env.NEXT_PUBLIC_VERIFY_BASE ||
+    (typeof window !== "undefined" ? `${window.location.origin}/verify` : "https://fatiha.id/verify");
+  return `${base}?id=${certificateId}`;
+}
 
 /** يحلّل التاريخ من رقم (ثوانٍ/ملّي) أو سلسلة ISO بشكل آمن. */
 function parseDate(v?: number | string | null): Date | null {
@@ -119,13 +129,13 @@ export function CertificateButton({ certificateId }: { certificateId: number }) 
 
       // رمز QR للتحقق
       try {
-        const verifyUrl = `${VERIFY_BASE}/${data.certificateId}`;
-        const qrDataUrl = await QRCode.toDataURL(verifyUrl, { width: 150, margin: 1 });
+        const vUrl = verifyUrl(data.certificateId);
+        const qrDataUrl = await QRCode.toDataURL(vUrl, { width: 150, margin: 1 });
         const qrImg = await loadImage(qrDataUrl);
         ctx.drawImage(qrImg, cx - 75, 800, 150, 150);
         ctx.font = "16px Arial";
         ctx.fillStyle = "#64748b";
-        ctx.fillText(verifyUrl, cx, 975);
+        ctx.fillText(vUrl, cx, 975);
       } catch {
         /* تجاهل فشل QR */
       }

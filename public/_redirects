@@ -1,0 +1,5 @@
+# Cloudflare Pages — روابط الشهادات
+# صفحة التحقق ساكنة (Next.js static export) وتقرأ الرقم من ?id=
+# هذه القواعد تُدعم الشكل القديم/المطبوع في رمز QR: /verify/123
+/verify/:id  /verify/?id=:id  302
+/verify/:id/ /verify/?id=:id  302
