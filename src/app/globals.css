@@ -1539,3 +1539,380 @@ html[dir="rtl"] .fh-auth__field input { padding: 13px 42px 13px 14px; }
   border-radius: 12px;
   padding: 12px 16px;
 }
+
+
+/* ═══════════════════════ محرّر الصفحات (Page Builder) ═══════════════════════ */
+
+.bz-scope {
+  min-height: 100vh;
+  background: #eef2f4;
+  color: #0f172a;
+}
+
+/* ── الشريط العلوي ── */
+.bz-scope .bz-top {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid #e2e8f0;
+  box-shadow: 0 6px 24px rgba(15, 23, 42, 0.05);
+}
+.bz-scope .bz-title {
+  max-width: 280px;
+  font-weight: 800;
+  border: 1px solid transparent;
+  background: #f1f5f9;
+  border-radius: 10px;
+}
+.bz-scope .bz-title:focus {
+  background: #fff;
+  border-color: #0b7a6e;
+  box-shadow: 0 0 0 3px rgba(11, 122, 110, 0.12);
+}
+.bz-scope .bz-badge {
+  font-size: 11px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-weight: 700;
+}
+
+/* ── اللوحات الجانبية ── */
+.bz-scope .bz-side {
+  width: 296px;
+  flex: 0 0 296px;
+  background: #fff;
+  border-inline-end: 1px solid #e2e8f0;
+  min-height: calc(100vh - 58px);
+}
+.bz-scope .bz-side--right {
+  width: 340px;
+  flex: 0 0 340px;
+  border-inline-end: 0;
+  border-inline-start: 1px solid #e2e8f0;
+}
+.bz-scope .bz-sec-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #64748b;
+  font-weight: 800;
+  margin: 14px 0 8px;
+}
+
+/* ── شبكة العناصر ── */
+.bz-scope .bz-widgets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.bz-scope .bz-widget {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: calc(50% - 4px);
+  padding: 9px 10px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  border-radius: 12px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #334155;
+  text-align: start;
+  transition: all 0.18s ease;
+}
+.bz-scope .bz-widget:hover {
+  border-color: #0b7a6e;
+  color: #0b7a6e;
+  box-shadow: 0 8px 20px rgba(11, 122, 110, 0.12);
+  transform: translateY(-1px);
+}
+.bz-scope .bz-widget i {
+  width: 26px;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: rgba(11, 122, 110, 0.1);
+  color: #0b7a6e;
+  font-size: 12px;
+}
+.bz-scope .bz-widget--pro i {
+  background: rgba(233, 163, 25, 0.16);
+  color: #b8791a;
+}
+
+/* ── الأقسام الجاهزة ── */
+.bz-scope .bz-sections {
+  display: grid;
+  gap: 6px;
+}
+.bz-scope .bz-sec {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px dashed #cbd5e1;
+  background: #f8fafc;
+  border-radius: 12px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #334155;
+  transition: all 0.18s ease;
+}
+.bz-scope .bz-sec:hover {
+  border-color: #0b7a6e;
+  background: #fff;
+  color: #0b7a6e;
+  transform: translateX(2px);
+}
+
+/* ── لوحة الرسم ── */
+.bz-scope .bz-canvas {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 18px;
+}
+.bz-scope .bz-frame {
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 18px 50px rgba(15, 23, 42, 0.1);
+  transition: max-width 0.25s ease;
+}
+.bz-scope .bz-frame--preview {
+  border-radius: 0;
+  border-color: transparent;
+  box-shadow: none;
+}
+.bz-scope [data-block-id] {
+  transition: outline-color 0.15s ease, box-shadow 0.15s ease;
+}
+.bz-scope [data-block-id]:hover {
+  outline-color: rgba(11, 122, 110, 0.5) !important;
+}
+
+/* ── لوحة الخصائص ── */
+.bz-scope .bz-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-bottom: 1px solid #e2e8f0;
+}
+.bz-scope .bz-tab {
+  border: 0;
+  background: #fff;
+  padding: 11px 6px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #64748b;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s ease;
+}
+.bz-scope .bz-tab:hover {
+  color: #0b7a6e;
+  background: #f8fafc;
+}
+.bz-scope .bz-tab--on {
+  color: #0b7a6e;
+  border-bottom-color: #0b7a6e;
+  background: #f0fdfa;
+}
+.bz-scope .bz-panel-body {
+  padding: 14px;
+  max-height: calc(100vh - 122px);
+  overflow-y: auto;
+}
+.bz-scope .bz-label {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #64748b;
+  margin-bottom: 4px;
+}
+.bz-scope .form-control,
+.bz-scope .form-select {
+  border-radius: 10px;
+  border-color: #e2e8f0;
+}
+.bz-scope .form-control:focus,
+.bz-scope .form-select:focus {
+  border-color: #0b7a6e;
+  box-shadow: 0 0 0 3px rgba(11, 122, 110, 0.12);
+}
+.bz-scope .bz-element-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-bottom: 12px;
+  border-bottom: 1px dashed #e2e8f0;
+  margin-bottom: 14px;
+}
+.bz-scope .bz-chip {
+  background: linear-gradient(135deg, #0b7a6e, #10a596);
+  color: #fff;
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 800;
+}
+.bz-scope .bz-toolbar .btn {
+  width: 32px;
+  height: 30px;
+  padding: 0;
+  line-height: 1;
+  border-radius: 8px;
+}
+.bz-scope .bz-group {
+  background: #f8fafc;
+  border: 1px solid #eef2f6;
+  border-radius: 12px;
+  padding: 10px;
+  margin-top: 12px;
+}
+.bz-scope .bz-ai {
+  background: linear-gradient(135deg, rgba(11, 122, 110, 0.06), rgba(233, 163, 25, 0.08));
+  border: 1px dashed rgba(11, 122, 110, 0.35);
+  border-radius: 14px;
+  padding: 12px;
+}
+.bz-scope .btn-primary {
+  background: linear-gradient(135deg, #0b7a6e, #10a596);
+  border: 0;
+}
+.bz-scope .btn-primary:hover {
+  filter: brightness(1.07);
+}
+
+
+/* ═══════════════════════ منتقي الوسائط (رفع الصور/الفيديو) ═══════════════════════ */
+
+.mp__drop {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border: 1.5px dashed #cbd5e1;
+  border-radius: 14px;
+  background: #f8fafc;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.18s ease;
+}
+.mp__drop:hover {
+  border-color: #0b7a6e;
+  background: #f0fdfa;
+}
+.mp__drop--on {
+  border-color: #0b7a6e;
+  background: #ecfdf5;
+  box-shadow: 0 0 0 3px rgba(11, 122, 110, 0.12);
+}
+.mp__hint {
+  text-align: center;
+  color: #94a3b8;
+  padding: 12px;
+}
+.mp__media {
+  display: block;
+  max-width: 100%;
+  max-height: 220px;
+  border-radius: 10px;
+}
+
+/* معرض متعدّد */
+.mpl__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  gap: 8px;
+  min-height: 92px;
+  padding: 8px;
+  border: 1.5px dashed #cbd5e1;
+  border-radius: 14px;
+  background: #f8fafc;
+  transition: all 0.18s ease;
+}
+.mpl__grid--on {
+  border-color: #0b7a6e;
+  background: #ecfdf5;
+}
+.mpl__item {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #e2e8f0;
+}
+.mpl__item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.mpl__tools {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  gap: 2px;
+  padding: 3px;
+  background: rgba(15, 23, 42, 0.62);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.mpl__item:hover .mpl__tools {
+  opacity: 1;
+}
+.mpl__tools button {
+  border: 0;
+  background: transparent;
+  color: #fff;
+  font-size: 11px;
+  padding: 2px 5px;
+  border-radius: 6px;
+}
+.mpl__tools button:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+.mpl__tools .mpl__del:hover {
+  background: #dc2626;
+}
+.mpl__add {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  aspect-ratio: 1 / 1;
+  padding: 8px;
+  border: 1.5px dashed #94a3b8;
+  border-radius: 10px;
+  background: #fff;
+  color: #64748b;
+  font-size: 11px;
+  transition: all 0.18s ease;
+}
+.mpl__add:hover:not(:disabled) {
+  border-color: #0b7a6e;
+  color: #0b7a6e;
+  background: #f0fdfa;
+}
+.mpl__add:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

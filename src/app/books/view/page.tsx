@@ -12,8 +12,9 @@ interface Book {
   publisher?: string | null;
   year?: number | null;
   description?: string | null;
-  coverUrl?: string | null;
+  cover?: string | null;
   fileUrl?: string | null;
+  images?: string[];
   visits: number;
   downloads: number;
 }
@@ -51,7 +52,7 @@ function BookDetail() {
       <div className="row g-4">
         <div className="col-lg-4">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={b.coverUrl || "/hero-img.jpg"} alt={b.title} className="img-fluid rounded-4 shadow-sm w-100" style={{ objectFit: "cover" }} />
+          <img src={b.cover || "/hero-img.jpg"} alt={b.title} className="img-fluid rounded-4 shadow-sm w-100" style={{ objectFit: "cover" }} />
         </div>
         <div className="col-lg-8">
           <h1 className="fw-bold text-primary">{b.title}</h1>
@@ -61,6 +62,14 @@ function BookDetail() {
           <p className="small text-muted">
             <i className="fas fa-eye me-1"></i>{b.visits} · <i className="fas fa-download me-1"></i>{b.downloads}
           </p>
+          {b.images && b.images.length > 0 && (
+            <div className="d-flex gap-2 mt-3 flex-wrap">
+              {b.images.map((src, i) => (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img key={i} src={src} alt="" width={78} height={78} className="rounded-3 border" style={{ objectFit: "cover" }} onClick={() => window.open(src, "_blank")} />
+              ))}
+            </div>
+          )}
           {b.description && <p style={{ whiteSpace: "pre-wrap" }}>{b.description}</p>}
           <button className="btn btn-primary mt-3" onClick={download}>
             <i className="fas fa-download me-2"></i>

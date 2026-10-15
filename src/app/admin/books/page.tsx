@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { AdminGuard } from "@/components/AdminGuard";
 import { api } from "@/lib/api";
 import { useI18n } from "@/context/I18nContext";
+import { MediaPicker, MediaListPicker } from "@/components/MediaPicker";
 
 interface Book {
   id: number;
@@ -14,6 +15,7 @@ interface Book {
   cover?: string | null;
   fileUrl?: string | null;
   description?: string | null;
+  images?: string[];
 }
 interface Category {
   id: number;
@@ -33,7 +35,7 @@ function Inner() {
   const ar = lang === "ar";
   const [items, setItems] = useState<Book[]>([]);
   const [cats, setCats] = useState<Category[]>([]);
-  const [form, setForm] = useState({ title: "", bookCategoryId: 0, languageId: 2, publisher: "", cover: "", fileUrl: "", description: "" });
+  const [form, setForm] = useState({ title: "", bookCategoryId: 0, languageId: 2, publisher: "", cover: "", fileUrl: "", description: "", images: [] as string[] });
   const [editId, setEditId] = useState<number | null>(null);
   const [msg, setMsg] = useState("");
   const [aiHint, setAiHint] = useState("");
@@ -49,7 +51,7 @@ function Inner() {
   }, [load]);
 
   function resetForm() {
-    setForm({ title: "", bookCategoryId: 0, languageId: 2, publisher: "", cover: "", fileUrl: "", description: "" });
+    setForm({ title: "", bookCategoryId: 0, languageId: 2, publisher: "", cover: "", fileUrl: "", description: "", images: [] });
     setEditId(null);
   }
 
@@ -62,6 +64,7 @@ function Inner() {
       cover: b.cover ?? "",
       fileUrl: b.fileUrl ?? "",
       description: b.description ?? "",
+      images: Array.isArray(b.images) ? b.images : [],
     });
     setEditId(b.id);
     if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
@@ -138,8 +141,16 @@ function Inner() {
                   ))}
                 </select>
                 <input className="form-control mb-2" placeholder={t("Publisher")} value={form.publisher} onChange={(e) => setForm({ ...form, publisher: e.target.value })} />
-                <input className="form-control mb-2" placeholder={t("Cover URL")} value={form.cover} onChange={(e) => setForm({ ...form, cover: e.target.value })} />
-                <input className="form-control mb-2" placeholder={t("File URL")} value={form.fileUrl} onChange={(e) => setForm({ ...form, fileUrl: e.target.value })} />
+                <div className="mb-2">
+                  <MediaPicker label={t("Cover image")} value={form.cover} onChange={(v) => setForm({ ...form, cover: v })} folder="books" previewHeight={150} />
+                </div>
+                <div className="mb-2">
+                  <MediaPicker label={t("File URL")} value={form.fileUrl} onChange={(v) => setForm({ ...form, fileUrl: v })} folder="books" kind="file" previewHeight={90} />
+                </div>
+                <div className="mb-3">
+                  <label className="bz-label">{t("Gallery images")}</label>
+                  <MediaListPicker value={form.images} onChange={(urls) => setForm({ ...form, images: urls })} folder="books" />
+                </div>
                 <select className="form-select mb-2" value={form.languageId} onChange={(e) => setForm({ ...form, languageId: Number(e.target.value) })}>
                   {LANG_IDS.map((id) => (
                     <option key={id} value={id}>{LANG_NAMES[id]}</option>

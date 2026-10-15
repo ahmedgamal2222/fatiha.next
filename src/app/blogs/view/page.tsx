@@ -10,6 +10,8 @@ interface Blog {
   title: string;
   body: string;
   reads: number;
+  coverImage?: string | null;
+  images?: string[];
 }
 
 function BlogDetail() {
@@ -38,6 +40,10 @@ function BlogDetail() {
     <div className="container py-5 min-vh-100 bg-light">
       <div className="mx-auto" style={{ maxWidth: 760 }}>
         <article className="card shadow-sm border-0 rounded-4">
+          {blog.coverImage ? (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img src={blog.coverImage} alt={blog.title} className="card-img-top rounded-top-4" style={{ maxHeight: 380, objectFit: "cover" }} />
+          ) : null}
           <div className="card-body p-4 p-md-5">
             <h1 className="fw-bold text-primary">{blog.title}</h1>
             <p className="text-muted small">
@@ -46,6 +52,22 @@ function BlogDetail() {
             </p>
             <hr />
             <div dangerouslySetInnerHTML={{ __html: blog.body }} />
+            {blog.images && blog.images.length > 0 && (
+              <div className="row g-3 mt-4">
+                {blog.images.map((src, i) => (
+                  <div className="col-6 col-md-4" key={i}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={src}
+                      alt=""
+                      className="w-100 rounded-3 border"
+                      style={{ height: 150, objectFit: "cover", cursor: "pointer" }}
+                      onClick={() => window.open(src, "_blank")}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </article>
       </div>

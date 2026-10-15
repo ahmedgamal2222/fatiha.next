@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { AdminGuard } from "@/components/AdminGuard";
 import { api } from "@/lib/api";
 import { useI18n } from "@/context/I18nContext";
+import { MediaPicker, MediaListPicker } from "@/components/MediaPicker";
 
 interface Blog {
   id: number;
@@ -12,6 +13,8 @@ interface Blog {
   languageId: number;
   blogCategoryId: number;
   body?: string;
+  coverImage?: string | null;
+  images?: string[];
 }
 interface Category {
   id: number;
@@ -29,7 +32,7 @@ function Inner() {
   const { t } = useI18n();
   const [items, setItems] = useState<Blog[]>([]);
   const [cats, setCats] = useState<Category[]>([]);
-  const [form, setForm] = useState({ title: "", body: "", languageId: 2, blogCategoryId: 0 });
+  const [form, setForm] = useState({ title: "", body: "", languageId: 2, blogCategoryId: 0, coverImage: "", images: [] as string[] });
   const [editId, setEditId] = useState<number | null>(null);
   const [msg, setMsg] = useState("");
   const [aiHint, setAiHint] = useState("");
@@ -45,12 +48,19 @@ function Inner() {
   }, [load]);
 
   function resetForm() {
-    setForm({ title: "", body: "", languageId: 2, blogCategoryId: 0 });
+    setForm({ title: "", body: "", languageId: 2, blogCategoryId: 0, coverImage: "", images: [] });
     setEditId(null);
   }
 
   function startEdit(b: Blog) {
-    setForm({ title: b.title, body: b.body ?? "", languageId: b.languageId, blogCategoryId: b.blogCategoryId });
+    setForm({
+      title: b.title,
+      body: b.body ?? "",
+      languageId: b.languageId,
+      blogCategoryId: b.blogCategoryId,
+      coverImage: b.coverImage ?? "",
+      images: Array.isArray(b.images) ? b.images : [],
+    });
     setEditId(b.id);
     if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -136,6 +146,19 @@ function Inner() {
                     {aiBusy ? <span className="spinner-border spinner-border-sm me-1" /> : <i className="fas fa-wand-magic-sparkles me-1" />}
                     {t("Write with AI")}
                   </button>
+                </div>
+                <div className="mb-2">
+                  <MediaPicker
+                    label={t("Cover image")}
+                    value={form.coverImage}
+                    onChange={(v) => setForm({ ...form, coverImage: v })}
+                    folder="blogs"
+                    previewHeight={150}
+                  />
+                </div>
+                <div className="mb-3">
+                  <label className="bz-label">{t("Gallery images")}</label>
+                  <MediaListPicker value={form.images} onChange={(urls) => setForm({ ...form, images: urls })} folder="blogs" />
                 </div>
                 <textarea className="form-control mb-2" rows={8} placeholder={t("Body")} value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} required />
                 <div className="d-flex gap-2">

@@ -12,8 +12,8 @@ interface Book {
   year?: number | null;
   visits: number;
   downloads: number;
-  coverUrl?: string | null;
-  coverKey?: string | null;
+  cover?: string | null;
+  images?: string[];
 }
 
 export default function BooksPage() {
@@ -56,7 +56,7 @@ export default function BooksPage() {
               <div className="card h-100 shadow-sm border-0 rounded-4">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={b.coverUrl || "/hero-img.jpg"}
+                  src={b.cover || "/hero-img.jpg"}
                   alt={b.title}
                   className="card-img-top rounded-top-4"
                   style={{ height: 240, objectFit: "cover" }}

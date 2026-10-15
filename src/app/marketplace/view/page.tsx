@@ -15,7 +15,7 @@ interface Product {
   currencyCode?: string | null;
   buyUrl?: string | null;
   imageUrl?: string | null;
-  images?: { url: string }[];
+  images?: Array<{ id: number; imageUrl: string }>;
   tags?: { name: string }[];
 }
 
@@ -42,12 +42,12 @@ function ProductDetail() {
       <div className="row g-4">
         <div className="col-lg-6">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={p.images?.[0]?.url || p.imageUrl || "/cta.jpg"} alt={p.title} className="img-fluid rounded-4 shadow-sm w-100" style={{ objectFit: "cover", maxHeight: 420 }} />
+          <img src={p.images?.[0]?.imageUrl || p.imageUrl || "/cta.jpg"} alt={p.title} className="img-fluid rounded-4 shadow-sm w-100" style={{ objectFit: "cover", maxHeight: 420 }} />
           {p.images && p.images.length > 1 && (
             <div className="d-flex gap-2 mt-3 flex-wrap">
               {p.images.map((im, i) => (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img key={i} src={im.url} alt="" width={72} height={72} className="rounded-3 border" style={{ objectFit: "cover" }} />
+                <img key={i} src={im.imageUrl} alt="" width={72} height={72} className="rounded-3 border" style={{ objectFit: "cover" }} />
               ))}
             </div>
           )}

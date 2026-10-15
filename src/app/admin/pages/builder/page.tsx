@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { AdminGuard } from "@/components/AdminGuard";
 import { BlockRenderer } from "@/components/blocks/BlockRenderer";
+import { MediaPicker } from "@/components/MediaPicker";
 import { api } from "@/lib/api";
 import { useI18n } from "@/context/I18nContext";
 import type { Block, BlockType, PageDoc } from "@/lib/blocks";
@@ -133,8 +134,37 @@ import type { FieldDef, RepeaterDef } from "@/lib/blocks";
 
 // ── محرّرات الحقول ──
 
+/** مفاتيح الحقول التي تُعرض بمنتقي وسائط (رفع من الجهاز + معاينة). */
+const MEDIA_KEYS = ["src", "bgImage", "cover", "image", "imageUrl"];
+
 /** حقل واحد في لوحة الخصائص حسب نوعه. */
-function FieldInput({ field, value, onChange }: { field: FieldDef; value: unknown; onChange: (v: unknown) => void }) {
+function FieldInput({
+  field,
+  value,
+  onChange,
+  blockType,
+  folder = "pages",
+}: {
+  field: FieldDef;
+  value: unknown;
+  onChange: (v: unknown) => void;
+  blockType?: BlockType;
+  folder?: string;
+}) {
+  // حقول الوسائط: منتقي برفع من الجهاز + سحب وإفلات + معاينة
+  const isVideoField = blockType === "video" && field.key === "url";
+  if (isVideoField || MEDIA_KEYS.includes(field.key)) {
+    return (
+      <MediaPicker
+        value={String(value ?? "")}
+        onChange={(v) => onChange(v)}
+        folder={folder}
+        kind={isVideoField ? "video" : "image"}
+        previewHeight={130}
+      />
+    );
+  }
+
   switch (field.type) {
     case "select":
       return (
@@ -207,7 +237,19 @@ function FieldInput({ field, value, onChange }: { field: FieldDef; value: unknow
 }
 
 /** محرّر العناصر المتكرّرة (نصوص/كائنات). */
-function RepeaterEditor({ def, items, onChange }: { def: RepeaterDef; items: unknown; onChange: (next: unknown[]) => void }) {
+function RepeaterEditor({
+  def,
+  items,
+  onChange,
+  folder = "pages",
+  blockType,
+}: {
+  def: RepeaterDef;
+  items: unknown;
+  onChange: (next: unknown[]) => void;
+  folder?: string;
+  blockType?: BlockType;
+}) {
   const list = Array.isArray(items) ? (items as Array<Record<string, unknown>>) : [];
   const add = () => onChange([...list, def.blank ? def.blank() : {}]);
   const remove = (i: number) => onChange(list.filter((_, k) => k !== i));
@@ -242,19 +284,18 @@ function RepeaterEditor({ def, items, onChange }: { def: RepeaterDef; items: unk
             </div>
           </div>
           {def.kind === "strings" ? (
-            <input
-              className="form-control form-control-sm"
-              dir="ltr"
-              placeholder="https://…"
+            <MediaPicker
               value={String(item ?? "")}
-              onChange={(e) => onChange(list.map((it, k) => (k === i ? e.target.value : it)))}
+              onChange={(v) => onChange(list.map((it, k) => (k === i ? v : it)))}
+              folder={folder}
+              previewHeight={110}
             />
           ) : (
             <div className="d-grid gap-2">
               {(def.fields ?? []).map((f) => (
                 <div key={f.key}>
                   <label className="form-label small mb-1 text-muted">{f.label}</label>
-                  <FieldInput field={f} value={(item ?? {})[f.key]} onChange={(val) => setField(i, f.key, val)} />
+                  <FieldInput field={f} value={(item ?? {})[f.key]} onChange={(val) => setField(i, f.key, val)} folder={folder} blockType={blockType} />
                 </div>
               ))}
             </div>
@@ -575,21 +616,20 @@ function BuilderInner() {
   if (loading) return <div className="p-5 text-center text-muted">{t("Loading...")}</div>;
 
   return (
-    <div style={{ minHeight: "100vh", background: "#f1f5f6" }}>
+    <div className="bz-scope">
       {/* ── الشريط العلوي ── */}
-      <div className="d-flex align-items-center justify-content-between gap-2 px-3 py-2 bg-white border-bottom flex-wrap">
+      <div className="bz-top">
         <div className="d-flex align-items-center gap-2">
           <Link href="/admin/pages" className="btn btn-sm btn-light" title={t("Exit")}>
             <i className="fas fa-arrow-right" />
           </Link>
           <input
-            className="form-control form-control-sm fw-bold"
-            style={{ maxWidth: 280 }}
+            className="form-control form-control-sm bz-title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder={t("Page title")}
           />
-          <span className={`badge ${published ? "bg-success" : "bg-secondary"}`}>
+          <span className={`bz-badge badge ${published ? "bg-success" : "bg-secondary"}`}>
             {published ? t("Published") : t("Draft")}
           </span>
         </div>
@@ -654,8 +694,8 @@ function BuilderInner() {
 
       <div className="d-flex align-items-stretch" style={{ alignItems: "flex-start" }}>
         {/* ── اللوحة الأولى: العناصر والأقسام والتوليد بالـAI ── */}
-        <aside style={{ width: 296, flex: "0 0 296px", background: "#ffffff", borderInlineEnd: "1px solid #e5e7eb", minHeight: "calc(100vh - 58px)" }}>
-          <div className="p-3 border-bottom">
+        <aside className="bz-side">
+          <div className="p-3">
             <label className="form-label small fw-bold mb-1">
               <i className="fas fa-wand-magic-sparkles me-1 text-primary" />
               {t("Generate page with AI")}
@@ -674,37 +714,36 @@ function BuilderInner() {
           </div>
 
           <div className="p-3">
-            <h6 className="fw-bold small text-uppercase text-muted mb-2">{t("Widgets")}</h6>
+            <h6 className="bz-sec-title mb-2">{t("Widgets")}</h6>
             {(["pro", "basic", "media", "layout"] as const).map((group) => (
               <div key={group} className="mb-3">
-                <div className="small text-muted mb-1">
+                <div className="bz-sec-title mb-1">
                   {t(group === "pro" ? "Pro widgets" : group === "basic" ? "Basic" : group === "media" ? "Media" : "Layout")}
                 </div>
-                <div className="d-flex flex-wrap gap-1">
+                <div className="bz-widgets">
                   {WIDGETS.filter((w) => w.group === group).map((w) => (
                     <button
                       key={w.type}
                       type="button"
-                      className="btn btn-sm btn-light border text-start py-1"
-                      style={{ width: "calc(50% - 3px)" }}
+                      className={`bz-widget${w.group === "pro" ? " bz-widget--pro" : ""}`}
                       onClick={() => addBlock(createBlock(w.type))}
                       title={t(w.label)}
                     >
-                      <i className={`fas ${w.icon} me-1 text-primary`} />
-                      <span className="small">{t(w.label)}</span>
+                      <i className={`fas ${w.icon}`} />
+                      <span>{t(w.label)}</span>
                     </button>
                   ))}
                 </div>
               </div>
             ))}
 
-            <h6 className="fw-bold small text-uppercase text-muted mb-2 mt-3">{t("Sections")}</h6>
-            <div className="d-grid gap-1">
+            <h6 className="bz-sec-title">{t("Sections")}</h6>
+            <div className="bz-sections">
               {TEMPLATES.map((sec) => (
                 <button
                   key={sec.id}
                   type="button"
-                  className="btn btn-sm btn-outline-secondary text-start"
+                  className="bz-sec"
                   onClick={() => {
                     const created = sec.build();
                     commit((d) => ({ ...d, blocks: [...d.blocks, ...created] }));
@@ -720,17 +759,9 @@ function BuilderInner() {
         </aside>
 
         {/* ── اللوحة الوسطى: لوحة الرسم ── */}
-        <main className="flex-grow-1 p-3" onClick={() => setSelectedId(null)}>
-          <div style={{ margin: "0 auto", maxWidth: frameWidth, transition: "max-width .25s ease" }}>
-            <div
-              style={{
-                background: doc.theme.bg,
-                borderRadius: preview ? 0 : 14,
-                overflow: "hidden",
-                boxShadow: "0 12px 40px rgba(15,23,42,0.08)",
-                border: "1px solid #e5e7eb",
-              }}
-            >
+        <main className="bz-canvas" onClick={() => setSelectedId(null)}>
+          <div style={{ maxWidth: frameWidth }}>
+            <div className={`bz-frame${preview ? " bz-frame--preview" : ""}`} style={{ background: doc.theme.bg }}>
               <div ref={canvasRef} onClick={(e) => e.stopPropagation()}>
                 <BlockRenderer doc={doc} editable={!preview} selectedId={selectedId} onSelect={setSelectedId} />
               </div>
@@ -739,13 +770,13 @@ function BuilderInner() {
         </main>
 
         {/* ── اللوحة الثالثة: الخصائص ── */}
-        <aside style={{ width: 340, flex: "0 0 340px", background: "#ffffff", borderInlineStart: "1px solid #e5e7eb", minHeight: "calc(100vh - 58px)" }}>
-          <div className="btn-group w-100">
+        <aside className="bz-side bz-side--right">
+          <div className="bz-tabs">
             {(["element", "page", "theme"] as const).map((tab) => (
               <button
                 key={tab}
                 type="button"
-                className={`btn btn-sm rounded-0 ${rightTab === tab ? "btn-primary" : "btn-light"}`}
+                className={`bz-tab${rightTab === tab ? " bz-tab--on" : ""}`}
                 onClick={() => setRightTab(tab)}
               >
                 <i className={`fas ${tab === "element" ? "fa-sliders" : tab === "page" ? "fa-file-lines" : "fa-palette"} me-1`} />
@@ -754,17 +785,17 @@ function BuilderInner() {
             ))}
           </div>
 
-          <div className="p-3" style={{ maxHeight: "calc(100vh - 112px)", overflowY: "auto" }}>
+          <div className="bz-panel-body">
             {rightTab === "element" &&
               (!selected ? (
                 <p className="text-muted small mb-0">{t("Select a block to edit its properties")}</p>
               ) : (
                 <>
-                  <div className="d-flex align-items-center justify-content-between gap-2 mb-3">
-                    <span className="badge bg-primary">
+                  <div className="bz-element-head">
+                    <span className="bz-chip">
                       {t(WIDGETS.find((w) => w.type === selected.type)?.label ?? selected.type)}
                     </span>
-                    <div className="btn-group btn-group-sm">
+                    <div className="btn-group btn-group-sm bz-toolbar">
                       <button type="button" className="btn btn-outline-secondary" onClick={() => moveBlock(selected.id, -1)} title={t("Move up")}>
                         <i className="fas fa-arrow-up" />
                       </button>
@@ -785,11 +816,13 @@ function BuilderInner() {
                       .filter((f) => !(REPEATERS[selected.type] ?? []).some((r) => r.key === f.key))
                       .map((f) => (
                         <div key={f.key}>
-                          <label className="form-label small mb-1 text-muted">{t(f.label)}</label>
+                          <label className="bz-label">{t(f.label)}</label>
                           <FieldInput
                             field={f}
                             value={(selected.props as Record<string, unknown>)[f.key]}
                             onChange={(val) => updateProps(selected.id, f.key, val)}
+                            blockType={selected.type}
+                            folder="pages"
                           />
                         </div>
                       ))}
@@ -799,17 +832,19 @@ function BuilderInner() {
                     .filter((r) => r.kind !== "blocks")
                     .map((r) => (
                       <div key={r.key} className="mt-3">
-                        <label className="form-label small mb-1 text-muted">{t(r.label)}</label>
+                        <label className="bz-label">{t(r.label)}</label>
                         <RepeaterEditor
                           def={r}
                           items={(selected.props as Record<string, unknown>)[r.key]}
                           onChange={(next) => updateProps(selected.id, r.key, next)}
+                          folder="pages"
+                          blockType={selected.type}
                         />
                       </div>
                     ))}
 
-                  <div className="mt-4 pt-3 border-top">
-                    <label className="form-label small fw-bold mb-1">
+                  <div className="bz-ai mt-3">
+                    <label className="bz-label">
                       <i className="fas fa-wand-magic-sparkles me-1 text-primary" />
                       {t("Improve with AI")}
                     </label>
@@ -853,8 +888,8 @@ function BuilderInner() {
               };
 
               return (
-                <div className="mt-4 pt-3 border-top">
-                  <label className="form-label small fw-bold mb-2">{t("Columns")}</label>
+              <div className="mt-4 pt-3 border-top">
+                  <label className="bz-label fw-bold mb-2">{t("Columns")}</label>
                   <div className="d-grid gap-2">
                     {cols.map((col, ci) => (
                       <div key={ci} className="border rounded-3 p-2">

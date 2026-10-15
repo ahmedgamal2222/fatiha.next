@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { AdminGuard } from "@/components/AdminGuard";
 import { api } from "@/lib/api";
 import { useI18n } from "@/context/I18nContext";
+import { MediaPicker, MediaListPicker } from "@/components/MediaPicker";
 
 interface Product {
   id: number;
@@ -14,6 +15,7 @@ interface Product {
   shortDescription?: string | null;
   description?: string | null;
   imageUrl?: string | null;
+  images?: Array<{ id: number; imageUrl: string }>;
 }
 interface Category {
   id: number;
@@ -34,7 +36,7 @@ function Inner() {
   const ar = lang === "ar";
   const [items, setItems] = useState<Product[]>([]);
   const [cats, setCats] = useState<Category[]>([]);
-  const [form, setForm] = useState({ title: "", marketCategoryId: 0, price: 0, shortDescription: "", description: "", imageUrl: "", currencyCode: "USD" });
+  const [form, setForm] = useState({ title: "", marketCategoryId: 0, price: 0, shortDescription: "", description: "", imageUrl: "", currencyCode: "USD", imageUrls: [] as string[] });
   const [editId, setEditId] = useState<number | null>(null);
   const [msg, setMsg] = useState("");
   const [aiHint, setAiHint] = useState("");
@@ -51,11 +53,11 @@ function Inner() {
   }, [load]);
 
   function resetForm() {
-    setForm({ title: "", marketCategoryId: 0, price: 0, shortDescription: "", description: "", imageUrl: "", currencyCode: "USD" });
+    setForm({ title: "", marketCategoryId: 0, price: 0, shortDescription: "", description: "", imageUrl: "", currencyCode: "USD", imageUrls: [] });
     setEditId(null);
   }
 
-  function startEdit(p: Product) {
+  async function startEdit(p: Product) {
     setForm({
       title: p.title,
       marketCategoryId: p.marketCategoryId ?? 0,
@@ -64,9 +66,18 @@ function Inner() {
       description: p.description ?? "",
       imageUrl: p.imageUrl ?? "",
       currencyCode: p.currencyCode ?? "USD",
+      imageUrls: [],
     });
     setEditId(p.id);
     if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
+    // نجلب التفاصيل لتحميل معرض الصور المرتبط بالمنتج
+    try {
+      const r = await api.get<Product>(`/api/marketplace/${p.id}`, false);
+      const imgs = Array.isArray(r.data?.images) ? r.data!.images.map((i) => i.imageUrl) : [];
+      setForm((f) => ({ ...f, imageUrls: imgs }));
+    } catch {
+      /* تجاهل */
+    }
   }
 
   /** توليد وصف المنتج (مختصر + كامل) بالذكاء الاصطناعي باللغة المختارة. */
@@ -149,7 +160,19 @@ function Inner() {
                   <input type="number" step="0.01" className="form-control" placeholder={t("Price")} value={form.price} onChange={(e) => setForm({ ...form, price: Number(e.target.value) })} required />
                   <input className="form-control" style={{ maxWidth: 90 }} value={form.currencyCode} onChange={(e) => setForm({ ...form, currencyCode: e.target.value.toUpperCase().slice(0, 3) })} />
                 </div>
-                <input className="form-control mb-2" placeholder={t("Image URL")} value={form.imageUrl} onChange={(e) => setForm({ ...form, imageUrl: e.target.value })} />
+                <div className="mb-2">
+                  <MediaPicker
+                    label={t("Image")}
+                    value={form.imageUrl}
+                    onChange={(v) => setForm({ ...form, imageUrl: v })}
+                    folder="products"
+                    previewHeight={150}
+                  />
+                </div>
+                <div className="mb-3">
+                  <label className="bz-label">{t("Gallery images")}</label>
+                  <MediaListPicker value={form.imageUrls} onChange={(urls) => setForm({ ...form, imageUrls: urls })} folder="products" />
+                </div>
                 <input className="form-control mb-2" placeholder={t("Short description")} value={form.shortDescription} onChange={(e) => setForm({ ...form, shortDescription: e.target.value })} />
                 <div className="input-group mb-2">
                   <input className="form-control" placeholder={t("Topic (optional)")} value={aiHint} onChange={(e) => setAiHint(e.target.value)} />
