@@ -8,7 +8,7 @@ import { BlockRenderer } from "@/components/blocks/BlockRenderer";
 import { MediaPicker } from "@/components/MediaPicker";
 import { api } from "@/lib/api";
 import { useI18n } from "@/context/I18nContext";
-import type { Block, BlockType, PageDoc } from "@/lib/blocks";
+import type { Block, BlockType, FieldDef, PageDoc, RepeaterDef } from "@/lib/blocks";
 import {
   DEFAULT_THEME,
   FIELDS,
@@ -132,8 +132,6 @@ function insertInTree(blocks: Block[], nearId: string | null, block: Block, afte
   });
 }
 
-import type { FieldDef, RepeaterDef } from "@/lib/blocks";
-
 // ── محرّرات الحقول ──
 
 /** مفاتيح الحقول التي تُعرض بمنتقي وسائط (رفع من الجهاز + معاينة). */
@@ -153,6 +151,7 @@ function FieldInput({
   blockType?: BlockType;
   folder?: string;
 }) {
+  const { t } = useI18n();
   // حقول الوسائط: منتقي برفع من الجهاز + سحب وإفلات + معاينة
   const isVideoField = (blockType === "video" && field.key === "url") || field.key === "bgVideo";
   if (isVideoField || MEDIA_KEYS.includes(field.key)) {
@@ -252,6 +251,7 @@ function RepeaterEditor({
   folder?: string;
   blockType?: BlockType;
 }) {
+  const { t } = useI18n();
   const list = Array.isArray(items) ? (items as Array<Record<string, unknown>>) : [];
   const add = () => onChange([...list, def.blank ? def.blank() : {}]);
   const remove = (i: number) => onChange(list.filter((_, k) => k !== i));
@@ -274,13 +274,13 @@ function RepeaterEditor({
           <div className="d-flex justify-content-between align-items-center mb-2">
             <span className="badge bg-light text-dark">#{i + 1}</span>
             <div className="d-flex gap-1">
-              <button type="button" className="btn btn-sm btn-outline-secondary py-0 px-1" onClick={() => move(i, -1)} title="Up">
+              <button type="button" className="btn btn-sm btn-outline-secondary py-0 px-1" onClick={() => move(i, -1)} title={t("Move up")}>
                 <i className="fas fa-arrow-up" />
               </button>
-              <button type="button" className="btn btn-sm btn-outline-secondary py-0 px-1" onClick={() => move(i, 1)} title="Down">
+              <button type="button" className="btn btn-sm btn-outline-secondary py-0 px-1" onClick={() => move(i, 1)} title={t("Move down")}>
                 <i className="fas fa-arrow-down" />
               </button>
-              <button type="button" className="btn btn-sm btn-outline-danger py-0 px-1" onClick={() => remove(i)} title="Delete">
+              <button type="button" className="btn btn-sm btn-outline-danger py-0 px-1" onClick={() => remove(i)} title={t("Delete block")}>
                 <i className="fas fa-trash" />
               </button>
             </div>
@@ -296,7 +296,7 @@ function RepeaterEditor({
             <div className="d-grid gap-2">
               {(def.fields ?? []).map((f) => (
                 <div key={f.key}>
-                  <label className="form-label small mb-1 text-muted">{f.label}</label>
+                  <label className="form-label small mb-1 text-muted">{t(f.label)}</label>
                   <FieldInput field={f} value={(item ?? {})[f.key]} onChange={(val) => setField(i, f.key, val)} folder={folder} blockType={blockType} />
                 </div>
               ))}
