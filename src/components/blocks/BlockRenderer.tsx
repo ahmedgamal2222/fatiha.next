@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState, type CSSProperties } from "react";
-import type { Block, PageDoc } from "@/lib/blocks";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
+import type { Block, BlockStyle, PageDoc } from "@/lib/blocks";
 
 /**
  * عارض البلوكات — يُستخدم في الصفحة العامة وللمعاينة داخل المحرّر.
@@ -27,7 +27,52 @@ function embedUrl(url: string): string | null {
 const alignToFlex = (a?: string) => (a === "center" ? "center" : a === "end" ? "flex-end" : "flex-start");
 const alignToText = (a?: string): CSSProperties["textAlign"] => (a === "center" ? "center" : a === "end" ? "end" : "start");
 
-const WRAP: CSSProperties = { maxWidth: 1140, margin: "0 auto", padding: "0 16px" };
+/** حاوية عرض المحتوى — عرضها قابل للتحكّم من تنسيق القسم عبر --bz-max. */
+const WRAP: CSSProperties = { maxWidth: "var(--bz-max, 1140px)", margin: "0 auto", padding: "0 16px" };
+
+/** يبني أنماط حاوية القسم من تنسيق البلوك. */
+function sectionStyle(st: BlockStyle): Record<string, unknown> {
+  const s: Record<string, unknown> = {};
+  if (st.bg) s.background = st.bg;
+  if (st.gradientFrom && st.gradientTo) s.backgroundImage = `linear-gradient(135deg, ${st.gradientFrom}, ${st.gradientTo})`;
+  if (st.bgImage) {
+    const o = Number(st.bgOverlay ?? 0);
+    s.backgroundImage = `linear-gradient(rgba(9,20,38,${o}), rgba(9,20,38,${o})), url(${st.bgImage})`;
+    s.backgroundSize = "cover";
+    s.backgroundPosition = "center";
+    if (st.bgFixed) s.backgroundAttachment = "fixed";
+  }
+  if (st.paddingY !== undefined) {
+    s.paddingTop = st.paddingY;
+    s.paddingBottom = st.paddingY;
+  }
+  if (st.paddingX !== undefined) s.paddingInline = st.paddingX;
+  if (st.minHeight) s.minHeight = st.minHeight;
+  if (st.radius) s.borderRadius = st.radius;
+  if (st.borderWidth && st.borderColor) s.border = `${st.borderWidth}px solid ${st.borderColor}`;
+  if (st.shadow) s.boxShadow = "0 18px 50px rgba(15,23,42,0.08)";
+  if (st.maxWidth) s["--bz-max"] = `${st.maxWidth}px`;
+  return s;
+}
+
+/** خلفية الفيديو (ملف مباشر أو يوتيوب/فيميو) مع طبقة تعتيم. */
+function SectionVideo({ src, overlay }: { src: string; overlay?: number }) {
+  const embed = embedUrl(src);
+  return (
+    <div className="bz-bgvid" aria-hidden="true">
+      {embed ? (
+        <iframe
+          src={`${embed}?autoplay=1&mute=1&loop=1&controls=0&showinfo=0&rel=0&playsinline=1`}
+          title="background video"
+          allow="autoplay; encrypted-media"
+        />
+      ) : (
+        <video src={src} autoPlay muted loop playsInline preload="metadata" />
+      )}
+      <span style={{ background: `rgba(9,20,38,${Number(overlay ?? 0.4)})` }} />
+    </div>
+  );
+}
 
 /** صورة مع بديل بصري عند غياب الرابط. */
 function Img({ src, alt, style, editable }: { src?: string; alt?: string; style?: CSSProperties; editable?: boolean }) {
@@ -70,14 +115,16 @@ function Btn({ label, href, variant, size, onDark }: { label?: string; href?: st
 
 
 /** يرسم البلوكات البسيطة (عنوان/نص/زر/فاصل/مسافة/صورة/قائمة/HTML). */
-function SimpleBlock({ block, theme, editable }: { block: Block; theme: PageDoc["theme"]; editable?: boolean }): React.ReactElement | null {
+function SimpleBlock({ block, theme, editable, align }: { block: Block; theme: PageDoc["theme"]; editable?: boolean; align?: string }): React.ReactElement | null {
   const p = (block.props ?? {}) as Record<string, any>;
   const radius = Number(p.radius ?? theme.radius);
+  // محاذاة البلوك مع الرجوع إلى محاذاة القسم عند غيابها
+  const A = (v?: unknown) => (typeof v === "string" && v ? v : align);
 
   switch (block.type) {
     case "heading": {
       const level = Number(p.level ?? 2);
-      const style: CSSProperties = { margin: 0, textAlign: alignToText(p.align), color: p.color || theme.text, fontWeight: 800 };
+      const style: CSSProperties = { margin: 0, textAlign: alignToText(A(p.align)), color: p.color || theme.text, fontWeight: 800 };
       const text = String(p.text ?? "");
       if (level === 1) return <div style={{ padding: "32px 0" }}><div style={WRAP}><h1 style={style}>{text}</h1></div></div>;
       if (level === 3) return <div style={{ padding: "24px 0" }}><div style={WRAP}><h3 style={style}>{text}</h3></div></div>;
@@ -87,13 +134,13 @@ function SimpleBlock({ block, theme, editable }: { block: Block; theme: PageDoc[
     case "text":
       return (
         <div style={{ padding: "18px 0" }}>
-          <div style={{ ...WRAP, textAlign: alignToText(p.align), color: p.color || theme.text }} dangerouslySetInnerHTML={{ __html: String(p.html ?? "") }} />
+          <div style={{ ...WRAP, textAlign: alignToText(A(p.align)), color: p.color || theme.text }} dangerouslySetInnerHTML={{ __html: String(p.html ?? "") }} />
         </div>
       );
     case "button":
       return (
         <div style={{ padding: "14px 0" }}>
-          <div style={{ ...WRAP, display: "flex", justifyContent: alignToFlex(p.align) }}>
+          <div style={{ ...WRAP, display: "flex", justifyContent: alignToFlex(A(p.align)) }}>
             <Btn label={p.label} href={p.href} variant={p.variant} size={p.size} />
           </div>
         </div>
@@ -113,7 +160,7 @@ function SimpleBlock({ block, theme, editable }: { block: Block; theme: PageDoc[
     case "image":
       return (
         <div style={{ padding: "44px 0" }}>
-          <div style={{ ...WRAP, display: "flex", flexDirection: "column", alignItems: alignToFlex(p.align) }}>
+          <div style={{ ...WRAP, display: "flex", flexDirection: "column", alignItems: alignToFlex(A(p.align)) }}>
             <div style={{ width: `${Number(p.width ?? 100)}%`, maxWidth: "100%" }}>
               <Img src={p.src} alt={p.alt} editable={editable} style={{ width: "100%", borderRadius: radius, objectFit: "cover", display: "block" }} />
               {p.caption ? <div style={{ textAlign: "center", fontSize: 13, color: "#64748b", marginTop: 8 }}>{p.caption}</div> : null}
@@ -220,9 +267,11 @@ function HeroSlider({ block, theme }: { block: Block; theme: PageDoc["theme"] })
 
 
 /** يرسم البلوكات الغنية (Hero · CTA · اقتباس · بطاقات · عدّادات · معرض · لوجو · فيديو · FAQ). */
-function RichBlock({ block, theme, editable }: { block: Block; theme: PageDoc["theme"]; editable?: boolean }): React.ReactElement | null {
+function RichBlock({ block, theme, editable, align }: { block: Block; theme: PageDoc["theme"]; editable?: boolean; align?: string }): React.ReactElement | null {
   const p = (block.props ?? {}) as Record<string, any>;
   const radius = Number(p.radius ?? theme.radius);
+  // محاذاة البلوك مع الرجوع إلى محاذاة القسم عند غيابها
+  const A = (v?: unknown) => (typeof v === "string" && v ? v : align);
 
   if (block.type === "slider") return <HeroSlider block={block} theme={theme} />;
 
@@ -235,7 +284,7 @@ function RichBlock({ block, theme, editable }: { block: Block; theme: PageDoc["t
         : `linear-gradient(135deg, ${theme.primary}, ${theme.accent})`;
       return (
         <section style={{ position: "relative", minHeight: p.height || "520px", display: "flex", alignItems: "center", background: bg }}>
-          <div style={{ ...WRAP, position: "relative", textAlign: alignToText(p.align), color: p.textColor || "#ffffff", padding: "96px 16px", width: "100%" }}>
+          <div style={{ ...WRAP, position: "relative", textAlign: alignToText(A(p.align)), color: p.textColor || "#ffffff", padding: "96px 16px", width: "100%" }}>
             {p.badge ? (
               <span style={{ display: "inline-block", padding: "6px 14px", borderRadius: 999, background: "rgba(255,255,255,0.18)", fontWeight: 700, marginBottom: 16 }}>
                 {p.badge}
@@ -243,10 +292,10 @@ function RichBlock({ block, theme, editable }: { block: Block; theme: PageDoc["t
             ) : null}
             <h1 style={{ fontWeight: 900, margin: 0, lineHeight: 1.15 }}>{p.title}</h1>
             {p.subtitle ? (
-              <p style={{ opacity: 0.94, marginTop: 16, fontSize: 18, maxWidth: 720, marginInline: p.align === "center" ? "auto" : undefined }}>{p.subtitle}</p>
+              <p style={{ opacity: 0.94, marginTop: 16, fontSize: 18, maxWidth: 720, marginInline: A(p.align) === "center" ? "auto" : undefined }}>{p.subtitle}</p>
             ) : null}
             {buttons.length > 0 && (
-              <div style={{ display: "flex", gap: 12, justifyContent: alignToFlex(p.align), flexWrap: "wrap", marginTop: 24 }}>
+              <div style={{ display: "flex", gap: 12, justifyContent: alignToFlex(A(p.align)), flexWrap: "wrap", marginTop: 24 }}>
                 {buttons.map((b, i) => (
                   <Btn key={i} label={b.label} href={b.href} variant={b.variant} size={b.size} onDark />
                 ))}
@@ -402,6 +451,7 @@ function ColumnsBlock({
   draw,
 }: {
   block: Block;
+  theme?: PageDoc["theme"];
   draw: (b: Block, nested?: boolean) => React.ReactNode;
 }) {
   const p = (block.props ?? {}) as Record<string, any>;
@@ -430,16 +480,47 @@ function ColumnsBlock({
 
 export function BlockRenderer({ doc, editable, selectedId, onSelect }: RendererProps) {
   const theme = doc.theme;
+  const rootRef = useRef<HTMLDivElement | null>(null);
+
+  // تشغيل حركات الظهور عند دخول القسم للشاشة (وفوراً داخل المحرّر)
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+    const targets = Array.from(root.querySelectorAll<HTMLElement>("[data-anim]"));
+    if (!targets.length) return;
+    if (editable || typeof IntersectionObserver === "undefined") {
+      targets.forEach((el) => el.classList.add("is-visible"));
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            e.target.classList.add("is-visible");
+            io.unobserve(e.target);
+          }
+        }
+      },
+      { threshold: 0.12, rootMargin: "0px 0px -60px 0px" }
+    );
+    targets.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, [doc, editable]);
 
   /** يرسم بلوكاً واحداً (يُنادى تعاودياً من حاوية الأعمدة). */
   function draw(block: Block, nested = false): React.ReactNode {
+    const st = (block.style ?? {}) as BlockStyle;
+    // لون نص القسم يُورَّث لأبنائه (عبر الثيم الفعّال)
+    const secTheme = st.textColor ? { ...theme, text: st.textColor } : theme;
+    const anim = st.anim && st.anim !== "none" ? st.anim : undefined;
+
     const inner =
       block.type === "columns" ? (
-        <ColumnsBlock block={block} draw={draw} />
+        <ColumnsBlock block={block} draw={draw} theme={secTheme} />
       ) : RICH_TYPES.includes(block.type) ? (
-        <RichBlock block={block} theme={theme} editable={editable} />
+        <RichBlock block={block} theme={secTheme} editable={editable} align={st.align} />
       ) : (
-        <SimpleBlock block={block} theme={theme} editable={editable} />
+        <SimpleBlock block={block} theme={secTheme} editable={editable} align={st.align} />
       );
 
     if (nested) return <div key={block.id}>{inner}</div>;
@@ -479,7 +560,19 @@ export function BlockRenderer({ doc, editable, selectedId, onSelect }: RendererP
             {block.type}
           </span>
         )}
-        {inner}
+        <section
+          className={anim ? "bz-anim" : undefined}
+          data-anim={anim}
+          style={{
+            ...(sectionStyle(st) as CSSProperties),
+            position: "relative",
+            overflow: st.bgVideo ? "hidden" : undefined,
+            animationDelay: st.animDelay ? `${st.animDelay}ms` : undefined,
+          }}
+        >
+          {st.bgVideo ? <SectionVideo src={st.bgVideo} overlay={st.bgOverlay} /> : null}
+          <div style={{ position: "relative", zIndex: 1 }}>{inner}</div>
+        </section>
       </div>
     );
   }
@@ -493,7 +586,7 @@ export function BlockRenderer({ doc, editable, selectedId, onSelect }: RendererP
     );
   }
 
-  return <>{doc.blocks.map((b) => draw(b))}</>;
+  return <div ref={rootRef}>{doc.blocks.map((b) => draw(b))}</div>;
 }
 
 export default BlockRenderer;

@@ -32,7 +32,48 @@ export interface Block {
   id: string;
   type: BlockType;
   props: Record<string, unknown>;
+  /** تنسيق القسم (يُطبَّق على حاوية البلوك الجذري): خلفية/أبعاد/محاذاة/حركة */
+  style?: BlockStyle;
 }
+
+/** أنواع حركات الظهور عند التمرير. */
+export type AnimKind = "none" | "fade-up" | "fade-in" | "slide-left" | "slide-right" | "zoom";
+
+/** تنسيق القسم/البلوك — يتحكّم في كل شيء بصرياً. */
+export interface BlockStyle {
+  // ── الخلفية ──
+  bg?: string; // لون خلفية القسم
+  bgImage?: string; // صورة خلفية
+  bgVideo?: string; // فيديو خلفية (mp4/webm أو يوتيوب)
+  bgOverlay?: number; // تعتيم فوق الخلفية 0..0.95
+  bgFixed?: boolean; // تثبيت صورة الخلفية (Parallax بسيط)
+  gradientFrom?: string; // تدرّج من
+  gradientTo?: string; // تدرّج إلى
+  // ── النص والمحاذاة ──
+  textColor?: string; // لون النص الموروث لأبناء القسم
+  align?: Align; // محاذاة محتوى القسم
+  // ── الأبعاد ──
+  paddingY?: number; // حشوة رأسية
+  paddingX?: number; // حشوة أفقية
+  maxWidth?: number; // أقصى عرض للمحتوى
+  minHeight?: number; // أدنى ارتفاع
+  radius?: number; // استدارة الزوايا
+  borderColor?: string; // لون الإطار
+  borderWidth?: number; // سماكة الإطار
+  shadow?: boolean; // ظل ناعم
+  // ── الحركة ──
+  anim?: AnimKind;
+  animDelay?: number; // تأخير الظهور بالمللي ثانية
+}
+
+export const ANIM_OPTIONS: Array<{ value: AnimKind; label: string }> = [
+  { value: "none", label: "None" },
+  { value: "fade-up", label: "Fade up" },
+  { value: "fade-in", label: "Fade in" },
+  { value: "slide-left", label: "Slide left" },
+  { value: "slide-right", label: "Slide right" },
+  { value: "zoom", label: "Zoom in" },
+];
 
 export interface PageTheme {
   primary: string;
@@ -476,3 +517,40 @@ export const REPEATERS: Partial<Record<BlockType, RepeaterDef[]>> = {
   logos: [{ key: "images", label: "Images", kind: "strings" }],
   columns: [{ key: "columns", label: "Columns", kind: "blocks" }],
 };
+
+// ─────────────────────────── حقول تنسيق القسم (Style) ───────────────────────────
+
+/** حقول تبويب «التنسيق» لكل بلوك — تتحكّم في الخلفية والأبعاد والحركة. */
+export const STYLE_FIELDS: FieldDef[] = [
+  // الخلفية
+  { key: "bg", label: "Background color", type: "color" },
+  { key: "gradientFrom", label: "Gradient from", type: "color" },
+  { key: "gradientTo", label: "Gradient to", type: "color" },
+  { key: "bgImage", label: "Background image", type: "text" },
+  { key: "bgVideo", label: "Background video", type: "text" },
+  { key: "bgOverlay", label: "Overlay", type: "range", min: 0, max: 0.95, step: 0.05 },
+  { key: "bgFixed", label: "Fixed background", type: "toggle" },
+  // النص والمحاذاة
+  { key: "textColor", label: "Text color", type: "color" },
+  { key: "align", label: "Align", type: "select", options: ALIGN_OPTS },
+  // الأبعاد
+  { key: "paddingY", label: "Vertical padding", type: "range", min: 0, max: 200, step: 4 },
+  { key: "paddingX", label: "Horizontal padding", type: "range", min: 0, max: 160, step: 4 },
+  { key: "maxWidth", label: "Content width", type: "range", min: 480, max: 1600, step: 20 },
+  { key: "minHeight", label: "Min height", type: "range", min: 0, max: 900, step: 10 },
+  { key: "radius", label: "Radius", type: "range", min: 0, max: 60, step: 2 },
+  { key: "borderWidth", label: "Border width", type: "range", min: 0, max: 10, step: 1 },
+  { key: "borderColor", label: "Border color", type: "color" },
+  { key: "shadow", label: "Soft shadow", type: "toggle" },
+  // الحركة
+  { key: "anim", label: "Entrance animation", type: "select", options: ANIM_OPTIONS },
+  { key: "animDelay", label: "Animation delay (ms)", type: "range", min: 0, max: 1500, step: 50 },
+];
+
+/** مفاتيح حقول الوسائط داخل تبويب التنسيق. */
+export const STYLE_MEDIA_KEYS = ["bgImage", "bgVideo"];
+
+/** يعيد كائن تنسيق البلوك (أو كائناً فارغاً). */
+export function styleOf(block: Block): BlockStyle {
+  return (block.style ?? {}) as BlockStyle;
+}

@@ -1709,7 +1709,7 @@ html[dir="rtl"] .fh-auth__field input { padding: 13px 42px 13px 14px; }
 /* ── لوحة الخصائص ── */
 .bz-scope .bz-tabs {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   border-bottom: 1px solid #e2e8f0;
 }
 .bz-scope .bz-tab {
@@ -1915,4 +1915,81 @@ html[dir="rtl"] .fh-auth__field input { padding: 13px 42px 13px 14px; }
 .mpl__add:disabled {
   opacity: 0.55;
   cursor: not-allowed;
+}
+
+/* ═══════════════════════ حركات الأقسام + خلفية الفيديو ═══════════════════════ */
+
+.bz-anim {
+  opacity: 0;
+  will-change: transform, opacity;
+}
+.bz-anim.is-visible {
+  animation: bz-fade-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.bz-anim[data-anim="fade-in"].is-visible {
+  animation-name: bz-fade-in;
+}
+.bz-anim[data-anim="slide-left"].is-visible {
+  animation-name: bz-slide-left;
+}
+.bz-anim[data-anim="slide-right"].is-visible {
+  animation-name: bz-slide-right;
+}
+.bz-anim[data-anim="zoom"].is-visible {
+  animation-name: bz-zoom;
+}
+.bz-anim[data-anim="none"].is-visible {
+  animation: none;
+  opacity: 1;
+}
+
+@keyframes bz-fade-up {
+  from { opacity: 0; transform: translateY(28px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes bz-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes bz-slide-left {
+  from { opacity: 0; transform: translateX(48px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes bz-slide-right {
+  from { opacity: 0; transform: translateX(-48px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes bz-zoom {
+  from { opacity: 0; transform: scale(0.94); }
+  to { opacity: 1; transform: scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bz-anim,
+  .bz-anim.is-visible {
+    opacity: 1 !important;
+    animation: none !important;
+  }
+}
+
+/* خلفية الفيديو للقسم */
+.bz-bgvid {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 0;
+  pointer-events: none;
+}
+.bz-bgvid video,
+.bz-bgvid iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border: 0;
+}
+.bz-bgvid span {
+  position: absolute;
+  inset: 0;
+  display: block;
 }

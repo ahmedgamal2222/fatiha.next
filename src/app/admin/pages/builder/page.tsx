@@ -13,6 +13,7 @@ import {
   DEFAULT_THEME,
   FIELDS,
   REPEATERS,
+  STYLE_FIELDS,
   TEMPLATES,
   WIDGETS,
   blockFromAI,
@@ -32,6 +33,7 @@ import {
 interface PageRow {
   id: number;
   title: string;
+  content?: string | null;
   slug?: string | null;
   blocks?: string | null;
   coverImage?: string | null;
@@ -152,7 +154,7 @@ function FieldInput({
   folder?: string;
 }) {
   // حقول الوسائط: منتقي برفع من الجهاز + سحب وإفلات + معاينة
-  const isVideoField = blockType === "video" && field.key === "url";
+  const isVideoField = (blockType === "video" && field.key === "url") || field.key === "bgVideo";
   if (isVideoField || MEDIA_KEYS.includes(field.key)) {
     return (
       <MediaPicker
@@ -172,7 +174,7 @@ function FieldInput({
           <option value="">—</option>
           {(field.options ?? []).map((o) => (
             <option key={o.value} value={o.value}>
-              {o.label}
+              {t(o.label)}
             </option>
           ))}
         </select>
@@ -330,7 +332,7 @@ function BuilderInner() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [device, setDevice] = useState<"desktop" | "tablet" | "mobile">("desktop");
   const [preview, setPreview] = useState(false);
-  const [rightTab, setRightTab] = useState<"element" | "page" | "theme">("element");
+  const [rightTab, setRightTab] = useState<"element" | "style" | "page" | "theme">("element");
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [msg, setMsg] = useState("");
@@ -339,6 +341,8 @@ function BuilderInner() {
   const [aiBusy, setAiBusy] = useState(false);
   const [aiBlockPrompt, setAiBlockPrompt] = useState("");
   const [aiBlockBusy, setAiBlockBusy] = useState(false);
+  /** محتوى صفحة قديمة (HTML/نص) لم يُحوَّل بعد إلى بلوكات. */
+  const [legacy, setLegacy] = useState<string | null>(null);
 
   const history = useRef<PageDoc[]>([]);
   const future = useRef<PageDoc[]>([]);
@@ -404,6 +408,7 @@ function BuilderInner() {
         setPublished(p.isPublished !== false);
         setLanguageId(p.languageId ?? 1);
         setDoc(parsePageDoc(p.blocks));
+        if (!p.blocks) setLegacy(p.content ?? null);
       })
       .catch(() => setErr(t("Operation failed")))
       .finally(() => setLoading(false));
@@ -457,6 +462,19 @@ function BuilderInner() {
 
   const updateTheme = useCallback(
     (key: string, value: unknown) => commit((d) => ({ ...d, theme: { ...d.theme, [key]: value } })),
+    [commit]
+  );
+
+  /** يحدّث خاصية تنسيق (Style) للبلوك — خلفية/أبعاد/محاذاة/حركة. */
+  const updateStyle = useCallback(
+    (id: string, key: string, value: unknown) => {
+      commit((d) => ({
+        ...d,
+        blocks: mapTree(d.blocks, (b) =>
+          b.id === id ? { ...b, style: { ...((b.style ?? {}) as Record<string, unknown>), [key]: value } } : b
+        ),
+      }));
+    },
     [commit]
   );
 
@@ -579,6 +597,49 @@ function BuilderInner() {
       setErr(e instanceof Error ? e.message : t("AI generation failed"));
     } finally {
       setAiBusy(false);
+    }
+  }
+
+  /** ترجمة الصفحة كاملة إلى لغات أخرى بالذكاء الاصطناعي (يُنشئ نسخة لكل لغة). */
+  async function translatePage() {
+    if (!pageId) {
+      setErr(t("Save the page first"));
+      return;
+    }
+    if (!doc.blocks.length) {
+      setErr(t("Add block"));
+      return;
+    }
+    setAiBusy(true);
+    setErr("");
+    setMsg("");
+    try {
+      await save();
+      const r = await api.post<{ pages?: unknown[]; failed?: number[] }>(`/api/pages/${pageId}/translate`, {});
+      const n = Array.isArray(r.data?.pages) ? r.data.pages.length : 0;
+      setMsg(`${t("Translated")}: ${n}`);
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : t("AI generation failed"));
+    } finally {
+      setAiBusy(false);
+    }
+  }
+
+  /** تحويل صفحة قديمة (HTML) إلى بلوكات قابلة للتحرير بصرياً. */
+  async function convertLegacy() {
+    if (!pageId) return;
+    setSaving(true);
+    setErr("");
+    setMsg("");
+    try {
+      const r = await api.post<{ blocks?: string | null }>(`/api/pages/${pageId}/convert`, {});
+      setDoc(parsePageDoc(r.data?.blocks));
+      setLegacy(null);
+      setMsg(t("Page converted"));
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : t("Operation failed"));
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -711,6 +772,11 @@ function BuilderInner() {
               {aiBusy ? <span className="spinner-border spinner-border-sm me-2" /> : <i className="fas fa-bolt me-1" />}
               {aiBusy ? t("AI is writing…") : t("Generate")}
             </button>
+            <button type="button" className="btn btn-sm btn-outline-primary w-100 mt-2" disabled={aiBusy || !pageId} onClick={translatePage}>
+              <i className="fas fa-language me-1" />
+              {t("Translate to 11 languages")}
+            </button>
+            <div className="form-text">{t("Creates a copy of this page in every language.")}</div>
           </div>
 
           <div className="p-3">
@@ -761,6 +827,18 @@ function BuilderInner() {
         {/* ── اللوحة الوسطى: لوحة الرسم ── */}
         <main className="bz-canvas" onClick={() => setSelectedId(null)}>
           <div style={{ maxWidth: frameWidth }}>
+            {legacy ? (
+              <div className="alert alert-warning rounded-4 d-flex flex-wrap align-items-center justify-content-between gap-2">
+                <div className="small">
+                  <i className="fas fa-wand-magic-sparkles me-2" />
+                  {t("This page has old HTML content. Convert it to blocks to edit it visually.")}
+                </div>
+                <button type="button" className="btn btn-sm btn-primary" disabled={saving} onClick={convertLegacy}>
+                  <i className="fas fa-wand-magic-sparkles me-1" />
+                  {t("Convert to blocks")}
+                </button>
+              </div>
+            ) : null}
             <div className={`bz-frame${preview ? " bz-frame--preview" : ""}`} style={{ background: doc.theme.bg }}>
               <div ref={canvasRef} onClick={(e) => e.stopPropagation()}>
                 <BlockRenderer doc={doc} editable={!preview} selectedId={selectedId} onSelect={setSelectedId} />
@@ -772,15 +850,15 @@ function BuilderInner() {
         {/* ── اللوحة الثالثة: الخصائص ── */}
         <aside className="bz-side bz-side--right">
           <div className="bz-tabs">
-            {(["element", "page", "theme"] as const).map((tab) => (
+            {(["element", "style", "page", "theme"] as const).map((tab) => (
               <button
                 key={tab}
                 type="button"
                 className={`bz-tab${rightTab === tab ? " bz-tab--on" : ""}`}
                 onClick={() => setRightTab(tab)}
               >
-                <i className={`fas ${tab === "element" ? "fa-sliders" : tab === "page" ? "fa-file-lines" : "fa-palette"} me-1`} />
-                {t(tab === "element" ? "Element" : tab === "page" ? "Page" : "Theme")}
+                <i className={`fas ${tab === "element" ? "fa-sliders" : tab === "style" ? "fa-palette" : tab === "page" ? "fa-file-lines" : "fa-swatchbook"} me-1`} />
+                {t(tab === "element" ? "Element" : tab === "style" ? "Style" : tab === "page" ? "Page" : "Theme")}
               </button>
             ))}
           </div>
@@ -962,6 +1040,70 @@ function BuilderInner() {
               );
             })()}
 
+
+            {/* ── تنسيق القسم (Style) ── */}
+            {rightTab === "style" &&
+              (!selected ? (
+                <p className="text-muted small mb-0">{t("Select a block to edit its properties")}</p>
+              ) : (
+                <>
+                  <div className="bz-element-head">
+                    <span className="bz-chip">{t("Section style")}</span>
+                    <div className="btn-group btn-group-sm bz-toolbar">
+                      <button type="button" className="btn btn-outline-secondary" onClick={() => moveBlock(selected.id, -1)} title={t("Move up")}>
+                        <i className="fas fa-arrow-up" />
+                      </button>
+                      <button type="button" className="btn btn-outline-secondary" onClick={() => moveBlock(selected.id, 1)} title={t("Move down")}>
+                        <i className="fas fa-arrow-down" />
+                      </button>
+                      <button type="button" className="btn btn-outline-danger" onClick={() => removeBlock(selected.id)} title={t("Delete block")}>
+                        <i className="fas fa-trash" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="d-grid gap-3">
+                    {STYLE_FIELDS.map((f) => (
+                      <div key={f.key}>
+                        <label className="bz-label">{t(f.label)}</label>
+                        <FieldInput
+                          field={f}
+                          value={((selected.style ?? {}) as Record<string, unknown>)[f.key]}
+                          onChange={(val) => updateStyle(selected.id, f.key, val)}
+                          blockType={selected.type}
+                          folder="pages"
+                        />
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="bz-group mt-3">
+                    <div className="bz-label mb-1">{t("Quick backgrounds")}</div>
+                    <div className="d-flex flex-wrap gap-1">
+                      {[
+                        { label: t("Soft"), bg: "#f8fafc" },
+                        { label: t("Dark"), bg: "#0f172a" },
+                        { label: t("Primary"), bg: "#0b7a6e" },
+                        { label: t("Accent"), bg: "#e9a319" },
+                        { label: t("Muted"), bg: "#eef2f4" },
+                      ].map((q) => (
+                        <button
+                          key={q.bg}
+                          type="button"
+                          className="btn btn-sm border"
+                          style={{ background: q.bg, color: "#334155", fontSize: 11 }}
+                          onClick={() => updateStyle(selected.id, "bg", q.bg)}
+                        >
+                          {q.label}
+                        </button>
+                      ))}
+                      <button type="button" className="btn btn-sm btn-outline-secondary" onClick={() => updateStyle(selected.id, "bg", "")}>
+                        <i className="fas fa-xmark" />
+                      </button>
+                    </div>
+                  </div>
+                </>
+              ))}
 
             {/* ── إعدادات الصفحة ── */}
             {rightTab === "page" && (
