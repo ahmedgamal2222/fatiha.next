@@ -1,10 +1,29 @@
 "use client";
 
-import { useI18n } from "@/context/I18nContext";
+import { useI18n, type Lang } from "@/context/I18nContext";
+import { useAuth } from "@/context/AuthContext";
+import { api } from "@/lib/api";
 
 export function LanguageModal() {
-  const { languages, lang, setLang, isLanguageModalOpen, closeLanguageModal } = useI18n();
+  const { languages, lang, t, setLang, isLanguageModalOpen, closeLanguageModal } = useI18n();
+  const { user, refresh } = useAuth();
   if (!isLanguageModalOpen) return null;
+
+  /**
+   * يبدّل لغة الواجهة، ويحدّث لغة المستخدم المفضّلة (preferredCulture) إن كان مسجّلاً،
+   * حتى تأتي إشعارات المنصة والرسائل البريدية بنفس اللغة المختارة.
+   */
+  async function choose(code: Lang) {
+    setLang(code);
+    const def = languages.find((l) => l.code === code);
+    if (!user || !def || def.apiCode === user.preferredCulture) return;
+    try {
+      await api.put("/api/account/profile", { preferredCulture: def.apiCode });
+      await refresh();
+    } catch {
+      /* تجاهل: لا نُعطّل تبديل اللغة بسبب فشل المزامنة */
+    }
+  }
 
   return (
     <div
@@ -16,7 +35,7 @@ export function LanguageModal() {
       <div className="modal-dialog modal-dialog-centered" onClick={(e) => e.stopPropagation()}>
         <div className="modal-content rounded-4">
           <div className="modal-header">
-            <h5 className="modal-title">{lang === "ar" ? "اختر لغتك" : "Choose Your Language"}</h5>
+            <h5 className="modal-title">{t("Languages")}</h5>
             <button type="button" className="btn-close" onClick={closeLanguageModal}></button>
           </div>
           <div className="modal-body">
@@ -28,7 +47,7 @@ export function LanguageModal() {
                   className={`list-group-item list-group-item-action d-flex justify-content-between align-items-center${
                     l.code === lang ? " active" : ""
                   }`}
-                  onClick={() => setLang(l.code)}
+                  onClick={() => choose(l.code)}
                   dir={l.dir}
                 >
                   <span>{l.name}</span>

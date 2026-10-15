@@ -27,7 +27,7 @@ function passwordStrength(pw: string): { pct: number; color: string; label: stri
 
 export default function RegisterPage() {
   const { register } = useAuth();
-  const { t, lang } = useI18n();
+  const { t, lang, languages } = useI18n();
   const router = useRouter();
   const ar = lang === "ar";
   const [nameAr, setNameAr] = useState("");
@@ -50,7 +50,9 @@ export default function RegisterPage() {
     if (password !== confirmPassword) { setError(t("Passwords do not match")); return; }
     setLoading(true);
     try {
-      await register({ email, password, nameAr: nameAr || undefined, preferredCulture: ar ? "ar-SA" : "en-US" });
+      // لغة المستخدم المفضّلة = لغة الواجهة المختارة (لتصل الإشعارات والبريد بنفس اللغة)
+      const preferredCulture = languages.find((l) => l.code === lang)?.apiCode ?? (ar ? "ar-SA" : "en-US");
+      await register({ email, password, nameAr: nameAr || undefined, preferredCulture });
       router.push(nextPath);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : t("Registration failed"));

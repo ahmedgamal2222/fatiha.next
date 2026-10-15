@@ -11,6 +11,7 @@ interface Product {
   price: number;
   currencyCode?: string | null;
   marketCategoryId?: number;
+  shortDescription?: string | null;
   description?: string | null;
   imageUrl?: string | null;
 }
@@ -21,14 +22,24 @@ interface Category {
   nameEn?: string;
 }
 
+/** أسماء اللغات بحسب EnumCommon.Languagelist (id == languageName). */
+const LANG_NAMES: Record<number, string> = {
+  1: "العربية", 2: "English", 3: "中文", 4: "Español", 5: "हिन्दी", 6: "Français",
+  7: "Русский", 8: "বাংলা", 9: "Português", 10: "اردو", 11: "Bahasa Indonesia",
+};
+const LANG_IDS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+
 function Inner() {
   const { t, lang } = useI18n();
   const ar = lang === "ar";
   const [items, setItems] = useState<Product[]>([]);
   const [cats, setCats] = useState<Category[]>([]);
-  const [form, setForm] = useState({ title: "", marketCategoryId: 0, price: 0, description: "", imageUrl: "", currencyCode: "USD" });
+  const [form, setForm] = useState({ title: "", marketCategoryId: 0, price: 0, shortDescription: "", description: "", imageUrl: "", currencyCode: "USD" });
   const [editId, setEditId] = useState<number | null>(null);
   const [msg, setMsg] = useState("");
+  const [aiHint, setAiHint] = useState("");
+  const [aiLang, setAiLang] = useState(1);
+  const [aiBusy, setAiBusy] = useState(false);
 
   const load = useCallback(() => {
     api.get<Product[]>("/api/marketplace", false).then((r) => setItems(r.data ?? [])).catch(() => {});
@@ -40,7 +51,7 @@ function Inner() {
   }, [load]);
 
   function resetForm() {
-    setForm({ title: "", marketCategoryId: 0, price: 0, description: "", imageUrl: "", currencyCode: "USD" });
+    setForm({ title: "", marketCategoryId: 0, price: 0, shortDescription: "", description: "", imageUrl: "", currencyCode: "USD" });
     setEditId(null);
   }
 
@@ -49,12 +60,43 @@ function Inner() {
       title: p.title,
       marketCategoryId: p.marketCategoryId ?? 0,
       price: p.price,
+      shortDescription: p.shortDescription ?? "",
       description: p.description ?? "",
       imageUrl: p.imageUrl ?? "",
       currencyCode: p.currencyCode ?? "USD",
     });
     setEditId(p.id);
     if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  /** توليد وصف المنتج (مختصر + كامل) بالذكاء الاصطناعي باللغة المختارة. */
+  async function aiFill() {
+    if (!form.title.trim()) {
+      setMsg(t("Title is required"));
+      return;
+    }
+    setAiBusy(true);
+    setMsg("");
+    try {
+      const r = await api.post<{ shortDescription?: string; description?: string }>("/api/marketplace/ai", {
+        title: form.title,
+        prompt: aiHint.trim() || undefined,
+        languageId: aiLang,
+        extra: { price: form.price, currency: form.currencyCode },
+      });
+      const desc = r.data?.description;
+      const short = r.data?.shortDescription;
+      if (desc || short) {
+        setForm((f) => ({ ...f, description: desc ?? f.description, shortDescription: short ?? f.shortDescription }));
+        setMsg(t("Generated with AI"));
+      } else {
+        setMsg(t("AI generation failed"));
+      }
+    } catch {
+      setMsg(t("AI generation failed"));
+    } finally {
+      setAiBusy(false);
+    }
   }
 
   async function save(e: React.FormEvent) {
@@ -108,7 +150,20 @@ function Inner() {
                   <input className="form-control" style={{ maxWidth: 90 }} value={form.currencyCode} onChange={(e) => setForm({ ...form, currencyCode: e.target.value.toUpperCase().slice(0, 3) })} />
                 </div>
                 <input className="form-control mb-2" placeholder={t("Image URL")} value={form.imageUrl} onChange={(e) => setForm({ ...form, imageUrl: e.target.value })} />
-                <textarea className="form-control mb-2" rows={3} placeholder={t("Description")} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+                <input className="form-control mb-2" placeholder={t("Short description")} value={form.shortDescription} onChange={(e) => setForm({ ...form, shortDescription: e.target.value })} />
+                <div className="input-group mb-2">
+                  <input className="form-control" placeholder={t("Topic (optional)")} value={aiHint} onChange={(e) => setAiHint(e.target.value)} />
+                  <select className="form-select flex-grow-0" style={{ maxWidth: 140 }} value={aiLang} onChange={(e) => setAiLang(Number(e.target.value))}>
+                    {LANG_IDS.map((id) => (
+                      <option key={id} value={id}>{LANG_NAMES[id]}</option>
+                    ))}
+                  </select>
+                  <button type="button" className="btn btn-outline-primary" disabled={aiBusy} onClick={aiFill}>
+                    {aiBusy ? <span className="spinner-border spinner-border-sm me-1" /> : <i className="fas fa-wand-magic-sparkles me-1" />}
+                    {t("Write with AI")}
+                  </button>
+                </div>
+                <textarea className="form-control mb-2" rows={5} placeholder={t("Description")} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
                 <div className="d-flex gap-2">
                   <button className="btn btn-primary flex-grow-1">{editId ? t("Update") : t("Create")}</button>
                   {editId && (

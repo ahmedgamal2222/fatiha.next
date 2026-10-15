@@ -21,6 +21,13 @@ interface Category {
   nameEn?: string;
 }
 
+/** أسماء اللغات بحسب EnumCommon.Languagelist (id == languageName). */
+const LANG_NAMES: Record<number, string> = {
+  1: "العربية", 2: "English", 3: "中文", 4: "Español", 5: "हिन्दी", 6: "Français",
+  7: "Русский", 8: "বাংলা", 9: "Português", 10: "اردو", 11: "Bahasa Indonesia",
+};
+const LANG_IDS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+
 function Inner() {
   const { t, lang } = useI18n();
   const ar = lang === "ar";
@@ -29,6 +36,8 @@ function Inner() {
   const [form, setForm] = useState({ title: "", bookCategoryId: 0, languageId: 2, publisher: "", cover: "", fileUrl: "", description: "" });
   const [editId, setEditId] = useState<number | null>(null);
   const [msg, setMsg] = useState("");
+  const [aiHint, setAiHint] = useState("");
+  const [aiBusy, setAiBusy] = useState(false);
 
   const load = useCallback(() => {
     api.get<Book[]>("/api/books", false).then((r) => setItems(r.data ?? [])).catch(() => {});
@@ -83,6 +92,34 @@ function Inner() {
     load();
   }
 
+  /** توليد وصف الكتاب بالذكاء الاصطناعي بلغة الكتاب المختارة. */
+  async function aiFill() {
+    if (!form.title.trim()) {
+      setMsg(t("Title is required"));
+      return;
+    }
+    setAiBusy(true);
+    setMsg("");
+    try {
+      const r = await api.post<{ description?: string }>("/api/books/ai", {
+        title: form.title,
+        prompt: aiHint.trim() || undefined,
+        languageId: Number(form.languageId) || 1,
+      });
+      const desc = r.data?.description;
+      if (desc) {
+        setForm((f) => ({ ...f, description: desc }));
+        setMsg(t("Generated with AI"));
+      } else {
+        setMsg(t("AI generation failed"));
+      }
+    } catch {
+      setMsg(t("AI generation failed"));
+    } finally {
+      setAiBusy(false);
+    }
+  }
+
   return (
     <div className="container py-5 min-vh-100 bg-light">
       <h2 className="fw-bold text-primary mb-4">{t("Manage Library")}</h2>
@@ -103,7 +140,19 @@ function Inner() {
                 <input className="form-control mb-2" placeholder={t("Publisher")} value={form.publisher} onChange={(e) => setForm({ ...form, publisher: e.target.value })} />
                 <input className="form-control mb-2" placeholder={t("Cover URL")} value={form.cover} onChange={(e) => setForm({ ...form, cover: e.target.value })} />
                 <input className="form-control mb-2" placeholder={t("File URL")} value={form.fileUrl} onChange={(e) => setForm({ ...form, fileUrl: e.target.value })} />
-                <textarea className="form-control mb-2" rows={3} placeholder={t("Description")} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+                <select className="form-select mb-2" value={form.languageId} onChange={(e) => setForm({ ...form, languageId: Number(e.target.value) })}>
+                  {LANG_IDS.map((id) => (
+                    <option key={id} value={id}>{LANG_NAMES[id]}</option>
+                  ))}
+                </select>
+                <div className="input-group mb-2">
+                  <input className="form-control" placeholder={t("Topic (optional)")} value={aiHint} onChange={(e) => setAiHint(e.target.value)} />
+                  <button type="button" className="btn btn-outline-primary" disabled={aiBusy} onClick={aiFill}>
+                    {aiBusy ? <span className="spinner-border spinner-border-sm me-1" /> : <i className="fas fa-wand-magic-sparkles me-1" />}
+                    {t("Write with AI")}
+                  </button>
+                </div>
+                <textarea className="form-control mb-2" rows={6} placeholder={t("Description")} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
                 <div className="d-flex gap-2">
                   <button className="btn btn-primary flex-grow-1">{editId ? t("Update") : t("Create")}</button>
                   {editId && (

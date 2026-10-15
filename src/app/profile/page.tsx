@@ -33,8 +33,13 @@ interface Job { jobCode: string; jobTitleAr?: string | null; jobTitleEn?: string
 const CULTURES = [
   { code: "ar-SA", label: "العربية" },
   { code: "en-US", label: "English" },
-  { code: "fr-FR", label: "Français" },
+  { code: "zh-CN", label: "中文" },
   { code: "es-ES", label: "Español" },
+  { code: "hi-IN", label: "हिन्दी" },
+  { code: "fr-FR", label: "Français" },
+  { code: "ru-RU", label: "Русский" },
+  { code: "bn-BD", label: "বাংলা" },
+  { code: "pt-BR", label: "Português" },
   { code: "ur-PK", label: "اردو" },
   { code: "id-ID", label: "Bahasa Indonesia" },
 ];

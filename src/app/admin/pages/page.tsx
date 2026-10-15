@@ -11,6 +11,9 @@ interface StaticPage {
   title: string;
   languageId?: number;
   content?: string;
+  slug?: string | null;
+  isPublished?: boolean;
+  updatedAt?: number | string | null;
 }
 
 function Inner() {
@@ -19,10 +22,34 @@ function Inner() {
   const [form, setForm] = useState({ title: "", content: "", languageId: 2 });
   const [editId, setEditId] = useState<number | null>(null);
   const [msg, setMsg] = useState("");
+  const [creating, setCreating] = useState(false);
 
   const load = useCallback(() => {
-    api.get<StaticPage[]>("/api/pages", false).then((r) => setItems(r.data ?? [])).catch(() => {});
+    api.get<StaticPage[]>("/api/pages").then((r) => setItems(r.data ?? [])).catch(() => {});
   }, []);
+
+  /** ينشئ صفحة فارغة ثم يفتح محرّر الصفحات المرئي عليها. */
+  async function openBuilder() {
+    setCreating(true);
+    setMsg("");
+    try {
+      const r = await api.post<StaticPage>("/api/pages", {
+        title: t("New page"),
+        content: t("New page"),
+        languageId: 1,
+        isPublished: false,
+      });
+      if (r.data?.id) {
+        window.location.href = `/admin/pages/builder?id=${r.data.id}`;
+        return;
+      }
+      setMsg(t("Operation failed"));
+    } catch {
+      setMsg(t("Operation failed"));
+    } finally {
+      setCreating(false);
+    }
+  }
 
   useEffect(() => {
     load();
@@ -65,8 +92,15 @@ function Inner() {
 
   return (
     <div className="container py-5 min-vh-100 bg-light">
-      <h2 className="fw-bold text-primary mb-4">{t("Static Pages")}</h2>
+      <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4">
+        <h2 className="fw-bold text-primary mb-0">{t("Static Pages")}</h2>
+        <button className="btn btn-primary" onClick={openBuilder} disabled={creating}>
+          {creating ? <span className="spinner-border spinner-border-sm me-2" /> : <i className="fas fa-layer-group me-2" />}
+          {t("Page builder")}
+        </button>
+      </div>
       {msg && <div className="alert alert-info">{msg}</div>}
+      <p className="text-muted small">{t("Build pages visually with blocks")}</p>
       <div className="row g-4">
         <div className="col-lg-5">
           <div className="card shadow-sm border-0 rounded-4">
@@ -94,15 +128,26 @@ function Inner() {
             <div className="card-body">
               <ul className="list-group list-group-flush">
                 {items.map((p) => (
-                  <li key={p.id} className="list-group-item d-flex justify-content-between align-items-center px-0">
-                    <Link href={`/page/view?id=${p.id}`} className="text-decoration-none text-truncate">
-                      {p.title}
-                    </Link>
-                    <span className="d-flex gap-2">
-                      <button className="btn btn-sm btn-outline-primary" onClick={() => startEdit(p)}>
+                  <li key={p.id} className="list-group-item d-flex justify-content-between align-items-center px-0 gap-2">
+                    <div className="text-truncate">
+                      <Link href={`/page/view?id=${p.id}`} className="text-decoration-none fw-semibold">
+                        {p.title}
+                      </Link>
+                      <div className="small text-muted" dir="ltr">
+                        {p.slug ? `/${p.slug}` : `#${p.id}`}
+                      </div>
+                    </div>
+                    <span className="d-flex gap-2 align-items-center flex-shrink-0">
+                      <span className={`badge ${p.isPublished ? "bg-success" : "bg-secondary"}`}>
+                        {p.isPublished ? t("Published") : t("Draft")}
+                      </span>
+                      <Link href={`/admin/pages/builder?id=${p.id}`} className="btn btn-sm btn-primary" title={t("Page builder")}>
+                        <i className="fas fa-layer-group" />
+                      </Link>
+                      <button className="btn btn-sm btn-outline-primary" onClick={() => startEdit(p)} title={t("Edit")}>
                         <i className="fas fa-pen"></i>
                       </button>
-                      <button className="btn btn-sm btn-outline-danger" onClick={() => remove(p.id)}>
+                      <button className="btn btn-sm btn-outline-danger" onClick={() => remove(p.id)} title={t("Delete")}>
                         <i className="fas fa-trash"></i>
                       </button>
                     </span>

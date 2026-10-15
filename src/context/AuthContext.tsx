@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
 import { api, setToken, getToken } from "@/lib/api";
+import { useI18n } from "@/context/I18nContext";
 
 export interface CurrentUser {
   id: string;
@@ -35,6 +36,7 @@ const Ctx = createContext<AuthCtx | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<CurrentUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const { languages, setLang } = useI18n();
 
   const refresh = useCallback(async () => {
     if (!getToken()) {
@@ -44,14 +46,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     try {
       const res = await api.get<CurrentUser>("/api/auth/me");
-      setUser(res.data ?? null);
+      const me = res.data ?? null;
+      setUser(me);
+      // إن لم يختر المستخدم لغة على هذا الجهاز، نعتمد لغته المفضّلة من الملف الشخصي
+      // حتى تكون إشعارات المنصة والبريد بنفس لغة الواجهة.
+      if (
+        me?.preferredCulture &&
+        typeof window !== "undefined" &&
+        !window.localStorage.getItem("fatiha_lang")
+      ) {
+        const two = me.preferredCulture.slice(0, 2).toLowerCase();
+        const def = languages.find((l) => l.apiCode.slice(0, 2).toLowerCase() === two);
+        if (def) setLang(def.code);
+      }
     } catch {
       setToken(null);
       setUser(null);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [languages, setLang]);
 
   useEffect(() => {
     refresh();

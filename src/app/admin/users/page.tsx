@@ -24,6 +24,8 @@ function UsersInner() {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [q, setQ] = useState("");
   const [loading, setLoading] = useState(true);
+  const [msg, setMsg] = useState("");
+  const [err, setErr] = useState("");
 
   const load = useCallback((search = "") => {
     setLoading(true);
@@ -42,10 +44,19 @@ function UsersInner() {
     await api.put(`/api/account/admin/users/${id}/role`, { role }).catch(() => {});
     load(q);
   }
-  async function remove(id: string) {
-    if (!confirm(t("Disable this user?"))) return;
-    await api.del(`/api/account/admin/users/${id}`).catch(() => {});
-    load(q);
+  /** تعطيل/تفعيل الحساب — التعطيل يُبطل جلسات المستخدم فوراً فلا يستطيع الدخول بأي طريقة. */
+  async function setStatus(id: string, isDeleted: boolean) {
+    const question = isDeleted ? t("Disable this user?") : t("Enable this user?");
+    if (!confirm(question)) return;
+    setMsg("");
+    setErr("");
+    try {
+      await api.patch(`/api/account/admin/users/${id}/status`, { isDeleted });
+      setMsg(t("Account status updated"));
+      load(q);
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : t("Operation failed"));
+    }
   }
   async function impersonate(id: string) {
     const r = await api.post<{ token: string }>(`/api/account/admin/users/${id}/impersonate`).catch(() => null);
@@ -72,6 +83,9 @@ function UsersInner() {
         </button>
       </div>
 
+      {msg && <div className="alert alert-success rounded-4">{msg}</div>}
+      {err && <div className="alert alert-danger rounded-4">{err}</div>}
+
       {loading ? (
         <p className="text-muted">{t("Loading...")}</p>
       ) : (
@@ -82,6 +96,7 @@ function UsersInner() {
                 <th>{t("User")}</th>
                 <th>{t("Email")}</th>
                 <th>{t("Role")}</th>
+                <th>{t("Status")}</th>
                 <th className="text-end">{t("Actions")}</th>
               </tr>
             </thead>
@@ -105,13 +120,25 @@ function UsersInner() {
                       ))}
                     </select>
                   </td>
+                  <td>
+                    <span className={`badge ${u.isDeleted ? "bg-secondary" : "bg-success"}`}>
+                      {u.isDeleted ? t("Disabled") : t("Active")}
+                    </span>
+                  </td>
                   <td className="text-end">
                     <button className="btn btn-sm btn-outline-secondary me-2" onClick={() => impersonate(u.id)} title={t("Impersonate")}>
                       <i className="fas fa-user-secret"></i>
                     </button>
-                    <button className="btn btn-sm btn-outline-danger" onClick={() => remove(u.id)}>
-                      <i className="fas fa-ban"></i>
-                    </button>
+                    {u.isDeleted ? (
+                      <button className="btn btn-sm btn-outline-success" onClick={() => setStatus(u.id, false)} title={t("Enable")}>
+                        <i className="fas fa-user-check me-1"></i>
+                        {t("Enable")}
+                      </button>
+                    ) : (
+                      <button className="btn btn-sm btn-outline-danger" onClick={() => setStatus(u.id, true)} title={t("Disable this user?")}>
+                        <i className="fas fa-ban"></i>
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}

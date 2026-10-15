@@ -18,10 +18,12 @@ interface Category {
   name: string;
 }
 
-const LANGS = [
-  { id: 1, label: "English" },
-  { id: 2, label: "Arabic" },
-];
+/** أسماء اللغات بحسب EnumCommon.Languagelist (id == languageName). */
+const LANG_NAMES: Record<number, string> = {
+  1: "العربية", 2: "English", 3: "中文", 4: "Español", 5: "हिन्दी", 6: "Français",
+  7: "Русский", 8: "বাংলা", 9: "Português", 10: "اردو", 11: "Bahasa Indonesia",
+};
+const LANG_IDS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
 
 function Inner() {
   const { t } = useI18n();
@@ -30,6 +32,8 @@ function Inner() {
   const [form, setForm] = useState({ title: "", body: "", languageId: 2, blogCategoryId: 0 });
   const [editId, setEditId] = useState<number | null>(null);
   const [msg, setMsg] = useState("");
+  const [aiHint, setAiHint] = useState("");
+  const [aiBusy, setAiBusy] = useState(false);
 
   const load = useCallback(() => {
     api.get<Blog[]>("/api/blogs", false).then((r) => setItems(r.data ?? [])).catch(() => {});
@@ -76,6 +80,34 @@ function Inner() {
     load();
   }
 
+  /** توليد المقال (عنوان + نص) بالذكاء الاصطناعي بلغة المقال المختارة. */
+  async function aiFill() {
+    if (!form.title.trim() && !aiHint.trim()) {
+      setMsg(t("Describe what you want…"));
+      return;
+    }
+    setAiBusy(true);
+    setMsg("");
+    try {
+      const r = await api.post<{ title?: string; body?: string }>("/api/blogs/ai", {
+        title: form.title || undefined,
+        prompt: aiHint.trim() || undefined,
+        languageId: Number(form.languageId) || 1,
+      });
+      const body = r.data?.body;
+      if (body) {
+        setForm((f) => ({ ...f, title: r.data?.title || f.title, body }));
+        setMsg(t("Generated with AI"));
+      } else {
+        setMsg(t("AI generation failed"));
+      }
+    } catch {
+      setMsg(t("AI generation failed"));
+    } finally {
+      setAiBusy(false);
+    }
+  }
+
   return (
     <div className="container py-5 min-vh-100 bg-light">
       <h2 className="fw-bold text-primary mb-4">{t("Manage Blog")}</h2>
@@ -94,11 +126,18 @@ function Inner() {
                   ))}
                 </select>
                 <select className="form-select mb-2" value={form.languageId} onChange={(e) => setForm({ ...form, languageId: Number(e.target.value) })}>
-                  {LANGS.map((l) => (
-                    <option key={l.id} value={l.id}>{t(l.label)}</option>
+                  {LANG_IDS.map((id) => (
+                    <option key={id} value={id}>{LANG_NAMES[id]}</option>
                   ))}
                 </select>
-                <textarea className="form-control mb-2" rows={5} placeholder={t("Body")} value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} required />
+                <div className="input-group mb-2">
+                  <input className="form-control" placeholder={t("Topic (optional)")} value={aiHint} onChange={(e) => setAiHint(e.target.value)} />
+                  <button type="button" className="btn btn-outline-primary" disabled={aiBusy} onClick={aiFill}>
+                    {aiBusy ? <span className="spinner-border spinner-border-sm me-1" /> : <i className="fas fa-wand-magic-sparkles me-1" />}
+                    {t("Write with AI")}
+                  </button>
+                </div>
+                <textarea className="form-control mb-2" rows={8} placeholder={t("Body")} value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} required />
                 <div className="d-flex gap-2">
                   <button className="btn btn-primary flex-grow-1">{editId ? t("Update") : t("Create")}</button>
                   {editId && (

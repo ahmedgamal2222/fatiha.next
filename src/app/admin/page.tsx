@@ -35,6 +35,8 @@ export default function AdminDashboard() {
     { href: "/admin/marketplace", icon: "fa-store", title: "Manage Marketplace", desc: "Products and listings" },
     { href: "/admin/pages", icon: "fa-file-alt", title: "Static Pages", desc: "Site content pages" },
     { href: "/admin/newsletter", icon: "fa-envelope", title: "Newsletter", desc: "Subscribers and campaigns" },
+    { href: "/admin/certificates", icon: "fa-certificate", title: "Certificates", desc: "Upload and manage issued certificates" },
+    { href: "/admin/settings", icon: "fa-gear", title: "Settings", desc: "Sender email and media storage" },
   ];
 
   return (
