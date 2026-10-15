@@ -109,6 +109,20 @@ export function docToText(doc: PageDoc): string {
         for (const item of arr) {
           if (typeof item === "string") { const v = clean(item); if (v) out.push(v); continue; }
           const o = (item ?? {}) as Record<string, unknown>;
+          for (const kk of ["title", "text", "label", "question", "answer", "subtitle", "value"]) {
+            const v = clean(o[kk]);
+            if (v) out.push(v);
+          }
+        }
+      }
+      if (b.type === "columns" && Array.isArray(p.columns)) {
+        for (const col of p.columns) if (Array.isArray(col)) walk(col as Block[]);
+      }
+    }
+  };
+  walk(doc.blocks);
+  return out.join("\n").slice(0, 20000);
+}
 
 // ─────────────────────────── مكتبة العناصر (Widgets) ───────────────────────────
 
@@ -163,6 +177,7 @@ export function blockFromAI(raw: unknown): Block | null {
   const type = o.type as BlockType;
   if (!WIDGETS.some((w) => w.type === type)) return null;
   return { id: uid(), type, props: (o.props ?? {}) as Record<string, unknown> };
+}
 
 // ─────────────────────────── قوالب الأقسام الجاهزة (Sections) ───────────────────────────
 
@@ -233,6 +248,34 @@ export const TEMPLATES: SectionTemplate[] = [
   {
     id: "gallery",
     label: "Gallery",
+    icon: "fa-images",
+    build: () => [
+      b("heading", { text: "Gallery", level: 2, align: "center", color: "" }),
+      b("gallery", WIDGETS.find((w) => w.type === "gallery")!.defaults()),
+    ],
+  },
+  {
+    id: "faq",
+    label: "FAQ",
+    icon: "fa-circle-question",
+    build: () => [
+      b("heading", { text: "Frequently asked questions", level: 2, align: "center", color: "" }),
+      b("faq", WIDGETS.find((w) => w.type === "faq")!.defaults()),
+    ],
+  },
+  {
+    id: "cta",
+    label: "Call to action",
+    icon: "fa-bullhorn",
+    build: () => [b("cta", WIDGETS.find((w) => w.type === "cta")!.defaults())],
+  },
+  {
+    id: "html",
+    label: "Custom HTML / Embed",
+    icon: "fa-code",
+    build: () => [b("html", { code: "<div style=\"text-align:center\">Custom HTML block</div>" })],
+  },
+];
 
 // ─────────────────────────── مخطط الحقول للوحة الخصائص ───────────────────────────
 
@@ -433,49 +476,3 @@ export const REPEATERS: Partial<Record<BlockType, RepeaterDef[]>> = {
   logos: [{ key: "images", label: "Images", kind: "strings" }],
   columns: [{ key: "columns", label: "Columns", kind: "blocks" }],
 };
-
-    icon: "fa-images",
-    build: () => [
-      b("heading", { text: "Gallery", level: 2, align: "center", color: "" }),
-      b("gallery", WIDGETS.find((w) => w.type === "gallery")!.defaults()),
-    ],
-  },
-  {
-    id: "faq",
-    label: "FAQ",
-    icon: "fa-circle-question",
-    build: () => [
-      b("heading", { text: "Frequently asked questions", level: 2, align: "center", color: "" }),
-      b("faq", WIDGETS.find((w) => w.type === "faq")!.defaults()),
-    ],
-  },
-  {
-    id: "cta",
-    label: "Call to action",
-    icon: "fa-bullhorn",
-    build: () => [b("cta", WIDGETS.find((w) => w.type === "cta")!.defaults())],
-  },
-  {
-    id: "html",
-    label: "Custom HTML / Embed",
-    icon: "fa-code",
-    build: () => [b("html", { code: "<div style=\"text-align:center\">Custom HTML block</div>" })],
-  },
-];
-
-}
-
-          for (const kk of ["title", "text", "label", "question", "answer", "subtitle", "value"]) {
-            const v = clean(o[kk]);
-            if (v) out.push(v);
-          }
-        }
-      }
-      if (b.type === "columns" && Array.isArray(p.columns)) {
-        for (const col of p.columns) if (Array.isArray(col)) walk(col as Block[]);
-      }
-    }
-  };
-  walk(doc.blocks);
-  return out.join("\n").slice(0, 20000);
-}

@@ -386,6 +386,10 @@ function RichBlock({ block, theme, editable }: { block: Block; theme: PageDoc["t
         </div>
       );
     }
+    default:
+      return null;
+  }
+}
 
 // ─────────────────────────── العارض الرئيسي ───────────────────────────
 
@@ -493,8 +497,3 @@ export function BlockRenderer({ doc, editable, selectedId, onSelect }: RendererP
 }
 
 export default BlockRenderer;
-
-    default:
-      return null;
-  }
-}

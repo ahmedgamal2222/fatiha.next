@@ -262,6 +262,14 @@ function RepeaterEditor({ def, items, onChange }: { def: RepeaterDef; items: unk
         </div>
       ))}
 
+      <button type="button" className="btn btn-sm btn-outline-primary" onClick={add}>
+        <i className="fas fa-plus me-1" />
+        {def.label}
+      </button>
+    </div>
+  );
+}
+
 // ─────────────────────────── المحرّر ───────────────────────────
 
 function BuilderInner() {
@@ -471,16 +479,6 @@ function BuilderInner() {
     return () => cleanups.forEach((off) => off());
   }, [doc, preview, onDrop]);
 
-
-      <button type="button" className="btn btn-sm btn-outline-primary" onClick={add}>
-        <i className="fas fa-plus me-1" />
-        {def.label}
-      </button>
-    </div>
-  );
-}
-
-
   // ── الحفظ ──
   async function save(publishOverride?: boolean) {
     if (!title.trim()) {
@@ -561,6 +559,16 @@ function BuilderInner() {
           ...d,
           blocks: mapTree(d.blocks, (b) =>
             b.id === target.id ? { ...b, props: { ...(b.props as Record<string, unknown>), ...props } } : b
+          ),
+        }));
+        setMsg(t("Generated with AI"));
+      }
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : t("AI generation failed"));
+    } finally {
+      setAiBlockBusy(false);
+    }
+  }
 
   const frameWidth = device === "mobile" ? 390 : device === "tablet" ? 780 : 1200;
 
@@ -643,11 +651,6 @@ function BuilderInner() {
           {err && <div className="alert alert-danger py-2 rounded-3 mb-0">{err}</div>}
         </div>
       )}
-
-          ),
-        }));
-        setMsg(t("Generated with AI"));
-      }
 
       <div className="d-flex align-items-stretch" style={{ alignItems: "flex-start" }}>
         {/* ── اللوحة الأولى: العناصر والأقسام والتوليد بالـAI ── */}
@@ -734,14 +737,6 @@ function BuilderInner() {
             </div>
           </div>
         </main>
-
-    } catch (e) {
-      setErr(e instanceof Error ? e.message : t("AI generation failed"));
-    } finally {
-      setAiBlockBusy(false);
-    }
-  }
-
 
         {/* ── اللوحة الثالثة: الخصائص ── */}
         <aside style={{ width: 340, flex: "0 0 340px", background: "#ffffff", borderInlineStart: "1px solid #e5e7eb", minHeight: "calc(100vh - 58px)" }}>
