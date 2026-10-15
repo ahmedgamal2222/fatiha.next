@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { AdminGuard } from "@/components/AdminGuard";
-import { api, API_URL } from "@/lib/api";
+import { api } from "@/lib/api";
+import { mediaUrl } from "@/lib/media";
 import { useI18n } from "@/context/I18nContext";
 
 interface AuthorizedUser {
@@ -22,12 +23,6 @@ interface AuthorizedUser {
   languageListSerialized?: string | null;
 }
 
-function fileSrc(key?: string | null): string | null {
-  if (!key) return null;
-  if (/^https?:\/\//i.test(key)) return key;
-  return API_URL + "/files/" + key.replace(/^\/+/, "");
-}
-
 function Inner() {
   const { t, lang } = useI18n();
   const ar = lang === "ar";
@@ -37,6 +32,9 @@ function Inner() {
   const [busyId, setBusyId] = useState<number | null>(null);
   const [msg, setMsg] = useState("");
   const [err, setErr] = useState("");
+  const [upImg, setUpImg] = useState<File | null>(null);
+  const [upCv, setUpCv] = useState<File | null>(null);
+  const [mediaBusyId, setMediaBusyId] = useState<number | null>(null);
 
   const load = useCallback(() => {
     api.get<AuthorizedUser[]>("/api/authorized-users", false).then((r) => setItems(r.data ?? [])).catch(() => setItems([]));
@@ -55,12 +53,28 @@ function Inner() {
     finally { setBusyId(null); }
   }
 
+  /** يرفع صورة/سيرة ذاتية لطلب قائم (لإصلاح الطلبات القديمة بلا صورة). */
+  async function uploadMedia(id: number) {
+    if (!upImg && !upCv) return;
+    setMediaBusyId(id); setMsg(""); setErr("");
+    try {
+      const fd = new FormData();
+      if (upImg) fd.append("profileImgFile", upImg);
+      if (upCv) fd.append("cvFile", upCv);
+      await api.patch(`/api/authorized-users/${id}/media`, fd);
+      setMsg(t("File uploaded"));
+      setUpImg(null);
+      setUpCv(null);
+      load();
+    } catch { setErr(t("Upload failed")); }
+    finally { setMediaBusyId(null); }
+  }
+
   const filtered = items.filter((u) => {
     if (filter === "pending") return !u.dateOfAuthorization;
     if (filter === "authorized") return !!u.dateOfAuthorization;
     return true;
   });
-
   const counts = {
     all: items.length,
     pending: items.filter((u) => !u.dateOfAuthorization).length,
@@ -110,7 +124,7 @@ function Inner() {
                     <div className="d-flex justify-content-between align-items-start gap-3 flex-wrap">
                       <div className="d-flex gap-3">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={fileSrc(u.profileImg) || "https://placehold.co/64x64?text=?"} alt=""
+                        <img src={mediaUrl(u.profileImg) || "https://placehold.co/64x64?text=?"} alt=""
                           width={64} height={64} className="rounded-circle border" style={{ objectFit: "cover" }} />
                         <div className="fh-req__main">
                           <div className="fh-req__title">
@@ -158,17 +172,41 @@ function Inner() {
                             </div>
                           </div>
                         )}
-                        {fileSrc(u.audioRecordingRequest) && (
+                        {mediaUrl(u.audioRecordingRequest) && (
                           <div className="fh-media-box">
                             <label className="fh-label mb-2"><i className="fas fa-microphone me-1" />{t("Audio recording")}</label>
-                            <audio controls src={fileSrc(u.audioRecordingRequest)!} className="w-100" />
+                            <audio controls src={mediaUrl(u.audioRecordingRequest)!} className="w-100" />
                           </div>
                         )}
-                        {fileSrc(u.cv) && (
-                          <a href={fileSrc(u.cv)!} target="_blank" rel="noreferrer" className="btn btn-sm btn-outline-primary align-self-start">
+                        {mediaUrl(u.cv) && (
+                          <a href={mediaUrl(u.cv)!} target="_blank" rel="noreferrer" className="btn btn-sm btn-outline-primary align-self-start">
                             <i className="fas fa-file-pdf me-1" />{t("View CV")}
                           </a>
                         )}
+
+                        {/* استبدال/إضافة المرفقات (لإصلاح الطلبات القديمة التي بلا صورة) */}
+                        <div className="fh-media-box">
+                          <label className="fh-label mb-2"><i className="fas fa-paperclip me-1" />{t("Profile image")} / {t("CV")}</label>
+                          <div className="row g-2">
+                            <div className="col-md-5">
+                              <input type="file" accept="image/*" className="form-control form-control-sm"
+                                onChange={(e) => setUpImg(e.target.files?.[0] ?? null)} />
+                            </div>
+                            <div className="col-md-5">
+                              <input type="file" accept="application/pdf" className="form-control form-control-sm"
+                                onChange={(e) => setUpCv(e.target.files?.[0] ?? null)} />
+                            </div>
+                            <div className="col-md-2 d-grid">
+                              <button className="btn btn-sm btn-outline-primary"
+                                disabled={mediaBusyId === u.id || (!upImg && !upCv)}
+                                onClick={() => uploadMedia(u.id)}>
+                                {mediaBusyId === u.id
+                                  ? <span className="spinner-border spinner-border-sm" />
+                                  : <><i className="fas fa-upload me-1" />{t("Upload")}</>}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     )}
                   </div>

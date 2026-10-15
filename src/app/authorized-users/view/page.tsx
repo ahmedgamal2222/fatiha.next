@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { api } from "@/lib/api";
+import { mediaUrl } from "@/lib/media";
 import { useI18n } from "@/context/I18nContext";
 
 interface Detail {
@@ -48,7 +49,7 @@ function AuthorizedUserDetail() {
         <div className="card shadow-sm border-0 rounded-4">
           <div className="card-body p-4 text-center">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={u.profileImg || "https://placehold.co/120x120?text=?"} alt="" width={120} height={120} className="rounded-circle border mb-3" style={{ objectFit: "cover" }} />
+            <img src={mediaUrl(u.profileImg) || "https://placehold.co/120x120?text=?"} alt="" width={120} height={120} className="rounded-circle border mb-3" style={{ objectFit: "cover" }} />
             <div className="d-flex justify-content-center gap-2 mb-3">
               <span className="badge bg-primary-subtle text-primary">{u.points} {t("pts")}</span>
               <span className={`badge ${u.isAvailable ? "bg-success" : "bg-secondary"}`}>
@@ -74,7 +75,7 @@ function AuthorizedUserDetail() {
               {u.website && <a href={u.website} target="_blank" rel="noreferrer"><i className="fas fa-globe"></i></a>}
             </div>
             {u.cv && (
-              <a href={u.cv} target="_blank" rel="noreferrer" className="btn btn-outline-primary mt-4">
+              <a href={mediaUrl(u.cv) ?? "#"} target="_blank" rel="noreferrer" className="btn btn-outline-primary mt-4">
                 <i className="fas fa-file-pdf me-2"></i>{t("View CV")}
               </a>
             )}

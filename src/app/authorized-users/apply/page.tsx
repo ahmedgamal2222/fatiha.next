@@ -97,6 +97,8 @@ export default function ApplyPage() {
     form.append("AuthorizedUser", JSON.stringify(formData));
     form.append("audioFile", audioResult.blob, audioResult.name);
     if (cvFile) form.append("cvFile", cvFile);
+    // صورة الملف الشخصي — تُرفع مع الطلب نفسه (كانت المعاينة محلية فقط ولا تُرسل)
+    if (profileImg) form.append("profileImgFile", profileImg);
     try {
       const res = await api.post("/api/authorized-users/apply", form);
       if (res.success) {

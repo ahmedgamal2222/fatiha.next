@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
+import { mediaUrl } from "@/lib/media";
 import { useI18n } from "@/context/I18nContext";
 
 interface AuthorizedUser {
@@ -46,7 +47,7 @@ export default function AuthorizedUsersPage() {
                   <div className="card-body text-center">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src={u.profileImg || "https://placehold.co/96x96?text=?"}
+                      src={mediaUrl(u.profileImg) || "https://placehold.co/96x96?text=?"}
                       alt=""
                       width={96}
                       height={96}
