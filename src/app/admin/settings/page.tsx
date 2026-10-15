@@ -24,6 +24,14 @@ interface AiSettingsData {
   envKey: boolean;
 }
 
+interface SchemaStatusData {
+  ok: boolean;
+  missingTables: string[];
+  missingColumns: Array<{ migration: string; table: string; column: string }>;
+  missingIndexes: Array<{ migration: string; name: string }>;
+  totalMissing: number;
+}
+
 function SettingsInner() {
   const { t } = useI18n();
   const [data, setData] = useState<EmailSettingsData | null>(null);
@@ -37,6 +45,8 @@ function SettingsInner() {
   const [aiKey, setAiKey] = useState("");
   const [aiModel, setAiModel] = useState("");
   const [aiBusy, setAiBusy] = useState(false);
+  const [dbStatus, setDbStatus] = useState<SchemaStatusData | null>(null);
+  const [dbBusy, setDbBusy] = useState(false);
 
   const load = useCallback(() => {
     api
@@ -54,6 +64,10 @@ function SettingsInner() {
         setAiModel(r.data?.model ?? "");
       })
       .catch(() => setAi(null));
+    api
+      .get<SchemaStatusData>("/api/settings/schema")
+      .then((r) => setDbStatus(r.data ?? null))
+      .catch(() => setDbStatus(null));
   }, []);
 
   useEffect(() => { load(); }, [load]);
@@ -131,6 +145,24 @@ function SettingsInner() {
     } catch (e2) {
       setErr(e2 instanceof Error ? e2.message : t("Key test failed"));
     } finally { setAiBusy(false); }
+  }
+
+  /** يفحص/يُطبّق ترحيلات قاعدة البيانات الناقصة (بلا wrangler). */
+  async function runMigrate() {
+    setDbBusy(true); setMsg(""); setErr("");
+    try {
+      const r = await api.post<{ ok: boolean; applied: string[]; skipped: string[]; errors: string[] }>("/api/settings/migrate", {});
+      const applied = r.data?.applied?.length ?? 0;
+      const errors = r.data?.errors ?? [];
+      if (errors.length) {
+        setErr(errors.slice(0, 3).join(" · "));
+      } else {
+        setMsg(`${t("Database updated successfully")}${applied ? ` (${applied})` : ""}`);
+      }
+      load();
+    } catch (e2) {
+      setErr(e2 instanceof Error ? e2.message : t("Operation failed"));
+    } finally { setDbBusy(false); }
   }
 
 
@@ -306,6 +338,41 @@ function SettingsInner() {
               </div>
               <p className="text-muted small mt-3 mb-0">{t("Saved in KV — applied instantly without redeploying.")}</p>
             </form>
+          </div>
+        </div>
+
+        {/* ── صحة قاعدة البيانات (ترحيلات) ── */}
+        <div className="fh-card mt-4">
+          <div className="fh-card__head">
+            <i className="fas fa-database"></i>
+            <h3>{t("Database")}</h3>
+            <span className={`badge ms-auto ${dbStatus?.ok ? "bg-success" : "bg-warning text-dark"}`}>
+              {dbStatus?.ok
+                ? t("Database is up to date")
+                : `${t("Missing columns")}: ${dbStatus?.totalMissing ?? 0}`}
+            </span>
+          </div>
+          <div className="fh-card__body">
+            {dbStatus && !dbStatus.ok ? (
+              <ul className="small text-muted mb-3" dir="ltr">
+                {dbStatus.missingTables.map((x) => <li key={`t-${x}`}>table: {x}</li>)}
+                {dbStatus.missingColumns.map((x) => <li key={`c-${x.table}.${x.column}`}>[{x.migration}] {x.table}.{x.column}</li>)}
+                {dbStatus.missingIndexes.map((x) => <li key={`i-${x.name}`}>[{x.migration}] index: {x.name}</li>)}
+              </ul>
+            ) : null}
+            <div className="d-flex flex-wrap gap-2 align-items-center">
+              <button type="button" className="btn btn-primary" disabled={dbBusy} onClick={runMigrate}>
+                {dbBusy ? <span className="spinner-border spinner-border-sm me-2" /> : <i className="fas fa-wrench me-2" />}
+                {t("Update database")}
+              </button>
+              <button type="button" className="btn btn-outline-secondary" disabled={dbBusy} onClick={load}>
+                <i className="fas fa-rotate me-2" />
+                {t("Reload")}
+              </button>
+            </div>
+            <p className="text-muted small mt-3 mb-0">
+              {t("Applies the missing columns/tables safely. Safe to run more than once.")}
+            </p>
           </div>
         </div>
       </div>

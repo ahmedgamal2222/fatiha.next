@@ -84,10 +84,12 @@ function Inner() {
       }
       resetForm();
       load();
-    } catch {
-      setMsg(t("Operation failed"));
+    } catch (e) {
+      setMsg(e instanceof Error ? e.message : t("Operation failed"));
     }
   }
+
+  /** حذف كتاب (مع تأكيد). */
   async function remove(id: number) {
     if (!confirm(t("Delete book?"))) return;
     await api.del(`/api/books/${id}`).catch(() => {});
