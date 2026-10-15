@@ -5,6 +5,7 @@ import { AdminGuard } from "@/components/AdminGuard";
 import { api } from "@/lib/api";
 import { useI18n } from "@/context/I18nContext";
 import { MediaPicker, MediaListPicker } from "@/components/MediaPicker";
+import { CategoryManager } from "@/components/CategoryManager";
 
 interface Book {
   id: number;
@@ -73,6 +74,10 @@ function Inner() {
   async function save(e: React.FormEvent) {
     e.preventDefault();
     setMsg("");
+    if (!Number(form.bookCategoryId) && !cats[0]) {
+      setMsg(t("Please add a category first"));
+      return;
+    }
     const payload = { ...form, bookCategoryId: Number(form.bookCategoryId) || (cats[0]?.id ?? 1) };
     try {
       if (editId) {
@@ -131,6 +136,7 @@ function Inner() {
       {msg && <div className="alert alert-info">{msg}</div>}
       <div className="row g-4">
         <div className="col-lg-5">
+          <CategoryManager base="/api/books" categories={cats} onChanged={load} bilingual />
           <div className="card shadow-sm border-0 rounded-4">
             <div className="card-body">
               <h5 className="fw-bold mb-3">{editId ? t("Edit") : t("New book")}</h5>

@@ -5,6 +5,7 @@ import { AdminGuard } from "@/components/AdminGuard";
 import { api } from "@/lib/api";
 import { useI18n } from "@/context/I18nContext";
 import { MediaPicker, MediaListPicker } from "@/components/MediaPicker";
+import { CategoryManager } from "@/components/CategoryManager";
 
 interface Product {
   id: number;
@@ -113,6 +114,10 @@ function Inner() {
   async function save(e: React.FormEvent) {
     e.preventDefault();
     setMsg("");
+    if (!Number(form.marketCategoryId) && !cats[0]) {
+      setMsg(t("Please add a category first"));
+      return;
+    }
     const payload = {
       ...form,
       price: Number(form.price),
@@ -128,8 +133,8 @@ function Inner() {
       }
       resetForm();
       load();
-    } catch {
-      setMsg(t("Operation failed"));
+    } catch (e2) {
+      setMsg(e2 instanceof Error ? e2.message : t("Operation failed"));
     }
   }
   async function remove(id: number) {
@@ -145,6 +150,7 @@ function Inner() {
       {msg && <div className="alert alert-info">{msg}</div>}
       <div className="row g-4">
         <div className="col-lg-5">
+          <CategoryManager base="/api/marketplace" categories={cats} onChanged={load} />
           <div className="card shadow-sm border-0 rounded-4">
             <div className="card-body">
               <h5 className="fw-bold mb-3">{editId ? t("Edit") : t("New product")}</h5>
