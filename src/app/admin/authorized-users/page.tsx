@@ -53,6 +53,18 @@ function Inner() {
     finally { setBusyId(null); }
   }
 
+  /** يحذف طلب الإجازة نهائياً (أدمن). */
+  async function remove(id: number) {
+    if (!confirm(t("Delete this request?"))) return;
+    setBusyId(id); setMsg(""); setErr("");
+    try {
+      await api.del(`/api/authorized-users/${id}`);
+      setItems((prev) => prev.filter((x) => x.id !== id));
+      setMsg(t("Deleted"));
+    } catch { setErr(t("Delete failed")); }
+    finally { setBusyId(null); }
+  }
+
   /** يرفع صورة/سيرة ذاتية لطلب قائم (لإصلاح الطلبات القديمة بلا صورة). */
   async function uploadMedia(id: number) {
     if (!upImg && !upCv) return;
@@ -149,6 +161,9 @@ function Inner() {
                             <i className="fas fa-user-check me-1" />{t("Authorize")}
                           </button>
                         )}
+                        <button className="btn btn-sm btn-outline-danger" disabled={busyId === u.id} onClick={() => remove(u.id)}>
+                          <i className="fas fa-trash" />
+                        </button>
                       </div>
                     </div>
                     {expandedId === u.id && (

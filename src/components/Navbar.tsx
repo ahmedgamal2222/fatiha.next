@@ -78,11 +78,20 @@ export function Navbar() {
                             {t("Fathia")}
                           </a>
                           <ul className="dropdown-menu" aria-labelledby="fatihaDropdown">
+                            {/* التقديم مباشرةً على طلب الفاتحة (نموذج التقديم) وليس صفحة الطلبات */}
                             <li>
-                              <Link className="dropdown-item" href="/fatiha-requests">
-                                {t("Fatiha Request")}
+                              <Link className="dropdown-item fw-semibold" href="/fatiha-requests/new">
+                                <i className="fas fa-file-signature me-2 text-primary"></i>
+                                {t("Apply")}
                               </Link>
                             </li>
+                            <li>
+                              <Link className="dropdown-item" href="/fatiha-requests">
+                                <i className="fas fa-list-check me-2"></i>
+                                {t("My Fatiha Requests")}
+                              </Link>
+                            </li>
+                            <li><hr className="dropdown-divider" /></li>
                             <li>
                               <Link className="dropdown-item" href="/books">
                                 <i className="fas fa-book-open me-2"></i>
@@ -99,11 +108,6 @@ export function Navbar() {
                               <Link className="dropdown-item" href="/marketplace">
                                 <i className="fas fa-store me-2"></i>
                                 {t("Fatiha Marketplace")}
-                              </Link>
-                            </li>
-                            <li>
-                              <Link className="dropdown-item" href="/fatiha-requests">
-                                {t("Apply")}
                               </Link>
                             </li>
                           </ul>

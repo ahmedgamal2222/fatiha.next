@@ -48,7 +48,7 @@ export function Hero() {
 
         <div className="fh-hero__actions">
           {isAuthed && !isAdmin && (
-            <Link href="/fatiha-requests" className="fh-btn fh-btn--primary">
+            <Link href="/fatiha-requests/new" className="fh-btn fh-btn--primary">
               <i className="fas fa-file-signature"></i>
               {t("Apply for Fatiha")}
             </Link>
