@@ -44,7 +44,7 @@ function NewsletterInner() {
     return subs.filter((s) => (s.languageId ?? null) === id).length;
   }
   const targetCount = targets.length
-    ? subs.filter((s) => s.languageId !== null && targets.includes(s.languageId)).length
+    ? subs.filter((s) => typeof s.languageId === "number" && targets.includes(s.languageId)).length
     : subs.length;
 
   function toggleTarget(id: number) {
