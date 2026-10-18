@@ -31,25 +31,29 @@ export function LogoCarousel() {
 
         <div className="fhx-qiraat__frame">
           <div className="fhx-qiraat__track">
-            {[...IMAGES, ...IMAGES].map((img, i) => {
-              const dup = i >= IMAGES.length;
-              const n = (i % IMAGES.length) + 1;
-              return (
-                <div className={`fhx-qiraat__item${dup ? " is-dup" : ""}`} key={`${img}-${i}`} aria-hidden={dup || undefined}>
-                  <div className="fhx-qiraat__card">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={img}
-                      alt={dup ? "" : `Qiraah ${n}`}
-                      loading="lazy"
-                      decoding="async"
-                    />
-                    <span className="fhx-qiraat__ring" aria-hidden="true" />
-                    <span className="fhx-qiraat__name">#{String(n).padStart(2, "0")}</span>
+            {[0, 1].map((copy) => (
+              <div
+                className="fhx-qiraat__group"
+                key={`copy-${copy}`}
+                aria-hidden={copy === 1 || undefined}
+              >
+                {IMAGES.map((img, i) => (
+                  <div className="fhx-qiraat__item" key={`${copy}-${img}`}>
+                    <div className="fhx-qiraat__card">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={img}
+                        alt={copy === 0 ? `Qiraah ${i + 1}` : ""}
+                        loading="lazy"
+                        decoding="async"
+                      />
+                      <span className="fhx-qiraat__ring" aria-hidden="true" />
+                      <span className="fhx-qiraat__name">#{String(i + 1).padStart(2, "0")}</span>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                ))}
+              </div>
+            ))}
           </div>
         </div>
       </div>

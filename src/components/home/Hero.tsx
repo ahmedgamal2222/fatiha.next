@@ -23,7 +23,7 @@ const HERO_TEXTS = [
 /** الواجهة الرئيسية: هيرو «مصحفي» فاخر بقوس محراب وتوهّج ذهبي. */
 export function Hero() {
   const { t, openLanguageModal } = useI18n();
-  const { isAuthed, isAdmin } = useAuth();
+  const { isAuthed, isAdmin, loading: authLoading } = useAuth();
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
@@ -60,19 +60,19 @@ export function Hero() {
           </p>
 
           <div className="fhx-hero__cta">
-            {!isAuthed && (
+            {!authLoading && !isAuthed && (
               <Link href="/login" className="fhx-btn fhx-btn--gold">
                 <i className="fas fa-right-to-bracket" aria-hidden="true" />
                 {t("Login to Apply for Fatiha")}
               </Link>
             )}
-            {isAuthed && !isAdmin && (
+            {!authLoading && isAuthed && !isAdmin && (
               <Link href="/fatiha-requests/new" className="fhx-btn fhx-btn--gold">
                 <i className="fas fa-file-signature" aria-hidden="true" />
                 {t("Apply for Fatiha")}
               </Link>
             )}
-            {isAdmin && (
+            {!authLoading && isAdmin && (
               <Link href="/admin" className="fhx-btn fhx-btn--gold">
                 <i className="fas fa-gauge-high" aria-hidden="true" />
                 {t("Admin Panel")}

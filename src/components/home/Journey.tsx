@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useI18n } from "@/context/I18nContext";
+import { useAuth } from "@/context/AuthContext";
 
 const STEPS = [
   {
@@ -29,6 +30,10 @@ const STEPS = [
 /** مسار المتعلّم في أربع خطوات واضحة. */
 export function Journey() {
   const { t } = useI18n();
+  const { isAuthed, loading } = useAuth();
+
+  // لا يظهر قسم «كيف تعمل المنصة» لمن أنشأ حسابًا بالفعل (ولا أثناء التحقق من الجلسة)
+  if (loading || isAuthed) return null;
 
   return (
     <section className="fhx-section fhx-section--alt" id="journey">

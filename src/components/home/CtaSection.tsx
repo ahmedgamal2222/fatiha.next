@@ -7,7 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 /** دعوة ختامية فاخرة داخل قوس ذهبي. */
 export function CtaSection() {
   const { t } = useI18n();
-  const { isAuthed, isAdmin } = useAuth();
+  const { isAuthed, isAdmin, loading: authLoading } = useAuth();
 
   return (
     <section className="fhx-cta">
@@ -24,19 +24,19 @@ export function CtaSection() {
           </h2>
 
           <div className="fhx-cta__actions">
-            {!isAuthed && (
+            {!authLoading && !isAuthed && (
               <Link href="/register" className="fhx-btn fhx-btn--gold">
                 <i className="fas fa-user-plus" aria-hidden="true" />
                 {t("Create your account")}
               </Link>
             )}
-            {isAuthed && !isAdmin && (
+            {!authLoading && isAuthed && !isAdmin && (
               <Link href="/fatiha-requests/new" className="fhx-btn fhx-btn--gold">
                 <i className="fas fa-file-signature" aria-hidden="true" />
                 {t("Apply for Fatiha")}
               </Link>
             )}
-            {isAdmin && (
+            {!authLoading && isAdmin && (
               <Link href="/admin/fatiha-requests" className="fhx-btn fhx-btn--gold">
                 <i className="fas fa-clipboard-check" aria-hidden="true" />
                 {t("Manage Fatiha Requests")}

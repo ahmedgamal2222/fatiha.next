@@ -1,2 +1,0 @@
-﻿F:\Fatiha-web\src\app\theme.css open=382 close=382 markers=0
-F:\Fatiha-web\src\app\globals.css open=596 close=596 markers=0

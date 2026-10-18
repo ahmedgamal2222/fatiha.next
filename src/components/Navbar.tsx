@@ -6,6 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useI18n } from "@/context/I18nContext";
 import { useRouter, usePathname } from "next/navigation";
 import { NotificationBell } from "@/components/NotificationBell";
+import { api } from "@/lib/api";
 
 type MenuKey = "fatiha" | "mjaz" | "admin" | "user" | null;
 
@@ -22,13 +23,15 @@ interface NavLink {
  */
 export function Navbar() {
   const { t, lang, languages, openLanguageModal } = useI18n();
-  const { user, isAuthed, isAdmin, logout } = useAuth();
+  const { user, isAuthed, isAdmin, loading: authLoading, logout } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
   const [openMenu, setOpenMenu] = useState<MenuKey>(null);
   const [drawer, setDrawer] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  // لا يظهر رابط الاختبار التأهيلي إلا لمن لديه طلب قائم مؤهّل للاختبار
+  const [canTakeExam, setCanTakeExam] = useState(false);
   const headerRef = useRef<HTMLElement | null>(null);
 
   const isHome = pathname === "/";
@@ -40,7 +43,10 @@ export function Navbar() {
   const fatihaLinks: NavLink[] = [
     { href: "/fatiha-requests/new", label: t("Apply"), icon: "fa-file-signature", desc: t("New Fatiha Request") },
     { href: "/fatiha-requests", label: t("Fatiha Requests"), icon: "fa-clipboard-list", desc: t("My Requests") },
-    { href: "/fatiha-exam", label: t("Fatiha Qualifying Exam"), icon: "fa-graduation-cap", desc: t("Take Qualifying Exam") },
+    // يظهر الاختبار فقط عند وجود طلب قائم لم يُعتمد بعد (وليس لمجرد تسجيل الدخول)
+    ...(canTakeExam
+      ? [{ href: "/fatiha-exam", label: t("Take Qualifying Exam"), icon: "fa-graduation-cap" }]
+      : []),
     { href: "/al-qerat", label: t("Ten Recitations (Al-Qerat)"), icon: "fa-book-quran", desc: t("Listen to the recitations") },
   ];
 
@@ -74,6 +80,26 @@ export function Navbar() {
     setOpenMenu(null);
     setDrawer(false);
   }, [pathname]);
+
+  // تحديث أهلية الاختبار: لا يظهر الرابط إلا لصاحب طلب قائم غير معتمد
+  const refreshExamEligibility = useCallback(async () => {
+    if (!isAuthed || isAdmin) {
+      setCanTakeExam(false);
+      return;
+    }
+    try {
+      const res = await api.get<Array<{ status: number; isApproved: boolean }>>("/api/fatiha-requests");
+      setCanTakeExam(
+        (res.data ?? []).some((r) => !r.isApproved && r.status !== 2 && r.status !== 3)
+      );
+    } catch {
+      setCanTakeExam(false);
+    }
+  }, [isAuthed, isAdmin]);
+
+  useEffect(() => {
+    void refreshExamEligibility();
+  }, [refreshExamEligibility, pathname]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -139,7 +165,7 @@ export function Navbar() {
             <nav className="fhx-nav" aria-label={t("Main navigation")}>
               <Link href="/" className={`fhx-nav__link${isActive("/") ? " is-active" : ""}`} aria-current={isActive("/") ? "page" : undefined}>
                 <span className="fhx-nav__ic"><i className="fas fa-house" aria-hidden="true" /></span>
-                <span className="fhx-nav__label">{t("Home")}</span>
+                <span className="fhx-nav__label">{lang === "ar" ? "الرئيسة" : t("Home")}</span>
               </Link>
 
               {isAuthed && !isAdmin && (
@@ -149,7 +175,7 @@ export function Navbar() {
                     className={`fhx-nav__link${openMenu === "fatiha" ? " is-open" : ""}`}
                     aria-expanded={openMenu === "fatiha"}
                     aria-haspopup="true"
-                    onClick={() => toggle("fatiha")}
+                    onClick={() => { toggle("fatiha"); void refreshExamEligibility(); }}
                   >
                     <span className="fhx-nav__ic"><i className="fas fa-book-open" aria-hidden="true" /></span>
                     <span className="fhx-nav__label">{t("Fathia")}</span>
@@ -262,7 +288,7 @@ export function Navbar() {
 
               {isAuthed && <NotificationBell />}
 
-              {!isAuthed && (
+              {!authLoading && !isAuthed && (
                 <div className="fhx-auth">
                   <Link href="/login" className="fhx-btn fhx-btn--ghost">
                     <i className="fas fa-right-to-bracket" aria-hidden="true" />
@@ -275,7 +301,7 @@ export function Navbar() {
                 </div>
               )}
 
-              {isAuthed && (
+              {!authLoading && isAuthed && (
                 <div className="fhx-menu">
                   <button
                     type="button"
@@ -317,7 +343,7 @@ export function Navbar() {
                 className={`fhx-burger${drawer ? " is-open" : ""}`}
                 aria-label={t("Menu")}
                 aria-expanded={drawer}
-                onClick={() => setDrawer((v) => !v)}
+                onClick={() => { setDrawer((v) => !v); if (!drawer) void refreshExamEligibility(); }}
               >
                 <span /><span /><span />
               </button>
@@ -352,7 +378,7 @@ export function Navbar() {
             </div>
             <Link href="/" className={`fhx-dlink${isActive("/") ? " is-active" : ""}`} onClick={() => setDrawer(false)}>
               <span className="fhx-dlink__ic"><i className="fas fa-house" aria-hidden="true" /></span>
-              <span>{t("Home")}</span>
+              <span>{lang === "ar" ? "الرئيسة" : t("Home")}</span>
             </Link>
             <Link href="/al-qerat" className={`fhx-dlink${isActive("/al-qerat") ? " is-active" : ""}`} onClick={() => setDrawer(false)}>
               <span className="fhx-dlink__ic"><i className="fas fa-book-quran" aria-hidden="true" /></span>
@@ -434,7 +460,7 @@ export function Navbar() {
           </div>
 
           <div className="fhx-drawer__foot">
-            {isAuthed ? (
+            {authLoading ? null : isAuthed ? (
               <>
                 <div className="fhx-drawer__user">
                   <span className="fhx-dropdown__avatar"><i className="fas fa-user" aria-hidden="true" /></span>

@@ -605,6 +605,17 @@ button.fhx-dlink {
   gap: 44px;
   padding: 64px 0 44px;
 }
+.fhx-footer__top--single {
+  grid-template-columns: 1fr;
+  justify-items: center;
+  text-align: center;
+  max-width: 780px;
+  margin-inline: auto;
+  gap: 22px;
+}
+.fhx-footer__top--single .fhx-footer__brand { justify-content: center; margin-bottom: 0; }
+.fhx-footer__top--single .fhx-footer__desc { max-width: 580px; }
+.fhx-footer__top--single .fhx-footer__socials { justify-content: center; }
 .fhx-footer__brand { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
 .fhx-footer__seal {
   width: 56px;
@@ -1238,6 +1249,7 @@ html[dir="ltr"] .fhx-hero__title { line-height: 1.28; letter-spacing: -0.01em; }
     radial-gradient(600px 220px at 50% 0%, rgba(200, 162, 74, 0.1), transparent 70%),
     linear-gradient(180deg, #fffdf6, #f9f3e5);
   box-shadow: 0 22px 55px rgba(10, 31, 26, 0.1);
+  direction: ltr;
 }
 .fhx-qiraat__frame::before,
 .fhx-qiraat__frame::after {
@@ -1250,11 +1262,13 @@ html[dir="ltr"] .fhx-hero__title { line-height: 1.28; letter-spacing: -0.01em; }
   pointer-events: none;
 }
 .fhx-qiraat__frame::before {
-  inset-inline-start: 0;
+  left: 0;
+  right: auto;
   background: linear-gradient(90deg, #fbf6ea, rgba(251, 246, 234, 0));
 }
 .fhx-qiraat__frame::after {
-  inset-inline-end: 0;
+  right: 0;
+  left: auto;
   background: linear-gradient(270deg, #fbf6ea, rgba(251, 246, 234, 0));
 }
 .fhx-qiraat__track {
@@ -1265,6 +1279,11 @@ html[dir="ltr"] .fhx-hero__title { line-height: 1.28; letter-spacing: -0.01em; }
   animation: fhx-marquee 46s linear infinite;
   will-change: transform;
 }
+.fhx-qiraat__group {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 0;
+}
 .fhx-qiraat__frame:hover .fhx-qiraat__track,
 .fhx-qiraat__frame:focus-within .fhx-qiraat__track { animation-play-state: paused; }
 @keyframes fhx-marquee {
@@ -1274,7 +1293,8 @@ html[dir="ltr"] .fhx-hero__title { line-height: 1.28; letter-spacing: -0.01em; }
 .fhx-qiraat__item {
   flex: 0 0 auto;
   width: clamp(118px, 15vw, 156px);
-  margin-inline-end: 18px;
+  margin-right: 18px;
+  margin-left: 0;
 }
 .fhx-qiraat__card {
   display: flex;
@@ -1480,7 +1500,7 @@ html[dir="ltr"] .fhx-hero__title { line-height: 1.28; letter-spacing: -0.01em; }
   .fhx-faq__intro { position: static; }
   .fhx-faq__intro .fhx-shead { text-align: center; }
   .fhx-faq__intro .fhx-ornament { justify-content: center; }
-  .fhx-footer__top { grid-template-columns: 1fr 1fr; gap: 34px; }
+  .fhx-footer__top:not(.fhx-footer__top--single) { grid-template-columns: 1fr 1fr; gap: 34px; }
 }
 @media (max-width: 900px) {
   .fhx-values { grid-template-columns: repeat(2, 1fr); }
@@ -1522,10 +1542,10 @@ html[dir="ltr"] .fhx-hero__title { line-height: 1.28; letter-spacing: -0.01em; }
   .fhx-faq__q { font-size: 0.9rem; }
   .fhx-faq__a p { padding-inline-start: 16px; padding-inline-end: 16px; }
   .fhx-qiraat__frame { border-radius: 20px; padding: 18px 0; }
-  .fhx-qiraat__item { width: 116px; margin-inline-end: 12px; }
+  .fhx-qiraat__item { width: 116px; margin-right: 12px; }
   .fhx-qiraat__card img { width: 78px; height: 78px; }
   .fhx-qiraat__frame::before, .fhx-qiraat__frame::after { width: 46px; }
-  .fhx-footer__top { grid-template-columns: 1fr; gap: 28px; padding: 44px 0 30px; }
+  .fhx-footer__top:not(.fhx-footer__top--single) { grid-template-columns: 1fr; gap: 28px; padding: 44px 0 30px; }
   .fhx-footer__bottom { justify-content: center; text-align: center; }
   .fhx-cta { padding-bottom: 64px; }
   .fhx-verse { padding: 36px 0; }
@@ -1701,13 +1721,17 @@ html[dir="ltr"] .fhx-hero__title { line-height: 1.28; letter-spacing: -0.01em; }
 @media (prefers-reduced-motion: reduce) {
   .fhx-qiraat__track {
     animation: none;
+    width: 100%;
+  }
+  .fhx-qiraat__group {
     flex-wrap: wrap;
     width: 100%;
     justify-content: center;
-    padding: 0 12px;
     gap: 12px;
+    padding: 0 12px;
   }
-  .fhx-qiraat__track .is-dup { display: none; }
+  .fhx-qiraat__group[aria-hidden="true"] { display: none; }
+  .fhx-qiraat__item { margin-right: 0; }
   .fhx-qiraat__frame::before,
   .fhx-qiraat__frame::after { display: none; }
   .fhx-hero__title, .fhx-hero__scroll, .fhx-faq__a { animation: none; transition: none; }
