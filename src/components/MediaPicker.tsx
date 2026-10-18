@@ -27,10 +27,11 @@ export async function uploadFile(file: File, folder = "uploads"): Promise<Upload
 }
 
 const IMAGE_ACCEPT = "image/png,image/jpeg,image/webp,image/gif,image/svg+xml,image/avif";
-const VIDEO_ACCEPT = "video/mp4,video/webm,video/quicktime,video/ogg";
+const VIDEO_ACCEPT =
+  "video/mp4,video/webm,video/quicktime,video/ogg,video/x-matroska,video/x-msvideo,video/mpeg,video/3gpp,.mp4,.webm,.mov,.m4v,.ogv,.mkv,.avi,.mpeg,.mpg,.3gp";
 
 function isVideoUrl(url: string): boolean {
-  return /\.(mp4|webm|mov|ogv|ogg)$/i.test(url);
+  return /\.(mp4|webm|mov|ogv|ogg|m4v|mkv|avi|mpeg|mpg|3gp)(\?.*)?$/i.test(url);
 }
 
 interface PickerProps {

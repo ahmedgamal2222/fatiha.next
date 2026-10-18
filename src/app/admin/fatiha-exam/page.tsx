@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { AdminGuard } from "@/components/AdminGuard";
+import { ExamVideoManager } from "@/components/admin/ExamVideoManager";
 import { api } from "@/lib/api";
 import { useI18n } from "@/context/I18nContext";
 
@@ -143,6 +144,9 @@ function Inner() {
             <div className="fh-hint mt-2"><i className="fas fa-circle-info me-1"></i>{t("Generated questions are added to the bank and used randomly in exams.")}</div>
           </div>
         </div>
+
+        {/* درس الفيديو قبل الاختبار — فيديو لكل لغة */}
+        <ExamVideoManager languages={languages} />
 
         <div className="row g-4">
           <div className="col-lg-5">

@@ -5,7 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
-import { useI18n } from "@/context/I18nContext";
+import { useI18n, type Lang } from "@/context/I18nContext";
+import { VideoLesson } from "@/components/VideoLesson";
 
 interface Question {
   id: number;
@@ -18,6 +19,21 @@ interface Question {
   languageId: number;
 }
 interface Language { id: number; languageName: number; }
+interface LessonVideo {
+  id: number;
+  languageId: number;
+  title?: string | null;
+  description?: string | null;
+  videoUrl: string;
+  playbackUrl: string;
+  updatedAt?: string | number | null;
+}
+interface LessonVideoResponse {
+  video: LessonVideo | null;
+  requestedLanguageId: number | null;
+  languageId: number | null;
+  isFallback: boolean;
+}
 interface ExamResult {
   correct: number;
   total: number;
@@ -32,9 +48,19 @@ const LANGUAGE_NAMES: Record<number, string> = {
   7: "Русский", 8: "বাংলা", 9: "Português", 10: "اردو", 11: "Bahasa Indonesia",
 };
 
+/** ربط لغة الواجهة بمعرّف اللغة في قاعدة البيانات (EnumCommon.Languagelist). */
+const LANG_TO_ID: Record<Lang, number> = {
+  ar: 1, en: 2, zh: 3, es: 4, hi: 5, fr: 6, ru: 7, bn: 8, pt: 9, ur: 10, id: 11,
+};
+
+const ALL_LANGUAGES: Language[] = Object.keys(LANGUAGE_NAMES).map((id) => ({
+  id: Number(id),
+  languageName: Number(id),
+}));
+
 function ExamContent() {
   const { user, loading } = useAuth();
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const router = useRouter();
   const search = useSearchParams();
   const requestId = search.get("requestId") ? Number(search.get("requestId")) : null;
@@ -48,10 +74,42 @@ function ExamContent() {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
 
+  // فيديو شرح معاني سورة الفاتحة — يُعرض قبل الاختبار بلغة المتعلّم
+  const [video, setVideo] = useState<LessonVideo | null>(null);
+  const [videoFallback, setVideoFallback] = useState(false);
+  const [videoLoading, setVideoLoading] = useState(false);
+
   useEffect(() => {
     if (!loading && !user) { router.push("/login"); return; }
-    api.get<Language[]>("/api/reference/languages", false).then((r) => setLanguages(r.data ?? [])).catch(() => {});
-  }, [user, loading, router]);
+    api.get<Language[]>("/api/reference/languages", false)
+      .then((r) => {
+        const list = (r.data && r.data.length > 0) ? r.data : ALL_LANGUAGES;
+        setLanguages(list);
+        // اختيار لغة الامتحان تلقائياً بحسب لغة الواجهة الحالية
+        const preferred = LANG_TO_ID[lang] ?? 1;
+        setLanguageId((current) => {
+          if (current) return current;
+          return list.some((l) => l.id === preferred) ? preferred : list[0]?.id ?? 0;
+        });
+      })
+      .catch(() => setLanguages(ALL_LANGUAGES));
+  }, [user, loading, router, lang]);
+
+  // جلب فيديو الدرس المناسب للغة المختارة (مع بديل تلقائي إن لم يوجد)
+  useEffect(() => {
+    if (!languageId) { setVideo(null); setVideoFallback(false); return; }
+    let cancelled = false;
+    setVideoLoading(true);
+    api.get<LessonVideoResponse>(`/api/fatiha-exam/video?languageId=${languageId}`, false)
+      .then((r) => {
+        if (cancelled) return;
+        setVideo(r.data?.video ?? null);
+        setVideoFallback(!!r.data?.isFallback);
+      })
+      .catch(() => { if (!cancelled) { setVideo(null); setVideoFallback(false); } })
+      .finally(() => { if (!cancelled) setVideoLoading(false); });
+    return () => { cancelled = true; };
+  }, [languageId]);
 
   async function startExam() {
     if (!languageId) { setErr(t("Please choose a language")); return; }
@@ -111,6 +169,28 @@ function ExamContent() {
                 <i className="fas fa-circle-info me-1"></i>
                 {t("The exam consists of 5 questions. You need 60% or more to pass.")}
               </div>
+
+              {/* درس الفيديو — يظهر باللغة المختارة قبل بدء الاختبار */}
+              {videoLoading ? (
+                <div className="fh-lesson-skeleton">
+                  <span className="spinner-border spinner-border-sm text-primary" aria-hidden="true" />
+                  <span>{t("Loading...")}</span>
+                </div>
+              ) : video ? (
+                <VideoLesson
+                  url={video.playbackUrl || video.videoUrl}
+                  title={video.title}
+                  description={video.description}
+                  languageName={LANGUAGE_NAMES[video.languageId] ?? null}
+                  isFallback={videoFallback}
+                />
+              ) : (
+                <div className="fh-lesson-empty">
+                  <i className="fas fa-film" aria-hidden="true" />
+                  <p>{t("No lesson video is available for this language yet.")}</p>
+                </div>
+              )}
+
               <button className="btn btn-primary" onClick={startExam} disabled={busy}>
                 {busy ? <span className="spinner-border spinner-border-sm me-2" /> : <i className="fas fa-play me-2" />}
                 {t("Start Exam")}

@@ -7,6 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useI18n } from "@/context/I18nContext";
 import { CommentsThread } from "@/components/CommentsThread";
 import { CertificateButton } from "@/components/CertificateButton";
+import { AudioPlayer } from "@/components/AudioPlayer";
 
 interface FatihaRequest {
   id: number;
@@ -228,7 +229,12 @@ export default function FatihaRequestsPage() {
                           {audioSrc(r.audioRecord) && (
                             <div className="fh-media-box mb-3">
                               <label className="fh-label mb-2"><i className="fas fa-microphone me-1" />{t("My Recitation")}</label>
-                              <audio controls src={audioSrc(r.audioRecord)!} className="w-100" />
+                              <AudioPlayer
+                                src={audioSrc(r.audioRecord)!}
+                                title={r.alQeratName || t("My Recitation")}
+                                subtitle={t("Listen to the recitation")}
+                                compact
+                              />
                             </div>
                           )}
                           <h6 className="fw-bold mt-3 mb-2"><i className="fas fa-comments me-1 text-primary" />{t("Comments")}</h6>

@@ -32,7 +32,7 @@ const TRANSLATION_API = `${API_BASE}/api/Language/GetTranslation`;
 
 // احتياطي محلي لبعض المفاتيح الأساسية عند تعذّر تحميل الترجمة
 const FALLBACK: Record<string, Partial<Record<Lang, string>>> = {
-  Home: { ar: "الرئيسية", en: "Home" },
+  Home: { ar: "الرئيسة", en: "Home" },
   "Log in": { ar: "تسجيل الدخول", en: "Log in" },
   Register: { ar: "إنشاء حساب", en: "Register" },
   "Log out": { ar: "تسجيل الخروج", en: "Log out" },
@@ -41,6 +41,61 @@ const FALLBACK: Record<string, Partial<Record<Lang, string>>> = {
   Settings: { ar: "الإعدادات", en: "Settings" },
   Fathia: { ar: "الفاتحة", en: "Fatiha" },
   MJAZ: { ar: "المُجاز", en: "MJAZ" },
+  "Fatiha Lesson": { ar: "درس الفاتحة", en: "Fatiha Lesson" },
+  "Pre-exam lesson": { ar: "درس ما قبل الاختبار", en: "Pre-exam lesson" },
+  "I have watched the lesson": { ar: "شاهدت الدرس", en: "I have watched the lesson" },
+  "Listen to the selected recitation": { ar: "استمع إلى القراءة المختارة", en: "Listen to the selected recitation" },
+  "Listen to the recitation": { ar: "استمع إلى القراءة", en: "Listen to the recitation" },
+  "Listen to the recitation before recording your own.": {
+    ar: "استمع إلى التلاوة قبل تسجيل تلاوتك.",
+    en: "Listen to the recitation before recording your own.",
+  },
+  "No audio is available for this recitation.": {
+    ar: "لا يوجد ملف صوتي متاح لهذه القراءة.",
+    en: "No audio is available for this recitation.",
+  },
+  "No lesson video is available for this language yet.": {
+    ar: "لا يوجد فيديو درس متاح لهذه اللغة بعد.",
+    en: "No lesson video is available for this language yet.",
+  },
+  "A video for this language is not available yet — showing another available lesson.": {
+    ar: "لا يوجد فيديو لهذه اللغة بعد — يُعرض درس آخر متاح.",
+    en: "A video for this language is not available yet — showing another available lesson.",
+  },
+  "Open video in a new window": { ar: "فتح الفيديو في نافذة جديدة", en: "Open video in a new window" },
+  "Your browser does not support the video tag.": {
+    ar: "متصفحك لا يدعم تشغيل الفيديو.",
+    en: "Your browser does not support the video tag.",
+  },
+  "Watch the lesson before starting the exam — it explains the meanings of Surah Al-Fatiha.": {
+    ar: "شاهد الدرس قبل بدء الاختبار — يشرح معاني سورة الفاتحة.",
+    en: "Watch the lesson before starting the exam — it explains the meanings of Surah Al-Fatiha.",
+  },
+  "Lesson video per language": { ar: "فيديو الدرس حسب اللغة", en: "Lesson video per language" },
+  "Save lesson video": { ar: "حفظ فيديو الدرس", en: "Save lesson video" },
+  "Delete lesson video": { ar: "حذف فيديو الدرس", en: "Delete lesson video" },
+  "Upload video from device": { ar: "رفع فيديو من الجهاز", en: "Upload video from device" },
+  "Video title (optional)": { ar: "عنوان الفيديو (اختياري)", en: "Video title (optional)" },
+  "Video description (optional)": { ar: "وصف الفيديو (اختياري)", en: "Video description (optional)" },
+  "Video URL (YouTube, Vimeo, direct file, or any platform)": {
+    ar: "رابط الفيديو (يوتيوب، فيميو، ملف مباشر، أو أي منصّة)",
+    en: "Video URL (YouTube, Vimeo, direct file, or any platform)",
+  },
+  "The lesson appears to learners before the exam, in the language they select.": {
+    ar: "يظهر الدرس للمتعلّمين قبل الاختبار، باللغة التي يختارونها.",
+    en: "The lesson appears to learners before the exam, in the language they select.",
+  },
+  "Now playing": { ar: "يُشغَّل الآن", en: "Now playing" },
+  Play: { ar: "تشغيل", en: "Play" },
+  Pause: { ar: "إيقاف مؤقت", en: "Pause" },
+  Mute: { ar: "كتم الصوت", en: "Mute" },
+  Unmute: { ar: "إلغاء الكتم", en: "Unmute" },
+  Volume: { ar: "مستوى الصوت", en: "Volume" },
+  "Playback speed": { ar: "سرعة التشغيل", en: "Playback speed" },
+  Repeat: { ar: "تكرار", en: "Repeat" },
+  "Audio player": { ar: "مشغّل الصوت", en: "Audio player" },
+  Watch: { ar: "مشاهدة", en: "Watch" },
+  Video: { ar: "فيديو", en: "Video" },
 };
 
 interface I18nCtx {
@@ -124,7 +179,11 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 
   const toggle = useCallback(() => setLang(lang === "ar" ? "en" : "ar"), [lang, setLang]);
 
-  const t = useCallback((key: string) => dict[key] ?? FALLBACK[key]?.[lang] ?? key, [dict, lang]);
+  const t = useCallback((key: string) => {
+    // ضمان التسمية المطلوبة للصفحة الرئيسة حتى مع قاموس خادم قديم
+    if (key === "Home" && lang === "ar") return "الرئيسة";
+    return dict[key] ?? FALLBACK[key]?.[lang] ?? key;
+  }, [dict, lang]);
 
   return (
     <Ctx.Provider

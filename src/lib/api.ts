@@ -16,6 +16,16 @@ export function storageUrl(key: string | null | undefined): string | null {
   return STORAGE_URL.replace(/\/$/, "") + "/" + key.replace(/^\//, "");
 }
 
+/**
+ * رابط ملف من تخزين R2 (يُقدَّم عبر مسار العامل /files/:key).
+ * يُستخدم للصور والتسجيلات الصوتية وفيديوهات الدروس المرفوعة من الجهاز.
+ */
+export function fileUrl(key: string | null | undefined): string | null {
+  if (!key) return null;
+  if (/^https?:\/\//i.test(key)) return key;
+  return `${API_URL}/files/${key.replace(/^\/+/, "")}`;
+}
+
 const TOKEN_KEY = "fatiha_token";
 
 export function getToken(): string | null {

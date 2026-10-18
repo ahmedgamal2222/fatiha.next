@@ -1,20 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { api, API_URL } from "@/lib/api";
+import { api, fileUrl } from "@/lib/api";
 import { useI18n } from "@/context/I18nContext";
+import { AudioPlayer } from "@/components/AudioPlayer";
 
 interface Qerat {
   id: number;
   qeratName: string;
   description?: string | null;
   audioFile?: string | null;
-}
-
-function audioSrc(key?: string | null): string | null {
-  if (!key) return null;
-  if (/^https?:\/\//i.test(key)) return key;
-  return API_URL + "/files/" + key.replace(/^\/+/, "");
 }
 
 export default function AlQeratPage() {
@@ -55,7 +50,16 @@ export default function AlQeratPage() {
                   <span className="badge bg-primary-subtle text-primary ms-auto">{i + 1}</span>
                 </div>
                 {q.description && <p className="text-muted small mb-2">{q.description}</p>}
-                {audioSrc(q.audioFile) && <audio controls src={audioSrc(q.audioFile)!} className="w-100 mt-1" />}
+                {fileUrl(q.audioFile) ? (
+                  <AudioPlayer
+                    src={fileUrl(q.audioFile)!}
+                    title={q.qeratName}
+                    subtitle={t("Listen to the recitation")}
+                    compact
+                  />
+                ) : (
+                  <div className="fh-hint"><i className="fas fa-circle-info" aria-hidden="true" />{t("No audio is available for this recitation.")}</div>
+                )}
               </div>
             ))}
           </div>

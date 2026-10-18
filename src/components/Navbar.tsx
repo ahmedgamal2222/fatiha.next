@@ -7,12 +7,15 @@ import { useRouter, usePathname } from "next/navigation";
 import { NotificationBell } from "@/components/NotificationBell";
 
 export function Navbar() {
-  const { t } = useI18n();
+  const { t, lang, languages, openLanguageModal } = useI18n();
   const { user, isAuthed, logout } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const isAdmin = user?.role === "Admin";
   const isHome = pathname === "/";
+  const currentLangName = languages.find((l) => l.code === lang)?.name ?? "";
+  const isActive = (href: string) =>
+    href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
 
   async function handleLogout() {
     await logout();
@@ -51,15 +54,17 @@ export function Navbar() {
                   <div className="collapse navbar-collapse" id="navbarNav">
                     <ul className="navbar-nav ms-auto cs-nav__list">
                       <li className="nav-item">
-                        <Link className="nav-link" href="/">
-                          {t("Home")}
+                        <Link className={`nav-link${isActive("/") ? " is-active" : ""}`} href="/" aria-current={isActive("/") ? "page" : undefined}>
+                          <i className="fas fa-house" aria-hidden="true" />
+                          <span>{t("Home")}</span>
                         </Link>
                       </li>
 
                       {isAuthed && isAdmin && (
                         <li className="nav-item">
-                          <Link className="nav-link" href="/admin">
-                            {t("Admin panel")}
+                          <Link className={`nav-link${isActive("/admin") ? " is-active" : ""}`} href="/admin">
+                            <i className="fas fa-gauge-high" aria-hidden="true" />
+                            <span>{t("Admin panel")}</span>
                           </Link>
                         </li>
                       )}
@@ -130,11 +135,13 @@ export function Navbar() {
                           <ul className="dropdown-menu" aria-labelledby="mjazDropdown">
                             <li>
                               <Link className="dropdown-item" href="/authorized-users">
+                                <i className="fas fa-users-rectangle me-2" aria-hidden="true" />
                                 {t("Requests")}
                               </Link>
                             </li>
                             <li>
                               <Link className="dropdown-item" href="/authorized-users/apply">
+                                <i className="fas fa-user-graduate me-2" aria-hidden="true" />
                                 {t("Apply")}
                               </Link>
                             </li>
@@ -142,17 +149,33 @@ export function Navbar() {
                         </li>
                       )}
 
+                      {/* مبدّل اللغة — متاح دائماً في الرأس */}
+                      <li className="nav-item">
+                        <button
+                          type="button"
+                          className="nav-link fh-lang-switch"
+                          onClick={openLanguageModal}
+                          title={t("Languages")}
+                          aria-label={t("Languages")}
+                        >
+                          <i className="fas fa-globe" aria-hidden="true" />
+                          <span className="fh-lang-switch__text">{currentLangName}</span>
+                        </button>
+                      </li>
+
                       {!isAuthed && (
                         <li className="nav-item">
                           <Link className="nav-link" href="/register">
-                            {t("Register")}
+                            <i className="fas fa-user-plus" aria-hidden="true" />
+                            <span>{t("Register")}</span>
                           </Link>
                         </li>
                       )}
                       {!isAuthed && (
                         <li className="nav-item">
                           <Link className="nav-link" href="/login">
-                            {t("Log in")}
+                            <i className="fas fa-right-to-bracket" aria-hidden="true" />
+                            <span>{t("Log in")}</span>
                           </Link>
                         </li>
                       )}
@@ -178,6 +201,17 @@ export function Navbar() {
                             {t("Settings")}
                           </a>
                           <ul className="dropdown-menu dropdown-menu-end">
+                            {isAuthed && user ? (
+                              <li className="fh-user-chip">
+                                <span className="fh-user-chip__avatar" aria-hidden="true">
+                                  <i className="fas fa-user" />
+                                </span>
+                                <span className="fh-user-chip__meta">
+                                  <strong>{user.nameAr || user.nameEn || t("profile")}</strong>
+                                  <small dir="ltr">{user.email}</small>
+                                </span>
+                              </li>
+                            ) : null}
                             {isAdmin && (
                               <>
                                 <li>

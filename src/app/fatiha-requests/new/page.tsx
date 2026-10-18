@@ -2,12 +2,13 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { api } from "@/lib/api";
+import { api, fileUrl } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import { useI18n } from "@/context/I18nContext";
 import { AudioRecorder, AudioRecordResult } from "@/components/AudioRecorder";
+import { AudioPlayer } from "@/components/AudioPlayer";
 
-interface Qerat { id: number; qeratName: string; audioFile?: string | null; }
+interface Qerat { id: number; qeratName: string; description?: string | null; audioFile?: string | null; }
 
 export default function NewFatihaRequestPage() {
   const { user, loading } = useAuth();
@@ -22,6 +23,9 @@ export default function NewFatihaRequestPage() {
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const selectedQerat = qerats.find((q) => q.id === selectedQeratId) ?? null;
+  const recitationUrl = fileUrl(selectedQerat?.audioFile);
 
   useEffect(() => {
     if (!loading && !user) { router.push("/login"); return; }
@@ -84,6 +88,36 @@ export default function NewFatihaRequestPage() {
                   <option value={0} disabled>{t("Select a Qirat...")}</option>
                   {qerats.map((q) => (<option key={q.id} value={q.id}>{q.qeratName}</option>))}
                 </select>
+
+                {/* الاستماع إلى القراءة بعد اختيارها — قبل تسجيل الطلب */}
+                {selectedQerat && (
+                  <div className="fh-recitation">
+                    <div className="fh-recitation__head">
+                      <span className="fh-recitation__icon"><i className="fas fa-headphones-simple" aria-hidden="true" /></span>
+                      <div>
+                        <h4>{t("Listen to the selected recitation")}</h4>
+                        <p>
+                          {selectedQerat.description?.trim()
+                            ? selectedQerat.description
+                            : t("Listen to the recitation before recording your own.")}
+                        </p>
+                      </div>
+                    </div>
+
+                    {recitationUrl ? (
+                      <AudioPlayer
+                        src={recitationUrl}
+                        title={selectedQerat.qeratName}
+                        subtitle={t("Listen to the recitation")}
+                      />
+                    ) : (
+                      <div className="fh-hint">
+                        <i className="fas fa-circle-info" aria-hidden="true" />
+                        {t("No audio is available for this recitation.")}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
               <div className="mb-3">
                 <AudioRecorder onResult={setAudioResult} onClear={() => setAudioResult(null)} required />
