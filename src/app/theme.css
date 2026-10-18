@@ -1,0 +1,1756 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   FATIHA • الإصدار الرابع — هوية «مصحفية» فاخرة
+   أخضر ليلي عميق · ذهب مخطوطات · ورق عاجي · خط Amiri للعناوين
+   ملف مستقل يُحمَّل بعد globals.css ليتجاوز التصميم السابق بالكامل.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  --fhx-ink: #0a1f1a;
+  --fhx-deep: #04211c;
+  --fhx-deep-2: #073129;
+  --fhx-emerald: #0f5b4c;
+  --fhx-emerald-2: #0b463b;
+  --fhx-emerald-3: #14735f;
+  --fhx-gold: #c8a24a;
+  --fhx-gold-2: #e7ce8f;
+  --fhx-gold-3: #9a7628;
+  --fhx-paper: #fffdf6;
+  --fhx-parchment: #f7f1e3;
+  --fhx-parchment-2: #efe6d2;
+  --fhx-muted: #6b6353;
+  --fhx-line: rgba(200, 162, 74, 0.28);
+  --fhx-line-soft: rgba(200, 162, 74, 0.16);
+
+  /* توافق مع الصفحات الداخلية القائمة */
+  --primary: var(--fhx-emerald);
+  --primary-dark: var(--fhx-emerald-2);
+  --primary-light: var(--fhx-emerald-3);
+  --primary-soft: #e8f1ee;
+  --accent: var(--fhx-gold);
+  --accent-dark: var(--fhx-gold-3);
+  --accent-soft: #f7ecd0;
+  --bg: var(--fhx-parchment);
+  --surface: var(--fhx-paper);
+  --surface-2: var(--fhx-parchment-2);
+  --text: var(--fhx-ink);
+  --heading: var(--fhx-ink);
+  --muted: var(--fhx-muted);
+  --border: #e6dcc6;
+  --radius: 18px;
+  --shadow-sm: 0 4px 18px rgba(10, 31, 26, 0.07);
+  --shadow: 0 22px 55px rgba(10, 31, 26, 0.12);
+  --shadow-lg: 0 36px 90px rgba(10, 31, 26, 0.2);
+  --ring: 0 0 0 4px rgba(200, 162, 74, 0.28);
+  --grad-primary: linear-gradient(140deg, #14735f 0%, #0f5b4c 55%, #073129 100%);
+  --grad-gold: linear-gradient(140deg, #f0dda9 0%, #c8a24a 50%, #9a7628 100%);
+  --font-body: "Cairo", "Tajawal", "Segoe UI", Tahoma, sans-serif;
+  --font-head: "Amiri", "Reem Kufi", "Cairo", serif;
+  --font-display: "Amiri", "Reem Kufi", "Cairo", serif;
+  --fhx-header-h: 88px;
+  --fhx-pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='68' height='68' viewBox='0 0 68 68'%3E%3Cg fill='none' stroke='%23c8a24a' stroke-width='1'%3E%3Cpath d='M34 1l8 17 17 8-17 8-8 17-8-17-17-8 17-8z'/%3E%3Ccircle cx='34' cy='34' r='3.4'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+html[dir="ltr"] {
+  --font-body: "Poppins", "Cairo", "Segoe UI", system-ui, sans-serif;
+  --font-head: "Poppins", "Cairo", "Segoe UI", sans-serif;
+  --font-display: "Poppins", "Cairo", "Segoe UI", sans-serif;
+}
+
+html,
+body { background-color: var(--fhx-parchment); }
+
+body {
+  background-image:
+    radial-gradient(900px 460px at 100% -8%, rgba(200, 162, 74, 0.12), transparent 62%),
+    radial-gradient(760px 420px at 0% 0%, rgba(15, 91, 76, 0.08), transparent 60%);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  color: var(--fhx-ink);
+  font-family: var(--font-body);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-head);
+  color: var(--fhx-ink);
+  letter-spacing: 0;
+}
+
+html[lang="ar"] h1,
+html[lang="ar"] h2,
+html[lang="ar"] .fh-heading,
+html[lang="ar"] .fh-page__title,
+html[lang="ar"] .fhx-title {
+  font-family: var(--font-display);
+}
+
+html[lang="ar"] h1,
+html[lang="ar"] h2,
+html[lang="ar"] h3,
+html[lang="ar"] .fh-heading,
+html[lang="ar"] .fh-page__title,
+html[lang="ar"] .fhx-title,
+html[lang="ar"] .fhx-shead__title,
+html[lang="ar"] .fhx-cta__title,
+html[lang="ar"] .fhx-arch__title {
+  font-weight: 700;
+}
+
+::selection {
+  background: rgba(200, 162, 74, 0.32);
+  color: var(--fhx-deep);
+}
+
+/* ─────────────────────────── نظام الأيقونات المضمون ─────────────────────────── */
+.fhx-ic,
+.fhx-nav__ic,
+.fhx-drop__ic,
+.fhx-stat__ic,
+.fhx-step__ic,
+.fhx-value__ic,
+.fhx-btn__ic {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  line-height: 1;
+}
+.fhx-ic > i,
+.fhx-nav__ic > i,
+.fhx-drop__ic > i,
+.fhx-stat__ic > i,
+.fhx-step__ic > i,
+.fhx-value__ic > i,
+.fhx-btn__ic > i {
+  display: block;
+  line-height: 1;
+  margin: 0 !important;
+}
+i.fas, i.far, i.fab, i.fa-solid, i.fa-regular, i.fa-brands { flex: 0 0 auto; }
+.btn > i,
+.btn > .fhx-btn__ic { margin: 0 !important; }
+.btn { gap: 0.6rem; }
+
+/* ─────────────────────────── الهيدر المخصّص ─────────────────────────── */
+.fhx-header {
+  position: fixed;
+  inset-inline: 0;
+  top: 0;
+  z-index: 1000;
+  transition: background 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
+  border-bottom: 1px solid transparent;
+}
+.fhx-header__bar {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  min-height: var(--fhx-header-h);
+  padding: 10px 0;
+}
+.fhx-shell {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding-inline: 24px;
+}
+.fhx-header.is-solid,
+.fhx-header.is-scrolled {
+  background: rgba(249, 244, 233, 0.94);
+  backdrop-filter: blur(18px) saturate(150%);
+  border-bottom-color: var(--fhx-line);
+  box-shadow: 0 14px 40px rgba(10, 31, 26, 0.1);
+}
+.fhx-header.is-home:not(.is-scrolled) {
+  background: linear-gradient(180deg, rgba(4, 33, 28, 0.6), rgba(4, 33, 28, 0));
+}
+.fhx-header.is-home.is-scrolled {
+  background: rgba(4, 33, 28, 0.95);
+  border-bottom-color: rgba(200, 162, 74, 0.32);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+}
+
+/* الشعار */
+.fhx-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 0 0 auto;
+  text-decoration: none;
+  min-width: 0;
+}
+.fhx-brand__seal {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(150deg, #ffffff, #f7ecd0);
+  border: 1px solid rgba(200, 162, 74, 0.65);
+  box-shadow: 0 10px 24px rgba(10, 31, 26, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  padding: 6px;
+  flex: 0 0 auto;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.fhx-brand__seal img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.fhx-brand:hover .fhx-brand__seal {
+  transform: translateY(-1px) scale(1.03);
+  box-shadow: 0 14px 30px rgba(10, 31, 26, 0.28);
+}
+.fhx-brand__text { display: flex; flex-direction: column; line-height: 1.18; min-width: 0; }
+.fhx-brand__text strong {
+  font-family: "Amiri", "Cairo", serif;
+  font-size: 1.34rem;
+  font-weight: 700;
+  color: var(--fhx-ink);
+}
+.fhx-brand__text small {
+  font-size: 0.6rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--fhx-gold-3);
+  font-weight: 800;
+  direction: ltr;
+}
+.is-home:not(.is-scrolled) .fhx-brand__text strong { color: #fff; }
+.is-home:not(.is-scrolled) .fhx-brand__text small { color: var(--fhx-gold-2); }
+.fhx-header.is-home.is-scrolled .fhx-brand__text strong { color: #fff; }
+.fhx-header.is-home.is-scrolled .fhx-brand__text small { color: var(--fhx-gold-2); }
+
+/* روابط التنقّل */
+.fhx-nav { display: flex; align-items: center; gap: 4px; margin-inline-start: 10px; }
+.fhx-nav__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 8px 13px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--fhx-ink);
+  font-family: inherit;
+  font-size: 0.93rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.22s ease, color 0.22s ease, border-color 0.22s ease;
+}
+.fhx-nav__ic {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: rgba(15, 91, 76, 0.08);
+  color: var(--fhx-emerald);
+  font-size: 0.82rem;
+  transition: background 0.22s ease, color 0.22s ease;
+}
+.fhx-nav__label { display: inline-block; min-width: 0; }
+.fhx-nav__caret { font-size: 0.62rem; opacity: 0.7; margin-inline-start: 2px; transition: transform 0.25s ease; }
+.fhx-nav__link.is-open .fhx-nav__caret { transform: rotate(180deg); }
+.fhx-nav__link:hover { background: rgba(15, 91, 76, 0.08); color: var(--fhx-emerald); }
+.fhx-nav__link.is-active { background: rgba(15, 91, 76, 0.1); border-color: var(--fhx-line); color: var(--fhx-emerald); }
+.fhx-nav__link.is-active .fhx-nav__ic { background: var(--grad-primary); color: #f5e6bc; }
+.fhx-header.is-home .fhx-nav__link { color: #f6efdd; }
+.fhx-header.is-home .fhx-nav__ic { background: rgba(255, 255, 255, 0.1); color: var(--fhx-gold-2); }
+.fhx-header.is-home .fhx-nav__link:hover { background: rgba(255, 255, 255, 0.12); color: #fff; }
+.fhx-header.is-home .fhx-nav__link.is-active {
+  background: rgba(200, 162, 74, 0.18);
+  border-color: rgba(200, 162, 74, 0.5);
+  color: #fff;
+}
+.fhx-header.is-home .fhx-nav__link.is-active .fhx-nav__ic {
+  background: var(--grad-gold);
+  color: var(--fhx-deep);
+}
+
+/* القوائم المنسدلة المخصّصة */
+.fhx-menu { position: relative; }
+.fhx-dropdown {
+  position: absolute;
+  top: calc(100% + 12px);
+  inset-inline-start: 0;
+  min-width: 280px;
+  max-width: 340px;
+  padding: 10px;
+  border-radius: 18px;
+  background: rgba(255, 253, 246, 0.99);
+  border: 1px solid var(--fhx-line);
+  box-shadow: 0 30px 70px rgba(10, 31, 26, 0.22);
+  backdrop-filter: blur(14px);
+  animation: fhx-pop 0.18s ease both;
+  z-index: 20;
+}
+.fhx-dropdown--wide { min-width: 330px; }
+.fhx-dropdown {
+  max-height: min(72vh, 640px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.fhx-dropdown::-webkit-scrollbar { width: 8px; }
+.fhx-dropdown::-webkit-scrollbar-thumb { background: rgba(200, 162, 74, 0.45); border-radius: 8px; }
+.fhx-dropdown::-webkit-scrollbar-track { background: transparent; }
+@keyframes fhx-pop {
+  from { opacity: 0; transform: translateY(-6px) scale(0.99); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.fhx-dropdown__label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px 8px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fhx-gold-3);
+}
+.fhx-drop {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 9px 10px;
+  border-radius: 12px;
+  text-decoration: none;
+  color: var(--fhx-ink);
+  transition: background 0.18s ease, color 0.18s ease;
+}
+.fhx-drop + .fhx-drop { margin-top: 2px; }
+.fhx-drop:hover { background: rgba(15, 91, 76, 0.08); color: var(--fhx-emerald); }
+.fhx-drop__ic {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: rgba(15, 91, 76, 0.08);
+  color: var(--fhx-emerald);
+  font-size: 0.85rem;
+}
+.fhx-drop:hover .fhx-drop__ic { background: var(--grad-primary); color: #f5e6bc; }
+.fhx-drop__text { display: flex; flex-direction: column; min-width: 0; line-height: 1.3; }
+.fhx-drop__text strong { font-size: 0.88rem; font-weight: 700; }
+.fhx-drop__text small { font-size: 0.72rem; color: var(--fhx-muted); font-weight: 500; }
+.fhx-drop--danger { color: #b42318; }
+.fhx-drop--danger .fhx-drop__ic { background: rgba(180, 35, 24, 0.08); color: #b42318; }
+.fhx-drop--danger:hover { background: rgba(180, 35, 24, 0.08); color: #b42318; }
+.fhx-drop--danger:hover .fhx-drop__ic { background: #b42318; color: #fff; }
+.fhx-dropdown__sep { height: 1px; background: var(--fhx-line-soft); margin: 7px 6px; }
+.fhx-dropdown__user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px 11px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--fhx-line-soft);
+}
+.fhx-dropdown__avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--grad-primary);
+  color: #f5e6bc;
+  flex: 0 0 auto;
+}
+.fhx-dropdown__meta { display: flex; flex-direction: column; min-width: 0; }
+.fhx-dropdown__meta strong { font-size: 0.88rem; color: var(--fhx-ink); }
+.fhx-dropdown__meta small { font-size: 0.72rem; color: var(--fhx-muted); direction: ltr; text-align: start; overflow: hidden; text-overflow: ellipsis; }
+
+/* أدوات الهيدر */
+.fhx-actions { display: flex; align-items: center; gap: 8px; margin-inline-start: auto; }
+.fhx-icon-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--fhx-line-soft);
+  background: rgba(255, 255, 255, 0.65);
+  color: var(--fhx-emerald);
+  cursor: pointer;
+  font-size: 0.95rem;
+  position: relative;
+  transition: all 0.2s ease;
+}
+.fhx-icon-btn:hover { background: var(--grad-primary); color: #f5e6bc; border-color: transparent; }
+.fhx-header.is-home .fhx-icon-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(200, 162, 74, 0.35);
+  color: #f2e6c8;
+}
+.fhx-header.is-home .fhx-icon-btn:hover { background: var(--grad-gold); color: var(--fhx-deep); }
+.fhx-icon-btn .fh-lang-switch__text { display: none; }
+.fhx-auth { display: flex; align-items: center; gap: 8px; }
+.fhx-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  padding: 10px 18px;
+  border-radius: 12px;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 0.9rem;
+  line-height: 1.2;
+  text-decoration: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: transform 0.18s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+.fhx-btn--gold {
+  background: var(--grad-gold);
+  color: var(--fhx-deep);
+  box-shadow: 0 12px 26px rgba(200, 162, 74, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+.fhx-btn--gold:hover { transform: translateY(-2px); box-shadow: 0 18px 34px rgba(200, 162, 74, 0.4); color: var(--fhx-deep); }
+.fhx-btn--emerald { background: var(--grad-primary); color: #fff; box-shadow: 0 12px 26px rgba(15, 91, 76, 0.28); }
+.fhx-btn--emerald:hover { transform: translateY(-2px); color: #fff; box-shadow: 0 18px 34px rgba(15, 91, 76, 0.36); }
+.fhx-btn--ghost { background: rgba(255, 255, 255, 0.08); border-color: rgba(200, 162, 74, 0.5); color: #f7eeda; }
+.fhx-btn--ghost:hover { background: rgba(200, 162, 74, 0.18); color: #fff; transform: translateY(-2px); }
+.fhx-header:not(.is-home) .fhx-btn--ghost {
+  background: rgba(15, 91, 76, 0.06);
+  border-color: var(--fhx-line);
+  color: var(--fhx-emerald);
+}
+.fhx-header.is-home.is-scrolled .fhx-btn--ghost {
+  background: rgba(255, 255, 255, 0.12);
+  color: #f7eeda;
+  border-color: rgba(200, 162, 74, 0.45);
+}
+
+/* زر القائمة للجوال */
+.fhx-burger {
+  display: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid var(--fhx-line-soft);
+  background: rgba(255, 255, 255, 0.65);
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 5px;
+  flex: 0 0 auto;
+}
+.fhx-burger span { display: block; width: 20px; height: 2px; border-radius: 2px; background: var(--fhx-emerald); transition: transform 0.25s ease, opacity 0.2s ease; }
+.fhx-burger.is-open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.fhx-burger.is-open span:nth-child(2) { opacity: 0; }
+.fhx-burger.is-open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+.fhx-header.is-home .fhx-burger { background: rgba(255, 255, 255, 0.12); border-color: rgba(200, 162, 74, 0.4); }
+.fhx-header.is-home .fhx-burger span { background: #f5e6bc; }
+
+/* درج الجوال */
+.fhx-drawer { position: fixed; inset: 0; z-index: 1300; visibility: hidden; pointer-events: none; }
+.fhx-drawer.is-open { visibility: visible; pointer-events: auto; }
+.fhx-drawer__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(4, 33, 28, 0.55);
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.fhx-drawer.is-open .fhx-drawer__backdrop { opacity: 1; }
+.fhx-drawer__panel {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  inset-inline-start: 0;
+  width: min(390px, 88vw);
+  background: linear-gradient(180deg, #fffdf6 0%, #f7f1e3 100%);
+  border-inline-end: 1px solid var(--fhx-line);
+  box-shadow: 0 0 80px rgba(4, 33, 28, 0.4);
+  transform: translateX(-100%);
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding: 20px 20px 28px;
+}
+html[dir="rtl"] .fhx-drawer__panel { transform: translateX(100%); }
+.fhx-drawer.is-open .fhx-drawer__panel { transform: translateX(0); }
+.fhx-drawer__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--fhx-line-soft);
+}
+.fhx-drawer__close {
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  border: 1px solid var(--fhx-line-soft);
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--fhx-emerald);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+.fhx-drawer__group { margin-top: 18px; }
+.fhx-drawer__title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--fhx-gold-3);
+  padding: 0 6px 8px;
+}
+.fhx-dlink {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 10px;
+  border-radius: 12px;
+  text-decoration: none;
+  color: var(--fhx-ink);
+  font-weight: 700;
+  font-size: 0.92rem;
+  border: 1px solid transparent;
+}
+.fhx-dlink + .fhx-dlink { margin-top: 2px; }
+.fhx-dlink:hover, .fhx-dlink.is-active {
+  background: rgba(15, 91, 76, 0.08);
+  border-color: var(--fhx-line-soft);
+  color: var(--fhx-emerald);
+}
+.fhx-dlink__ic {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: rgba(15, 91, 76, 0.08);
+  color: var(--fhx-emerald);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+.fhx-dlink.is-active .fhx-dlink__ic { background: var(--grad-primary); color: #f5e6bc; }
+.fhx-drawer__foot { margin-top: auto; padding-top: 20px; display: grid; gap: 8px; }
+.fhx-drawer__user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(15, 91, 76, 0.06);
+  border: 1px solid var(--fhx-line-soft);
+  margin-top: 18px;
+}
+
+/* عناصر تفاعلية داخل الدرج والهيدر */
+button.fhx-dlink {
+  width: 100%;
+  background: none;
+  border: 1px solid transparent;
+  font-family: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.fhx-drawer__foot .fhx-btn { width: 100%; }
+.fhx-drawer__foot .fhx-drawer__user { margin-top: 0; }
+.fhx-actions .fh-bell { display: inline-flex; }
+.fhx-actions .fh-bell__btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  border: 1px solid var(--fhx-line-soft);
+  background: rgba(255, 255, 255, 0.65);
+  color: var(--fhx-emerald);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+}
+.fhx-header.is-home .fh-bell__btn {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(200, 162, 74, 0.35);
+  color: #f2e6c8;
+}
+.fhx-header.is-home .fh-bell__btn:hover { background: var(--grad-gold); color: var(--fhx-deep); }
+
+/* ─────────────────────────── الفوتر ─────────────────────────── */
+.fhx-footer {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(900px 300px at 90% 0%, rgba(200, 162, 74, 0.16), transparent 60%),
+    linear-gradient(160deg, #04211c 0%, #062f27 55%, #0b463b 100%);
+  color: #e9e1cd;
+  border-top: 1px solid rgba(200, 162, 74, 0.35);
+}
+.fhx-footer::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--fhx-pattern);
+  background-size: 74px 74px;
+  opacity: 0.07;
+  pointer-events: none;
+}
+.fhx-footer__top {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr;
+  gap: 44px;
+  padding: 64px 0 44px;
+}
+.fhx-footer__brand { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
+.fhx-footer__seal {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: linear-gradient(150deg, #ffffff, #f7ecd0);
+  border: 1px solid rgba(200, 162, 74, 0.6);
+  padding: 7px;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.fhx-footer__seal img { width: 100%; height: 100%; object-fit: contain; }
+.fhx-footer__brand-text strong {
+  display: block;
+  font-family: "Amiri", "Cairo", serif;
+  font-size: 1.45rem;
+  color: #fff;
+  line-height: 1.2;
+}
+.fhx-footer__brand-text small {
+  display: block;
+  font-size: 0.62rem;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--fhx-gold-2);
+  direction: ltr;
+}
+.fhx-footer__desc { color: rgba(233, 225, 205, 0.72); font-size: 0.9rem; line-height: 1.9; max-width: 360px; margin: 0; }
+.fhx-footer__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--fhx-gold-2);
+  margin-bottom: 16px;
+}
+.fhx-footer__link {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 6px 0;
+  color: rgba(233, 225, 205, 0.82);
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+.fhx-footer__link i { color: var(--fhx-gold); flex: 0 0 auto; }
+.fhx-footer__link:hover { color: #fff; transform: translateX(2px); }
+html[dir="rtl"] .fhx-footer__link:hover { transform: translateX(-2px); }
+.fhx-footer__socials { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
+.fhx-footer__social {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(200, 162, 74, 0.32);
+  background: rgba(255, 255, 255, 0.06);
+  color: #f2e6c8;
+  font-size: 1.02rem;
+  transition: all 0.22s ease;
+}
+.fhx-footer__social:hover {
+  background: var(--grad-gold);
+  color: var(--fhx-deep);
+  transform: translateY(-3px);
+  border-color: transparent;
+  box-shadow: 0 12px 24px rgba(200, 162, 74, 0.35);
+}
+.fhx-footer__ornament { height: 1px; background: linear-gradient(90deg, transparent, rgba(200, 162, 74, 0.6), transparent); }
+.fhx-footer__bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 18px 0 22px;
+  color: rgba(233, 225, 205, 0.62);
+  font-size: 0.82rem;
+}
+.fhx-footer__bottom span { display: inline-flex; align-items: center; gap: 7px; }
+.fhx-footer__bottom i { color: var(--fhx-gold); }
+
+/* ─────────────────────────── الهيرو ─────────────────────────── */
+.fhx-hero {
+  position: relative;
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  padding: calc(var(--fhx-header-h) + 56px) 0 108px;
+  overflow: hidden;
+  background: var(--fhx-deep);
+  color: #f6efdd;
+}
+.fhx-hero__bg {
+  position: absolute;
+  inset: 0;
+  background: url("/image1.jpg") center / cover no-repeat;
+  opacity: 0.4;
+  transform: scale(1.05);
+  filter: saturate(0.72) contrast(1.05);
+}
+.fhx-hero__veil {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(1100px 620px at 82% 8%, rgba(200, 162, 74, 0.2), transparent 62%),
+    radial-gradient(900px 520px at 8% 92%, rgba(20, 115, 95, 0.35), transparent 60%),
+    linear-gradient(115deg, rgba(4, 33, 28, 0.97) 0%, rgba(6, 47, 39, 0.92) 46%, rgba(11, 70, 59, 0.84) 100%);
+}
+.fhx-hero__pattern {
+  position: absolute;
+  inset: 0;
+  background-image: var(--fhx-pattern);
+  background-size: 88px 88px;
+  opacity: 0.11;
+  mask-image: radial-gradient(circle at 70% 35%, #000 0%, transparent 78%);
+  -webkit-mask-image: radial-gradient(circle at 70% 35%, #000 0%, transparent 78%);
+}
+.fhx-hero__innr {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 1.12fr 0.88fr;
+  gap: 56px;
+  align-items: center;
+  width: 100%;
+}
+.fhx-hero__copy { max-width: 680px; }
+.fhx-hero__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 8px 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(200, 162, 74, 0.45);
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--fhx-gold-2);
+  font-size: 0.82rem;
+  font-weight: 700;
+  backdrop-filter: blur(6px);
+  margin-bottom: 20px;
+}
+.fhx-hero__eyebrow .fhx-ic { color: var(--fhx-gold); font-size: 0.95rem; }
+.fhx-hero__bismillah {
+  font-family: "Amiri", serif;
+  font-size: clamp(1.15rem, 1.8vw, 1.6rem);
+  color: var(--fhx-gold-2);
+  margin: 0 0 10px;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+}
+.fhx-hero__title {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4.1vw, 3.5rem);
+  font-weight: 700;
+  line-height: 1.55;
+  color: #fffdf6;
+  margin: 0 0 18px;
+  text-wrap: balance;
+  text-shadow: 0 14px 44px rgba(0, 0, 0, 0.4);
+  animation: fhx-rise 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+html[dir="ltr"] .fhx-hero__title { line-height: 1.28; letter-spacing: -0.01em; }
+@keyframes fhx-rise {
+  from { opacity: 0; transform: translateY(22px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fhx-hero__rule { display: flex; align-items: center; gap: 10px; margin: 0 0 22px; }
+.fhx-hero__rule::before {
+  content: "";
+  width: 64px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--fhx-gold), transparent);
+  border-radius: 2px;
+}
+.fhx-hero__rule span {
+  width: 9px;
+  height: 9px;
+  transform: rotate(45deg);
+  background: var(--grad-gold);
+  box-shadow: 0 0 0 4px rgba(200, 162, 74, 0.16);
+}
+.fhx-hero__sub {
+  color: rgba(246, 239, 221, 0.8);
+  font-size: clamp(0.95rem, 1.3vw, 1.06rem);
+  line-height: 1.95;
+  max-width: 560px;
+  margin: 0 0 30px;
+}
+.fhx-hero__cta { display: flex; flex-wrap: wrap; gap: 12px; }
+.fhx-hero__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 22px;
+  margin-top: 34px;
+  padding-top: 22px;
+  border-top: 1px solid rgba(200, 162, 74, 0.22);
+}
+.fhx-hero__meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: rgba(246, 239, 221, 0.86);
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+.fhx-hero__meta-item .fhx-ic {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: rgba(200, 162, 74, 0.14);
+  color: var(--fhx-gold-2);
+  font-size: 0.78rem;
+}
+.fhx-hero__scroll {
+  position: absolute;
+  bottom: 26px;
+  inset-inline-start: 50%;
+  transform: translateX(-50%);
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1px solid rgba(200, 162, 74, 0.4);
+  color: var(--fhx-gold-2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  animation: fhx-bob 2.2s ease-in-out infinite;
+  z-index: 3;
+}
+@keyframes fhx-bob {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(7px); }
+}
+
+/* قوس المحراب */
+.fhx-arch-wrap { display: flex; justify-content: center; }
+.fhx-arch {
+  position: relative;
+  width: min(360px, 100%);
+  aspect-ratio: 3 / 4;
+  border-radius: 999px 999px 26px 26px / 46% 46% 26px 26px;
+  border: 1px solid rgba(200, 162, 74, 0.55);
+  background:
+    radial-gradient(420px 320px at 50% 0%, rgba(200, 162, 74, 0.18), transparent 62%),
+    linear-gradient(180deg, rgba(255, 253, 246, 0.08), rgba(200, 162, 74, 0.05));
+  box-shadow: inset 0 0 70px rgba(200, 162, 74, 0.12), 0 36px 90px rgba(0, 0, 0, 0.42);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 52px 28px 34px;
+  overflow: hidden;
+}
+.fhx-arch::before {
+  content: "";
+  position: absolute;
+  inset: 14px;
+  border-radius: inherit;
+  border: 1px solid rgba(200, 162, 74, 0.26);
+  pointer-events: none;
+}
+.fhx-arch::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--fhx-pattern);
+  background-size: 58px 58px;
+  opacity: 0.1;
+  pointer-events: none;
+}
+.fhx-arch__kicker {
+  position: relative;
+  z-index: 1;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--fhx-gold-2);
+  margin-bottom: 10px;
+}
+.fhx-arch__title {
+  position: relative;
+  z-index: 1;
+  font-family: "Amiri", serif;
+  font-size: clamp(2.4rem, 4vw, 3.1rem);
+  color: #fffdf6;
+  margin: 0 0 6px;
+  line-height: 1.15;
+  text-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+.fhx-arch__divider {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0 16px;
+}
+.fhx-arch__divider i { color: var(--fhx-gold); font-size: 0.5rem; }
+.fhx-arch__divider::before,
+.fhx-arch__divider::after {
+  content: "";
+  width: 46px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(200, 162, 74, 0.8), transparent);
+}
+.fhx-arch__verse {
+  position: relative;
+  z-index: 1;
+  font-family: "Amiri", serif;
+  font-size: clamp(1.05rem, 1.6vw, 1.3rem);
+  line-height: 2;
+  color: #f4e8c9;
+  margin: 0 0 12px;
+}
+.fhx-arch__note {
+  position: relative;
+  z-index: 1;
+  color: rgba(246, 239, 221, 0.68);
+  font-size: 0.8rem;
+  line-height: 1.8;
+  margin: 0;
+  max-width: 240px;
+}
+.fhx-arch__seal {
+  position: relative;
+  z-index: 1;
+  margin-top: 18px;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--grad-gold);
+  color: var(--fhx-deep);
+  font-size: 1.15rem;
+  box-shadow: 0 14px 30px rgba(200, 162, 74, 0.32);
+}
+
+/* ─────────────────────────── الإحصاءات ─────────────────────────── */
+.fhx-stats { position: relative; z-index: 4; margin-top: -64px; padding-bottom: 72px; }
+.fhx-stats__card {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  background: var(--fhx-paper);
+  border: 1px solid var(--fhx-line);
+  border-radius: 26px;
+  box-shadow: 0 30px 70px rgba(10, 31, 26, 0.14);
+  overflow: hidden;
+}
+.fhx-stats__card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--fhx-pattern);
+  background-size: 64px 64px;
+  opacity: 0.05;
+  pointer-events: none;
+}
+.fhx-stat {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 30px 22px;
+}
+.fhx-stat + .fhx-stat::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  top: 22%;
+  bottom: 22%;
+  width: 1px;
+  background: linear-gradient(180deg, transparent, var(--fhx-line), transparent);
+}
+.fhx-stat__ic {
+  width: 62px;
+  height: 62px;
+  border-radius: 50% 50% 18px 18px / 44% 44% 18px 18px;
+  background: var(--grad-primary);
+  color: #f5e6bc;
+  font-size: 1.3rem;
+  box-shadow: 0 14px 30px rgba(15, 91, 76, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(200, 162, 74, 0.5);
+}
+.fhx-stat__num {
+  font-family: var(--font-display);
+  font-size: clamp(1.7rem, 2.8vw, 2.3rem);
+  font-weight: 700;
+  color: var(--fhx-emerald);
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+.fhx-stat__label { color: var(--fhx-muted); font-size: 0.86rem; font-weight: 700; }
+
+/* ─────────────────────────── عناوين الأقسام ─────────────────────────── */
+.fhx-section { position: relative; padding: 92px 0; }
+.fhx-section--paper { background: var(--fhx-paper); }
+.fhx-section--alt {
+  background:
+    radial-gradient(700px 320px at 100% 0%, rgba(200, 162, 74, 0.09), transparent 60%),
+    linear-gradient(180deg, #f2ead8 0%, var(--fhx-parchment) 100%);
+}
+.fhx-shead { text-align: center; max-width: 780px; margin: 0 auto 50px; }
+.fhx-shead__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--fhx-gold-3);
+}
+.fhx-shead__title {
+  font-size: clamp(1.75rem, 3.4vw, 2.75rem);
+  line-height: 1.5;
+  margin: 6px 0 0;
+  color: var(--fhx-ink);
+}
+.fhx-shead__text {
+  color: var(--fhx-muted);
+  font-size: 1rem;
+  line-height: 2;
+  margin: 14px auto 0;
+  max-width: 700px;
+}
+.fhx-ornament { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 16px; }
+.fhx-ornament::before,
+.fhx-ornament::after {
+  content: "";
+  height: 1px;
+  width: min(120px, 24vw);
+  background: linear-gradient(90deg, transparent, var(--fhx-gold));
+}
+.fhx-ornament::after { background: linear-gradient(90deg, var(--fhx-gold), transparent); }
+.fhx-ornament span { width: 8px; height: 8px; transform: rotate(45deg); background: var(--grad-gold); }
+
+/* ─────────────────────────── شريط الآية ─────────────────────────── */
+.fhx-verse {
+  position: relative;
+  overflow: hidden;
+  padding: 50px 0;
+  background:
+    radial-gradient(800px 260px at 50% 0%, rgba(200, 162, 74, 0.16), transparent 66%),
+    linear-gradient(140deg, #052a23 0%, #073129 60%, #0b463b 100%);
+  text-align: center;
+  color: #f5e9cd;
+}
+.fhx-verse::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--fhx-pattern);
+  background-size: 72px 72px;
+  opacity: 0.08;
+  pointer-events: none;
+}
+.fhx-verse__mark {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--fhx-gold-2);
+  margin-bottom: 14px;
+}
+.fhx-verse__mark::before,
+.fhx-verse__mark::after {
+  content: "";
+  width: 34px;
+  height: 1px;
+  background: rgba(200, 162, 74, 0.6);
+}
+.fhx-verse__text {
+  position: relative;
+  font-family: "Amiri", serif;
+  font-size: clamp(1.25rem, 2.8vw, 2rem);
+  line-height: 2.1;
+  margin: 0 auto;
+  max-width: 900px;
+  color: #fbf2dd;
+}
+.fhx-verse__ref {
+  position: relative;
+  display: block;
+  margin-top: 14px;
+  font-size: 0.82rem;
+  color: rgba(245, 233, 205, 0.62);
+  font-weight: 600;
+}
+
+/* ─────────────────────────── قيم المنصة ─────────────────────────── */
+.fhx-values {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+.fhx-value {
+  position: relative;
+  padding: 30px 24px 26px;
+  border-radius: 22px;
+  background: linear-gradient(180deg, #ffffff 0%, #fdfaf1 100%);
+  border: 1px solid var(--fhx-line-soft);
+  box-shadow: 0 14px 34px rgba(10, 31, 26, 0.06);
+  overflow: hidden;
+  transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
+}
+.fhx-value::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: var(--grad-gold);
+  opacity: 0.75;
+}
+.fhx-value::after {
+  content: attr(data-index);
+  position: absolute;
+  inset-inline-end: 16px;
+  top: 10px;
+  font-family: var(--font-display);
+  font-size: 3.2rem;
+  font-weight: 700;
+  color: rgba(200, 162, 74, 0.12);
+  line-height: 1;
+  pointer-events: none;
+}
+.fhx-value:hover {
+  transform: translateY(-6px);
+  border-color: rgba(200, 162, 74, 0.45);
+  box-shadow: 0 28px 60px rgba(10, 31, 26, 0.13);
+}
+.fhx-value__ic {
+  width: 58px;
+  height: 58px;
+  border-radius: 50% 50% 16px 16px / 44% 44% 16px 16px;
+  background: var(--grad-primary);
+  color: #f5e6bc;
+  font-size: 1.2rem;
+  border: 1px solid rgba(200, 162, 74, 0.45);
+  box-shadow: 0 12px 26px rgba(15, 91, 76, 0.24);
+  margin-bottom: 16px;
+}
+.fhx-value__title { font-size: 1.18rem; font-weight: 700; margin: 0 0 8px; }
+.fhx-value__text { color: var(--fhx-muted); font-size: 0.9rem; line-height: 1.95; margin: 0; }
+
+/* ─────────────────────────── مسار الإجازة ─────────────────────────── */
+.fhx-journey {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 22px;
+  counter-reset: step;
+}
+.fhx-step {
+  position: relative;
+  text-align: center;
+  padding: 30px 18px 26px;
+  border-radius: 22px;
+  background: rgba(255, 253, 246, 0.86);
+  border: 1px solid var(--fhx-line-soft);
+  box-shadow: 0 14px 34px rgba(10, 31, 26, 0.06);
+  transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
+}
+.fhx-step:hover {
+  transform: translateY(-6px);
+  border-color: rgba(200, 162, 74, 0.45);
+  box-shadow: 0 28px 60px rgba(10, 31, 26, 0.13);
+}
+.fhx-step::before {
+  counter-increment: step;
+  content: counter(step, decimal-leading-zero);
+  position: absolute;
+  top: 12px;
+  inset-inline-end: 16px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--fhx-gold-3);
+}
+.fhx-step__ic {
+  width: 66px;
+  height: 66px;
+  margin: 0 auto 16px;
+  border-radius: 50% 50% 18px 18px / 44% 44% 18px 18px;
+  background: var(--grad-gold);
+  color: var(--fhx-deep);
+  font-size: 1.35rem;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 14px 30px rgba(200, 162, 74, 0.32);
+}
+.fhx-step__title { font-size: 1.08rem; font-weight: 700; margin: 0 0 8px; }
+.fhx-step__text { color: var(--fhx-muted); font-size: 0.87rem; line-height: 1.9; margin: 0; }
+@media (min-width: 992px) {
+  .fhx-step:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    top: 63px;
+    inset-inline-end: -22px;
+    width: 22px;
+    height: 1px;
+    background: repeating-linear-gradient(90deg, rgba(200, 162, 74, 0.7) 0 5px, transparent 5px 10px);
+  }
+}
+
+/* ─────────────────────────── سلايدر القراءات العشر ─────────────────────────── */
+.fhx-qiraat { position: relative; }
+.fhx-qiraat__frame {
+  position: relative;
+  overflow: hidden;
+  padding: 26px 0;
+  border-radius: 26px;
+  border: 1px solid var(--fhx-line);
+  background:
+    radial-gradient(600px 220px at 50% 0%, rgba(200, 162, 74, 0.1), transparent 70%),
+    linear-gradient(180deg, #fffdf6, #f9f3e5);
+  box-shadow: 0 22px 55px rgba(10, 31, 26, 0.1);
+}
+.fhx-qiraat__frame::before,
+.fhx-qiraat__frame::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 90px;
+  z-index: 2;
+  pointer-events: none;
+}
+.fhx-qiraat__frame::before {
+  inset-inline-start: 0;
+  background: linear-gradient(90deg, #fbf6ea, rgba(251, 246, 234, 0));
+}
+.fhx-qiraat__frame::after {
+  inset-inline-end: 0;
+  background: linear-gradient(270deg, #fbf6ea, rgba(251, 246, 234, 0));
+}
+.fhx-qiraat__track {
+  display: flex;
+  direction: ltr;
+  gap: 0;
+  width: max-content;
+  animation: fhx-marquee 46s linear infinite;
+  will-change: transform;
+}
+.fhx-qiraat__frame:hover .fhx-qiraat__track,
+.fhx-qiraat__frame:focus-within .fhx-qiraat__track { animation-play-state: paused; }
+@keyframes fhx-marquee {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+.fhx-qiraat__item {
+  flex: 0 0 auto;
+  width: clamp(118px, 15vw, 156px);
+  margin-inline-end: 18px;
+}
+.fhx-qiraat__card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 12px 12px;
+  border-radius: 18px;
+  background: #fff;
+  border: 1px solid var(--fhx-line-soft);
+  box-shadow: 0 10px 26px rgba(10, 31, 26, 0.06);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.fhx-qiraat__card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(200, 162, 74, 0.5);
+  box-shadow: 0 20px 44px rgba(10, 31, 26, 0.13);
+}
+.fhx-qiraat__card img {
+  width: clamp(78px, 11vw, 112px);
+  height: clamp(78px, 11vw, 112px);
+  object-fit: contain;
+  display: block;
+}
+.fhx-qiraat__name {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--fhx-muted);
+  text-align: center;
+  line-height: 1.3;
+}
+.fhx-qiraat__ring {
+  width: 100%;
+  height: 3px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, transparent, rgba(200, 162, 74, 0.55), transparent);
+}
+
+/* ─────────────────────────── الأسئلة الشائعة ─────────────────────────── */
+.fhx-faq { display: grid; grid-template-columns: 0.85fr 1.15fr; gap: 46px; align-items: start; }
+.fhx-faq__intro { position: sticky; top: calc(var(--fhx-header-h) + 24px); }
+.fhx-faq__intro .fhx-shead { text-align: start; margin: 0; }
+.fhx-faq__intro .fhx-ornament { justify-content: flex-start; }
+.fhx-faq__list { display: grid; gap: 12px; }
+.fhx-faq__item {
+  border-radius: 18px;
+  border: 1px solid var(--fhx-line-soft);
+  background: #fff;
+  overflow: hidden;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+.fhx-faq__item.is-open {
+  border-color: rgba(200, 162, 74, 0.5);
+  box-shadow: 0 20px 46px rgba(10, 31, 26, 0.1);
+}
+.fhx-faq__btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 20px;
+  background: none;
+  border: 0;
+  text-align: start;
+  font-family: inherit;
+  color: var(--fhx-ink);
+  cursor: pointer;
+}
+.fhx-faq__num {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: rgba(15, 91, 76, 0.08);
+  color: var(--fhx-emerald);
+  font-size: 0.78rem;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+.fhx-faq__item.is-open .fhx-faq__num { background: var(--grad-primary); color: #f5e6bc; }
+.fhx-faq__q { flex: 1 1 auto; min-width: 0; font-size: 0.95rem; font-weight: 700; line-height: 1.75; }
+.fhx-faq__chev {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--fhx-line-soft);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--fhx-gold-3);
+  flex: 0 0 auto;
+  transition: transform 0.3s ease, background 0.25s ease, color 0.25s ease;
+}
+.fhx-faq__item.is-open .fhx-faq__chev {
+  transform: rotate(180deg);
+  background: var(--grad-gold);
+  color: var(--fhx-deep);
+  border-color: transparent;
+}
+.fhx-faq__a {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.35s ease;
+}
+.fhx-faq__item.is-open .fhx-faq__a { grid-template-rows: 1fr; }
+.fhx-faq__a > div { overflow: hidden; }
+.fhx-faq__a p {
+  margin: 0;
+  padding-block: 0 20px;
+  padding-inline-start: 66px;
+  padding-inline-end: 22px;
+  color: var(--fhx-muted);
+  font-size: 0.9rem;
+  line-height: 2;
+}
+
+/* ─────────────────────────── دعوة الختام ─────────────────────────── */
+.fhx-cta { padding: 8px 0 96px; }
+.fhx-cta__card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 30px;
+  padding: clamp(38px, 6vw, 72px) clamp(22px, 4vw, 56px);
+  text-align: center;
+  background:
+    radial-gradient(900px 340px at 50% -10%, rgba(200, 162, 74, 0.24), transparent 60%),
+    linear-gradient(150deg, #052a23 0%, #073129 55%, #0f5b4c 100%);
+  border: 1px solid rgba(200, 162, 74, 0.5);
+  box-shadow: 0 40px 90px rgba(10, 31, 26, 0.22);
+  color: #fffdf6;
+}
+.fhx-cta__card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--fhx-pattern);
+  background-size: 78px 78px;
+  opacity: 0.08;
+  pointer-events: none;
+}
+.fhx-cta__icon {
+  position: relative;
+  width: 78px;
+  height: 78px;
+  margin: 0 auto 20px;
+  border-radius: 50% 50% 20px 20px / 44% 44% 20px 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--grad-gold);
+  color: var(--fhx-deep);
+  font-size: 1.7rem;
+  box-shadow: 0 18px 38px rgba(200, 162, 74, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+.fhx-cta__title {
+  position: relative;
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 2.7vw, 2.05rem);
+  line-height: 1.7;
+  color: #fffdf6;
+  max-width: 840px;
+  margin: 0 auto 26px;
+}
+.fhx-cta__actions { position: relative; display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; }
+.fhx-cta__note {
+  position: relative;
+  display: block;
+  margin-top: 20px;
+  color: rgba(255, 253, 246, 0.66);
+  font-size: 0.82rem;
+}
+.fhx-cta__note i { color: var(--fhx-gold); }
+
+/* ─────────────────────────── استجابة كاملة ─────────────────────────── */
+@media (max-width: 1360px) and (min-width: 1181px) {
+  .fhx-nav__link { padding: 8px 9px; font-size: 0.87rem; gap: 0.45rem; }
+  .fhx-nav__ic { width: 26px; height: 26px; border-radius: 8px; font-size: 0.74rem; }
+  .fhx-header__bar { gap: 12px; }
+  .fhx-actions { gap: 6px; }
+}
+@media (max-width: 1180px) {
+  .fhx-nav { display: none; }
+  .fhx-auth { display: none; }
+  .fhx-burger { display: inline-flex; }
+  .fhx-header__bar { gap: 12px; }
+  .fhx-actions { gap: 6px; }
+}
+@media (max-width: 1024px) {
+  .fhx-hero { padding-top: calc(var(--fhx-header-h) + 40px); }
+  .fhx-hero__innr { grid-template-columns: 1fr; gap: 42px; }
+  .fhx-hero__copy { max-width: 100%; text-align: center; margin-inline: auto; }
+  .fhx-hero__rule { justify-content: center; }
+  .fhx-hero__rule::before { background: linear-gradient(90deg, transparent, var(--fhx-gold)); }
+  .fhx-hero__cta, .fhx-hero__meta { justify-content: center; }
+  .fhx-hero__sub { margin-inline: auto; }
+  .fhx-arch { width: min(300px, 76vw); aspect-ratio: 1 / 1.15; padding: 34px 22px 26px; }
+  .fhx-arch__title { font-size: 2.3rem; }
+  .fhx-arch__note { display: none; }
+  .fhx-faq { grid-template-columns: 1fr; gap: 30px; }
+  .fhx-faq__intro { position: static; }
+  .fhx-faq__intro .fhx-shead { text-align: center; }
+  .fhx-faq__intro .fhx-ornament { justify-content: center; }
+  .fhx-footer__top { grid-template-columns: 1fr 1fr; gap: 34px; }
+}
+@media (max-width: 900px) {
+  .fhx-values { grid-template-columns: repeat(2, 1fr); }
+  .fhx-journey { grid-template-columns: repeat(2, 1fr); }
+  .fhx-shead { margin-bottom: 36px; }
+  .fhx-section { padding: 70px 0; }
+  .fhx-stats__card { grid-template-columns: 1fr; }
+  .fhx-stat { justify-content: flex-start; padding: 20px 24px; }
+  .fhx-stat + .fhx-stat::before {
+    inset-inline-start: 6%;
+    inset-inline-end: 6%;
+    top: 0;
+    bottom: auto;
+    width: auto;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--fhx-line), transparent);
+  }
+  .fhx-stats { margin-top: -46px; }
+}
+@media (max-width: 640px) {
+  .fhx-shell { padding-inline: 16px; }
+  :root { --fhx-header-h: 74px; }
+  .fhx-brand__seal { width: 44px; height: 44px; border-radius: 13px; }
+  .fhx-brand__text strong { font-size: 1.14rem; }
+  .fhx-brand__text small { font-size: 0.52rem; letter-spacing: 0.2em; }
+  .fhx-icon-btn, .fhx-burger { width: 40px; height: 40px; }
+  .fhx-hero { min-height: auto; padding: calc(var(--fhx-header-h) + 34px) 0 78px; }
+  .fhx-hero__title { font-size: clamp(1.75rem, 7vw, 2.4rem); line-height: 1.6; }
+  .fhx-hero__bismillah { font-size: 1.05rem; }
+  .fhx-hero__meta { gap: 8px 14px; }
+  .fhx-hero__meta-item { font-size: 0.78rem; }
+  .fhx-hero__meta-item .fhx-ic { width: 26px; height: 26px; }
+  .fhx-values, .fhx-journey { grid-template-columns: 1fr; }
+  .fhx-arch { width: min(270px, 84vw); aspect-ratio: 1 / 1.05; }
+  .fhx-arch__title { font-size: 2.1rem; }
+  .fhx-arch__verse { font-size: 0.98rem; }
+  .fhx-shead__title { line-height: 1.55; }
+  .fhx-faq__btn { padding: 15px 14px; gap: 10px; }
+  .fhx-faq__q { font-size: 0.9rem; }
+  .fhx-faq__a p { padding-inline-start: 16px; padding-inline-end: 16px; }
+  .fhx-qiraat__frame { border-radius: 20px; padding: 18px 0; }
+  .fhx-qiraat__item { width: 116px; margin-inline-end: 12px; }
+  .fhx-qiraat__card img { width: 78px; height: 78px; }
+  .fhx-qiraat__frame::before, .fhx-qiraat__frame::after { width: 46px; }
+  .fhx-footer__top { grid-template-columns: 1fr; gap: 28px; padding: 44px 0 30px; }
+  .fhx-footer__bottom { justify-content: center; text-align: center; }
+  .fhx-cta { padding-bottom: 64px; }
+  .fhx-verse { padding: 36px 0; }
+  .fhx-verse__text { line-height: 2; }
+  .fhx-drawer__panel { padding: 16px 16px 22px; }
+}
+@media (max-width: 480px) {
+  .fhx-brand__text { display: none; }
+  .fhx-brand__seal { width: 42px; height: 42px; }
+  .fhx-icon-btn, .fhx-burger, .fhx-actions .fh-bell__btn { width: 38px; height: 38px; }
+  .fhx-arch { width: 88vw; }
+}
+
+/* ─────────────────────────── الصفحات الداخلية ─────────────────────────── */
+.fhx-main { padding-top: var(--fhx-header-h); }
+.fhx-main--home { padding-top: 0; }
+.fhx-main--flush { padding-top: 0; }
+.fhx-header--hidden { display: none; }
+.fh-auth { min-height: calc(100vh - var(--fhx-header-h)); }
+
+.fh-page { background: transparent; padding-bottom: 80px; }
+.fh-page__header {
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 42px;
+  padding: 58px 0 50px;
+  background:
+    radial-gradient(900px 320px at 88% -30%, rgba(200, 162, 74, 0.3), transparent 62%),
+    radial-gradient(700px 300px at 0% 120%, rgba(20, 115, 95, 0.4), transparent 66%),
+    linear-gradient(125deg, #04211c 0%, #073129 55%, #0f5b4c 100%);
+  border-bottom: 1px solid rgba(200, 162, 74, 0.55);
+}
+.fh-page__header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--fhx-pattern);
+  background-size: 76px 76px;
+  opacity: 0.1;
+  pointer-events: none;
+}
+.fh-page__header::after {
+  display: none;
+}
+.fh-page__header .fh-container { position: relative; z-index: 1; }
+.fh-page__icon {
+  width: 62px;
+  height: 62px;
+  border-radius: 50% 50% 18px 18px / 44% 44% 18px 18px;
+  background: var(--grad-gold);
+  color: var(--fhx-deep);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.3);
+  font-size: 1.5rem;
+  margin-bottom: 16px;
+}
+.fh-page__icon::after { display: none; }
+.fh-page__title {
+  font-family: var(--font-display);
+  font-size: clamp(1.7rem, 3.2vw, 2.5rem);
+  color: #fffdf6;
+  margin: 0 0 8px;
+  text-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+}
+.fh-page__subtitle { color: rgba(255, 253, 246, 0.82); font-size: 1rem; line-height: 1.9; }
+
+.fh-card {
+  background: linear-gradient(180deg, #fffdf6 0%, #fbf6ea 100%);
+  border: 1px solid var(--fhx-line-soft);
+  border-radius: 22px;
+  box-shadow: 0 16px 38px rgba(10, 31, 26, 0.07);
+}
+.fh-card:hover { box-shadow: 0 26px 60px rgba(10, 31, 26, 0.11); }
+.fh-card__head {
+  gap: 12px;
+  padding: 18px 22px;
+  background: linear-gradient(180deg, rgba(239, 230, 210, 0.6), rgba(255, 253, 246, 0.4));
+  border-bottom: 1px solid var(--fhx-line-soft);
+}
+.fh-card__head > i:first-child {
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  background: var(--grad-primary);
+  color: #f5e6bc;
+  box-shadow: 0 10px 22px rgba(15, 91, 76, 0.24);
+  font-size: 0.95rem;
+}
+.fh-card__head h3 { font-size: 1.1rem; font-weight: 700; min-width: 0; }
+.fh-card__body { padding: 24px; }
+
+.fh-admin-card {
+  background: linear-gradient(145deg, #fffdf6 0%, #faf4e6 100%);
+  border: 1px solid var(--fhx-line-soft);
+  border-radius: 22px;
+}
+.fh-admin-card:hover {
+  border-color: rgba(200, 162, 74, 0.5);
+  box-shadow: 0 26px 60px rgba(10, 31, 26, 0.14);
+}
+.fh-admin-card__icon {
+  border-radius: 50% 50% 16px 16px / 44% 44% 16px 16px;
+  background: var(--grad-primary);
+  color: #f5e6bc;
+  border: 1px solid rgba(200, 162, 74, 0.4);
+}
+.fh-admin-card__title { font-weight: 700; }
+.fh-qerat, .fh-req {
+  background: linear-gradient(180deg, #fffdf6 0%, #fbf6ea 100%);
+  border-color: var(--fhx-line-soft);
+}
+.fh-qerat:hover, .fh-req:hover { border-color: rgba(200, 162, 74, 0.5); }
+
+.btn-primary {
+  background: var(--grad-primary);
+  box-shadow: 0 12px 26px rgba(15, 91, 76, 0.26);
+}
+.btn-primary:hover {
+  background: linear-gradient(140deg, #17876f 0%, #0f5b4c 55%, #06352c 100%);
+  box-shadow: 0 18px 36px rgba(15, 91, 76, 0.34), 0 0 0 3px rgba(200, 162, 74, 0.22);
+}
+.btn-outline-primary {
+  color: var(--fhx-emerald);
+  border: 1.6px solid rgba(15, 91, 76, 0.45);
+  background: transparent;
+}
+.btn-outline-primary:hover { background: var(--grad-primary); border-color: transparent; color: #fff; }
+.form-control, .form-select {
+  background: #fffdf8;
+  border: 1.4px solid #e4d9c2;
+  border-radius: 12px;
+}
+.form-control:focus, .form-select:focus {
+  border-color: var(--fhx-gold);
+  box-shadow: 0 0 0 4px rgba(200, 162, 74, 0.18);
+}
+.fh-label { color: var(--fhx-ink); font-weight: 700; }
+.fh-hint { color: var(--fhx-muted); }
+.badge.bg-primary-subtle, .bg-primary-subtle {
+  background-color: rgba(15, 91, 76, 0.1) !important;
+  color: var(--fhx-emerald) !important;
+}
+
+/* صفحة المصادقة */
+.fh-auth__brand {
+  background:
+    radial-gradient(600px 300px at 80% 0%, rgba(200, 162, 74, 0.24), transparent 62%),
+    linear-gradient(150deg, #04211c 0%, #073129 60%, #0f5b4c 100%);
+}
+.fh-auth__card { border-radius: 26px; border-color: var(--fhx-line-soft); }
+.fh-auth__form h1 { font-family: var(--font-display); }
+
+/* شارات الحالة */
+.fh-status--open { background: rgba(15, 91, 76, 0.12); color: var(--fhx-emerald); }
+.fh-status--processing { background: rgba(200, 162, 74, 0.18); color: var(--fhx-gold-3); }
+.fh-status--qualified { background: rgba(22, 163, 74, 0.14); color: #15803d; }
+.fh-step--active .fh-step__dot { box-shadow: 0 0 0 4px rgba(200, 162, 74, 0.24); }
+
+/* ضبط إضافي يمنع أي تداخل للأيقونات في بقية الصفحات */
+.btn > i,
+.fh-card__head > i,
+.fh-admin-card__icon > i,
+.fh-status > i,
+.fh-hint > i {
+  flex: 0 0 auto;
+  margin-inline-end: 0 !important;
+}
+.btn { gap: 0.6rem; }
+.fh-status { gap: 0.45rem; }
+.fh-hint { display: inline-flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
+.fh-card__head h3 { min-width: 0; overflow-wrap: anywhere; }
+
+@media (prefers-reduced-motion: reduce) {
+  .fhx-qiraat__track {
+    animation: none;
+    flex-wrap: wrap;
+    width: 100%;
+    justify-content: center;
+    padding: 0 12px;
+    gap: 12px;
+  }
+  .fhx-qiraat__track .is-dup { display: none; }
+  .fhx-qiraat__frame::before,
+  .fhx-qiraat__frame::after { display: none; }
+  .fhx-hero__title, .fhx-hero__scroll, .fhx-faq__a { animation: none; transition: none; }
+  .fhx-value, .fhx-step, .fhx-qiraat__card { transition: none; }
+}
+
+/* لمسات نهائية */
+#fh-stats,
+#about,
+#journey,
+#qiraat,
+#faq {
+  scroll-margin-top: calc(var(--fhx-header-h) + 20px);
+}
+.fhx-drawer__foot .fhx-btn--ghost {
+  background: rgba(15, 91, 76, 0.06);
+  border-color: var(--fhx-line);
+  color: var(--fhx-emerald);
+}
+.fhx-drawer__foot .fhx-btn--ghost:hover {
+  background: rgba(15, 91, 76, 0.12);
+  color: var(--fhx-emerald);
+}
+.fhx-drawer__panel .fhx-brand__text strong { color: var(--fhx-ink); }
+.fhx-drawer__panel .fhx-brand__text small { color: var(--fhx-gold-3); }
+.fhx-drawer a:focus-visible,
+.fhx-drawer button:focus-visible,
+.fhx-header a:focus-visible,
+.fhx-header button:focus-visible {
+  outline: 2px solid var(--fhx-gold);
+  outline-offset: 2px;
+}
+
+/* ═════════════════ نهاية ثيم فاتحة v4 ═════════════════ */
+
+
+
+
+
+
+
+
+
+
+
+

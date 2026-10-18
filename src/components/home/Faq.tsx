@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useI18n } from "@/context/I18nContext";
 
-// أسئلة وأجوبة بمفاتيحها الإنجليزية الأصلية — تُترجم عبر الـ API لكل اللغات
 const FAQS = [
   {
     q: "What is Fatiha.ID, and what does it aim to achieve?",
@@ -27,43 +26,54 @@ const FAQS = [
   },
 ];
 
+/** أسئلة شائعة بتصميم عمودين وأكورديون سلس. */
 export function Faq() {
   const { t } = useI18n();
   const [open, setOpen] = useState<number | null>(0);
 
   return (
-    <section className="fh-section fh-faq">
-      <div className="fh-container">
-        <div className="fh-center">
-          <span className="fh-eyebrow">
-            <i className="fas fa-circle-question"></i>
-            FAQ
-          </span>
-          <h2 className="fh-heading">{t("Frequently Ask Questions")}</h2>
-        </div>
+    <section className="fhx-section" id="faq">
+      <div className="fhx-shell">
+        <div className="fhx-faq">
+          <div className="fhx-faq__intro">
+            <div className="fhx-shead">
+              <span className="fhx-shead__eyebrow">
+                <i className="fas fa-circle-question" aria-hidden="true" />
+                FAQ
+              </span>
+              <h2 className="fhx-shead__title">{t("Frequently Ask Questions")}</h2>
+              <div className="fhx-ornament" aria-hidden="true"><span /></div>
+              <p className="fhx-shead__text">
+                {t("Everything you need to know before you begin your Fatiha journey.")}
+              </p>
+            </div>
+          </div>
 
-        <div className="fh-faq__wrap">
-          {FAQS.map((f, i) => {
-            const isOpen = open === i;
-            return (
-              <div className={`fh-faq__item${isOpen ? " open" : ""}`} key={i}>
-                <button
-                  type="button"
-                  className="fh-faq__head"
-                  onClick={() => setOpen(isOpen ? null : i)}
-                  aria-expanded={isOpen}
-                >
-                  <span>{t(f.q)}</span>
-                  <span className="fh-faq__icon">
-                    <i className="fas fa-chevron-down"></i>
-                  </span>
-                </button>
-                <div className="fh-faq__body" style={{ maxHeight: isOpen ? 600 : 0 }}>
-                  <p>{t(f.a)}</p>
+          <div className="fhx-faq__list">
+            {FAQS.map((f, i) => {
+              const isOpen = open === i;
+              return (
+                <div className={`fhx-faq__item${isOpen ? " is-open" : ""}`} key={f.q}>
+                  <button
+                    type="button"
+                    className="fhx-faq__btn"
+                    onClick={() => setOpen(isOpen ? null : i)}
+                    aria-expanded={isOpen}
+                    aria-controls={`faq-panel-${i}`}
+                  >
+                    <span className="fhx-faq__num">{String(i + 1).padStart(2, "0")}</span>
+                    <span className="fhx-faq__q">{t(f.q)}</span>
+                    <span className="fhx-faq__chev" aria-hidden="true">
+                      <i className="fas fa-chevron-down" />
+                    </span>
+                  </button>
+                  <div className="fhx-faq__a" id={`faq-panel-${i}`} role="region">
+                    <div><p>{t(f.a)}</p></div>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       </div>
     </section>

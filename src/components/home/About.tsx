@@ -2,7 +2,6 @@
 
 import { useI18n } from "@/context/I18nContext";
 
-// القيم بمفاتيحها الإنجليزية الأصلية — تُترجم عبر الـ API لكل اللغات
 const VALUES = [
   {
     icon: "fa-bullseye",
@@ -28,40 +27,41 @@ const VALUES = [
   },
 ];
 
-// يزيل البادئة "Mission:" من القيمة المترجمة ليبقى النص فقط
 function stripLabel(s: string): string {
   const idx = s.indexOf(":");
   return idx >= 0 && idx < 14 ? s.slice(idx + 1).trim() : s;
 }
 
+/** قسم «عن المنصة» ببطاقات مخطوطة وأيقونات أقواس. */
 export function About() {
   const { t } = useI18n();
 
   return (
-    <section className="fh-section">
-      <div className="fh-container">
-        <div className="fh-center">
-          <span className="fh-eyebrow">
-            <i className="fas fa-mosque"></i>
+    <section className="fhx-section fhx-section--paper" id="about">
+      <div className="fhx-shell">
+        <div className="fhx-shead">
+          <span className="fhx-shead__eyebrow">
+            <i className="fas fa-mosque" aria-hidden="true" />
             Fatiha.ID
           </span>
-          <h2 className="fh-heading">{t("About Fatiha.ID Platform")}</h2>
-          <p className="fh-subheading">
+          <h2 className="fhx-shead__title">{t("About Fatiha.ID Platform")}</h2>
+          <div className="fhx-ornament" aria-hidden="true"><span /></div>
+          <p className="fhx-shead__text">
             {t(
               "Fatiha.ID is a digital platform designed to promote a deep connection with Surat Al-Fatiha, a revered chapter of the Quran. Its primary goal is to empower and educate individuals worldwide, enabling them to accurately recite Surat Al-Fatiha, understand its profound meaning, and receive unique identification and certification."
             )}
           </p>
         </div>
 
-        <div className="fh-about__grid">
+        <div className="fhx-values">
           {VALUES.map((v, i) => (
-            <div className="fh-value" key={i}>
-              <div className="fh-value__icon">
-                <i className={`fas ${v.icon}`}></i>
+            <article className="fhx-value" key={v.titleKey} data-index={String(i + 1).padStart(2, "0")}>
+              <div className="fhx-value__ic">
+                <i className={`fas ${v.icon}`} aria-hidden="true" />
               </div>
-              <h3 className="fh-value__title">{t(v.titleKey)}</h3>
-              <p className="fh-value__text">{stripLabel(t(v.textKey))}</p>
-            </div>
+              <h3 className="fhx-value__title">{t(v.titleKey)}</h3>
+              <p className="fhx-value__text">{stripLabel(t(v.textKey))}</p>
+            </article>
           ))}
         </div>
       </div>

@@ -1,321 +1,473 @@
 "use client";
 
 import Link from "next/link";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useI18n } from "@/context/I18nContext";
 import { useRouter, usePathname } from "next/navigation";
 import { NotificationBell } from "@/components/NotificationBell";
 
+type MenuKey = "fatiha" | "mjaz" | "admin" | "user" | null;
+
+interface NavLink {
+  href: string;
+  label: string;
+  icon: string;
+  desc?: string;
+}
+
+/**
+ * هيدر مخصّص بالكامل (بدون Bootstrap) لضمان تناسق الأيقونات والمسافات في كل
+ * اللغات والاتجاهات، مع قوائم منسدلة تُدار بـ React ودرج جوال انسيابي.
+ */
 export function Navbar() {
   const { t, lang, languages, openLanguageModal } = useI18n();
-  const { user, isAuthed, logout } = useAuth();
+  const { user, isAuthed, isAdmin, logout } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-  const isAdmin = user?.role === "Admin";
+
+  const [openMenu, setOpenMenu] = useState<MenuKey>(null);
+  const [drawer, setDrawer] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const headerRef = useRef<HTMLElement | null>(null);
+
   const isHome = pathname === "/";
+  const isBuilder = pathname.startsWith("/admin/pages/builder");
   const currentLangName = languages.find((l) => l.code === lang)?.name ?? "";
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
 
+  const fatihaLinks: NavLink[] = [
+    { href: "/fatiha-requests/new", label: t("Apply"), icon: "fa-file-signature", desc: t("New Fatiha Request") },
+    { href: "/fatiha-requests", label: t("Fatiha Requests"), icon: "fa-clipboard-list", desc: t("My Requests") },
+    { href: "/fatiha-exam", label: t("Fatiha Qualifying Exam"), icon: "fa-graduation-cap", desc: t("Take Qualifying Exam") },
+    { href: "/al-qerat", label: t("Ten Recitations (Al-Qerat)"), icon: "fa-book-quran", desc: t("Listen to the recitations") },
+  ];
+
+  const mjazLinks: NavLink[] = [
+    { href: "/authorized-users/apply", label: t("Apply"), icon: "fa-user-graduate", desc: t("Join as an instructor") },
+    { href: "/authorized-users", label: t("Requests"), icon: "fa-users-rectangle", desc: t("Certified instructors") },
+  ];
+
+  const adminLinks: NavLink[] = [
+    { href: "/admin", label: t("Admin Panel"), icon: "fa-gauge-high", desc: t("Dashboard") },
+    { href: "/admin/fatiha-requests", label: t("Manage Fatiha Requests"), icon: "fa-clipboard-check" },
+    { href: "/admin/authorized-users", label: t("Ijazah Applications"), icon: "fa-user-graduate" },
+    { href: "/admin/al-qerat", label: t("Manage Recitations"), icon: "fa-book-quran" },
+    { href: "/admin/fatiha-exam", label: t("Manage Exam Questions"), icon: "fa-circle-question" },
+    { href: "/admin/users", label: t("Manage Users"), icon: "fa-users" },
+    { href: "/admin/certificates", label: t("Certificates"), icon: "fa-certificate" },
+    { href: "/admin/newsletter", label: t("Send Newsletter"), icon: "fa-envelope" },
+    { href: "/admin/pages", label: t("Manage Static Pages"), icon: "fa-file-lines" },
+    { href: "/admin/books", label: t("Manage Fatiha Library"), icon: "fa-book" },
+    { href: "/admin/blogs", label: t("Manage Fatiha Blog"), icon: "fa-newspaper" },
+    { href: "/admin/marketplace", label: t("Manage Fatiha Marketplace"), icon: "fa-store" },
+    { href: "/admin/settings", label: t("Settings"), icon: "fa-gear" },
+  ];
+
+  const userLinks: NavLink[] = [
+    { href: "/profile", label: t("Update Profile"), icon: "fa-user-pen" },
+    { href: "/fatiha-requests", label: t("Fatiha Requests"), icon: "fa-clipboard-list" },
+  ];
+
+  useEffect(() => {
+    setOpenMenu(null);
+    setDrawer(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    const onPointer = (e: MouseEvent) => {
+      if (headerRef.current && !headerRef.current.contains(e.target as Node)) setOpenMenu(null);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") { setOpenMenu(null); setDrawer(false); }
+    };
+    document.addEventListener("mousedown", onPointer);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onPointer);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, []);
+
+  useEffect(() => {
+    document.body.style.overflow = drawer ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [drawer]);
+
+  const toggle = useCallback((key: MenuKey) => {
+    setOpenMenu((current) => (current === key ? null : key));
+  }, []);
+
   async function handleLogout() {
+    setOpenMenu(null);
+    setDrawer(false);
     await logout();
     router.push("/");
   }
 
+  const headerClass = [
+    "fhx-header",
+    isHome ? "is-home" : "is-solid",
+    scrolled ? "is-scrolled" : "",
+    isBuilder ? "fhx-header--hidden" : "",
+  ].filter(Boolean).join(" ");
+
   return (
-    <header className={`cs-site__header cs-style1${isHome ? " cs-nav--home" : ""}`}>
-      <div className="cs-main__header">
-        <div className="container">
-          <div className="cs-main__header__in">
-            {/* الشعار */}
-            <div className="cs-main__header__left">
-              <Link className="navbar-brand cs-site__branding" href="/">
+    <>
+      <header className={headerClass} ref={headerRef}>
+        <div className="fhx-shell">
+          <div className="fhx-header__bar">
+            <Link className="fhx-brand" href="/" aria-label="Fatiha.id">
+              <span className="fhx-brand__seal">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src="/Logo.png" alt="Fatiha.id" />
+              </span>
+              <span className="fhx-brand__text">
+                <strong>{t("Fathia")}</strong>
+                <small>FATIHA.ID</small>
+              </span>
+            </Link>
+
+            <nav className="fhx-nav" aria-label={t("Main navigation")}>
+              <Link href="/" className={`fhx-nav__link${isActive("/") ? " is-active" : ""}`} aria-current={isActive("/") ? "page" : undefined}>
+                <span className="fhx-nav__ic"><i className="fas fa-house" aria-hidden="true" /></span>
+                <span className="fhx-nav__label">{t("Home")}</span>
               </Link>
-            </div>
 
-            {/* القائمة */}
-            <div className="cs-main__header__right">
-              <nav className="navbar navbar-expand-lg">
-                <div className="container-fluid">
+              {isAuthed && !isAdmin && (
+                <div className="fhx-menu">
                   <button
-                    className="navbar-toggler"
                     type="button"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#navbarNav"
-                    aria-controls="navbarNav"
-                    aria-expanded="false"
-                    aria-label="Toggle navigation"
+                    className={`fhx-nav__link${openMenu === "fatiha" ? " is-open" : ""}`}
+                    aria-expanded={openMenu === "fatiha"}
+                    aria-haspopup="true"
+                    onClick={() => toggle("fatiha")}
                   >
-                    <span className="navbar-toggler-icon"></span>
+                    <span className="fhx-nav__ic"><i className="fas fa-book-open" aria-hidden="true" /></span>
+                    <span className="fhx-nav__label">{t("Fathia")}</span>
+                    <i className="fas fa-chevron-down fhx-nav__caret" aria-hidden="true" />
                   </button>
-
-                  <div className="collapse navbar-collapse" id="navbarNav">
-                    <ul className="navbar-nav ms-auto cs-nav__list">
-                      <li className="nav-item">
-                        <Link className={`nav-link${isActive("/") ? " is-active" : ""}`} href="/" aria-current={isActive("/") ? "page" : undefined}>
-                          <i className="fas fa-house" aria-hidden="true" />
-                          <span>{t("Home")}</span>
+                  {openMenu === "fatiha" && (
+                    <div className="fhx-dropdown" role="menu">
+                      <div className="fhx-dropdown__label">
+                        <i className="fas fa-star-and-crescent" aria-hidden="true" />
+                        {t("Fatiha journey")}
+                      </div>
+                      {fatihaLinks.map((item) => (
+                        <Link key={item.href} href={item.href} className="fhx-drop" role="menuitem">
+                          <span className="fhx-drop__ic"><i className={`fas ${item.icon}`} aria-hidden="true" /></span>
+                          <span className="fhx-drop__text">
+                            <strong>{item.label}</strong>
+                            {item.desc ? <small>{item.desc}</small> : null}
+                          </span>
                         </Link>
-                      </li>
-
-                      {isAuthed && isAdmin && (
-                        <li className="nav-item">
-                          <Link className={`nav-link${isActive("/admin") ? " is-active" : ""}`} href="/admin">
-                            <i className="fas fa-gauge-high" aria-hidden="true" />
-                            <span>{t("Admin panel")}</span>
-                          </Link>
-                        </li>
-                      )}
-
-                      {/* قسم الفاتحة */}
-                      {isAuthed && !isAdmin && (
-                        <li className="nav-item dropdown">
-                          <a
-                            className="nav-link dropdown-toggle"
-                            href="#"
-                            id="fatihaDropdown"
-                            role="button"
-                            data-bs-toggle="dropdown"
-                            aria-expanded="false"
-                          >
-                            {t("Fathia")}
-                          </a>
-                          <ul className="dropdown-menu" aria-labelledby="fatihaDropdown">
-                            {/* التقديم مباشرةً على طلب الفاتحة (نموذج التقديم) وليس صفحة الطلبات */}
-                            <li>
-                              <Link className="dropdown-item fw-semibold" href="/fatiha-requests/new">
-                                <i className="fas fa-file-signature me-2 text-primary"></i>
-                                {t("Apply")}
-                              </Link>
-                            </li>
-                            <li>
-                              <Link className="dropdown-item" href="/fatiha-requests">
-                                <i className="fas fa-list-check me-2"></i>
-                                {t("My Fatiha Requests")}
-                              </Link>
-                            </li>
-                            <li><hr className="dropdown-divider" /></li>
-                            <li>
-                              <Link className="dropdown-item" href="/books">
-                                <i className="fas fa-book-open me-2"></i>
-                                {t("Fatiha Library")}
-                              </Link>
-                            </li>
-                            <li>
-                              <Link className="dropdown-item" href="/blogs">
-                                <i className="fas fa-blog me-2"></i>
-                                {t("Fatiha Blog")}
-                              </Link>
-                            </li>
-                            <li>
-                              <Link className="dropdown-item" href="/marketplace">
-                                <i className="fas fa-store me-2"></i>
-                                {t("Fatiha Marketplace")}
-                              </Link>
-                            </li>
-                          </ul>
-                        </li>
-                      )}
-
-                      {/* قسم المجاز */}
-                      {isAuthed && !isAdmin && (
-                        <li className="nav-item dropdown">
-                          <a
-                            className="nav-link dropdown-toggle"
-                            href="#"
-                            id="mjazDropdown"
-                            role="button"
-                            data-bs-toggle="dropdown"
-                            aria-expanded="false"
-                          >
-                            {t("MJAZ")}
-                          </a>
-                          <ul className="dropdown-menu" aria-labelledby="mjazDropdown">
-                            <li>
-                              <Link className="dropdown-item" href="/authorized-users">
-                                <i className="fas fa-users-rectangle me-2" aria-hidden="true" />
-                                {t("Requests")}
-                              </Link>
-                            </li>
-                            <li>
-                              <Link className="dropdown-item" href="/authorized-users/apply">
-                                <i className="fas fa-user-graduate me-2" aria-hidden="true" />
-                                {t("Apply")}
-                              </Link>
-                            </li>
-                          </ul>
-                        </li>
-                      )}
-
-                      {/* مبدّل اللغة — متاح دائماً في الرأس */}
-                      <li className="nav-item">
-                        <button
-                          type="button"
-                          className="nav-link fh-lang-switch"
-                          onClick={openLanguageModal}
-                          title={t("Languages")}
-                          aria-label={t("Languages")}
-                        >
-                          <i className="fas fa-globe" aria-hidden="true" />
-                          <span className="fh-lang-switch__text">{currentLangName}</span>
-                        </button>
-                      </li>
-
-                      {!isAuthed && (
-                        <li className="nav-item">
-                          <Link className="nav-link" href="/register">
-                            <i className="fas fa-user-plus" aria-hidden="true" />
-                            <span>{t("Register")}</span>
-                          </Link>
-                        </li>
-                      )}
-                      {!isAuthed && (
-                        <li className="nav-item">
-                          <Link className="nav-link" href="/login">
-                            <i className="fas fa-right-to-bracket" aria-hidden="true" />
-                            <span>{t("Log in")}</span>
-                          </Link>
-                        </li>
-                      )}
-
-                      {/* جرس الإشعارات */}
-                      {isAuthed && (
-                        <li className="nav-item d-flex align-items-center">
-                          <NotificationBell />
-                        </li>
-                      )}
-
-                      {/* الإعدادات */}
-                      {isAuthed && (
-                        <li className="nav-item dropdown">
-                          <a
-                            className="nav-link dropdown-toggle"
-                            href="#"
-                            role="button"
-                            data-bs-toggle="dropdown"
-                            aria-expanded="false"
-                          >
-                            <i className="fas fa-cog me-1"></i>
-                            {t("Settings")}
-                          </a>
-                          <ul className="dropdown-menu dropdown-menu-end">
-                            {isAuthed && user ? (
-                              <li className="fh-user-chip">
-                                <span className="fh-user-chip__avatar" aria-hidden="true">
-                                  <i className="fas fa-user" />
-                                </span>
-                                <span className="fh-user-chip__meta">
-                                  <strong>{user.nameAr || user.nameEn || t("profile")}</strong>
-                                  <small dir="ltr">{user.email}</small>
-                                </span>
-                              </li>
-                            ) : null}
-                            {isAdmin && (
-                              <>
-                                <li>
-                                  <Link className="dropdown-item" href="/admin">
-                                    <i className="fas fa-gauge-high me-2"></i>
-                                    {t("Admin panel")}
-                                  </Link>
-                                </li>
-                                <li>
-                                  <Link className="dropdown-item" href="/admin/fatiha-requests">
-                                    <i className="fas fa-clipboard-check me-2"></i>
-                                    {t("Manage Fatiha Requests")}
-                                  </Link>
-                                </li>
-                                <li>
-                                  <Link className="dropdown-item" href="/admin/authorized-users">
-                                    <i className="fas fa-user-graduate me-2"></i>
-                                    {t("Ijazah Applications")}
-                                  </Link>
-                                </li>
-                                <li>
-                                  <Link className="dropdown-item" href="/admin/al-qerat">
-                                    <i className="fas fa-book-quran me-2"></i>
-                                    {t("Manage Recitations")}
-                                  </Link>
-                                </li>
-                                <li>
-                                  <Link className="dropdown-item" href="/admin/fatiha-exam">
-                                    <i className="fas fa-circle-question me-2"></i>
-                                    {t("Manage Exam Questions")}
-                                  </Link>
-                                </li>
-                                <li>
-                                  <Link className="dropdown-item" href="/admin/users">
-                                    <i className="fas fa-users me-2"></i>
-                                    {t("Manage Users")}
-                                  </Link>
-                                </li>
-                                <li>
-                                  <Link className="dropdown-item" href="/admin/newsletter">
-                                    <i className="fas fa-envelope me-2"></i>
-                                    {t("Send Newsletter")}
-                                  </Link>
-                                </li>
-                                <li>
-                                  <Link className="dropdown-item" href="/admin/pages">
-                                    <i className="fas fa-file-alt me-2"></i>
-                                    {t("Manage Static Pages")}
-                                  </Link>
-                                </li>
-                                <li>
-                                  <Link className="dropdown-item" href="/admin/books">
-                                    <i className="fas fa-book me-2"></i>
-                                    {t("Manage Fatiha Library")}
-                                  </Link>
-                                </li>
-                                <li>
-                                  <Link className="dropdown-item" href="/admin/blogs">
-                                    <i className="fas fa-blog me-2"></i>
-                                    {t("Manage Fatiha Blog")}
-                                  </Link>
-                                </li>
-                                <li>
-                                  <Link className="dropdown-item" href="/admin/marketplace">
-                                    <i className="fas fa-store me-2"></i>
-                                    {t("Manage Fatiha Marketplace")}
-                                  </Link>
-                                </li>
-                                <li><hr className="dropdown-divider" /></li>
-                              </>
-                            )}
-                            <li>
-                              <Link className="dropdown-item" href="/profile">
-                                <i className="fas fa-user-edit me-2"></i>
-                                {t("Update Profile")}
-                              </Link>
-                            </li>
-                            <li>
-                              <hr className="dropdown-divider" />
-                            </li>
-                            <li>
-                              <button className="dropdown-item text-danger" onClick={handleLogout} style={btnStyle}>
-                                <i className="fas fa-sign-out-alt me-2"></i>
-                                {t("Log out")}
-                              </button>
-                            </li>
-                          </ul>
-                        </li>
-                      )}
-                    </ul>
-                  </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              </nav>
+              )}
+
+              {isAuthed && !isAdmin && (
+                <div className="fhx-menu">
+                  <button
+                    type="button"
+                    className={`fhx-nav__link${openMenu === "mjaz" ? " is-open" : ""}`}
+                    aria-expanded={openMenu === "mjaz"}
+                    aria-haspopup="true"
+                    onClick={() => toggle("mjaz")}
+                  >
+                    <span className="fhx-nav__ic"><i className="fas fa-user-graduate" aria-hidden="true" /></span>
+                    <span className="fhx-nav__label">{t("MJAZ")}</span>
+                    <i className="fas fa-chevron-down fhx-nav__caret" aria-hidden="true" />
+                  </button>
+                  {openMenu === "mjaz" && (
+                    <div className="fhx-dropdown" role="menu">
+                      <div className="fhx-dropdown__label">
+                        <i className="fas fa-award" aria-hidden="true" />
+                        {t("Certified instructors")}
+                      </div>
+                      {mjazLinks.map((item) => (
+                        <Link key={item.href} href={item.href} className="fhx-drop" role="menuitem">
+                          <span className="fhx-drop__ic"><i className={`fas ${item.icon}`} aria-hidden="true" /></span>
+                          <span className="fhx-drop__text">
+                            <strong>{item.label}</strong>
+                            {item.desc ? <small>{item.desc}</small> : null}
+                          </span>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <Link href="/al-qerat" className={`fhx-nav__link${isActive("/al-qerat") ? " is-active" : ""}`}>
+                <span className="fhx-nav__ic"><i className="fas fa-book-quran" aria-hidden="true" /></span>
+                <span className="fhx-nav__label">{t("Qiraat")}</span>
+              </Link>
+
+              <Link href="/books" className={`fhx-nav__link${isActive("/books") ? " is-active" : ""}`}>
+                <span className="fhx-nav__ic"><i className="fas fa-book-open-reader" aria-hidden="true" /></span>
+                <span className="fhx-nav__label">{t("Fatiha Library")}</span>
+              </Link>
+
+              {isAdmin && (
+                <div className="fhx-menu">
+                  <button
+                    type="button"
+                    className={`fhx-nav__link${openMenu === "admin" || isActive("/admin") ? " is-open is-active" : ""}`}
+                    aria-expanded={openMenu === "admin"}
+                    aria-haspopup="true"
+                    onClick={() => toggle("admin")}
+                  >
+                    <span className="fhx-nav__ic"><i className="fas fa-gauge-high" aria-hidden="true" /></span>
+                    <span className="fhx-nav__label">{t("Admin Panel")}</span>
+                    <i className="fas fa-chevron-down fhx-nav__caret" aria-hidden="true" />
+                  </button>
+                  {openMenu === "admin" && (
+                    <div className="fhx-dropdown fhx-dropdown--wide" role="menu">
+                      <div className="fhx-dropdown__label">
+                        <i className="fas fa-shield-halved" aria-hidden="true" />
+                        {t("Control center")}
+                      </div>
+                      {adminLinks.map((item) => (
+                        <Link key={item.href} href={item.href} className="fhx-drop" role="menuitem">
+                          <span className="fhx-drop__ic"><i className={`fas ${item.icon}`} aria-hidden="true" /></span>
+                          <span className="fhx-drop__text"><strong>{item.label}</strong></span>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </nav>
+
+            <div className="fhx-actions">
+              <button
+                type="button"
+                className="fhx-icon-btn"
+                onClick={openLanguageModal}
+                title={`${t("Languages")} — ${currentLangName}`}
+                aria-label={t("Languages")}
+              >
+                <i className="fas fa-globe" aria-hidden="true" />
+              </button>
+
+              {isAuthed && <NotificationBell />}
+
+              {!isAuthed && (
+                <div className="fhx-auth">
+                  <Link href="/login" className="fhx-btn fhx-btn--ghost">
+                    <i className="fas fa-right-to-bracket" aria-hidden="true" />
+                    {t("Log in")}
+                  </Link>
+                  <Link href="/register" className="fhx-btn fhx-btn--gold">
+                    <i className="fas fa-user-plus" aria-hidden="true" />
+                    {t("Register")}
+                  </Link>
+                </div>
+              )}
+
+              {isAuthed && (
+                <div className="fhx-menu">
+                  <button
+                    type="button"
+                    className="fhx-icon-btn"
+                    aria-expanded={openMenu === "user"}
+                    aria-haspopup="true"
+                    aria-label={t("Account menu")}
+                    onClick={() => toggle("user")}
+                  >
+                    <i className="fas fa-user" aria-hidden="true" />
+                  </button>
+                  {openMenu === "user" && (
+                    <div className="fhx-dropdown" role="menu" style={{ insetInlineStart: "auto", insetInlineEnd: 0 }}>
+                      <div className="fhx-dropdown__user">
+                        <span className="fhx-dropdown__avatar"><i className="fas fa-user" aria-hidden="true" /></span>
+                        <span className="fhx-dropdown__meta">
+                          <strong>{user?.nameAr || user?.nameEn || t("profile")}</strong>
+                          <small>{user?.email}</small>
+                        </span>
+                      </div>
+                      {userLinks.map((item) => (
+                        <Link key={item.href} href={item.href} className="fhx-drop" role="menuitem">
+                          <span className="fhx-drop__ic"><i className={`fas ${item.icon}`} aria-hidden="true" /></span>
+                          <span className="fhx-drop__text"><strong>{item.label}</strong></span>
+                        </Link>
+                      ))}
+                      <div className="fhx-dropdown__sep" />
+                      <button type="button" className="fhx-drop fhx-drop--danger" onClick={handleLogout} role="menuitem">
+                        <span className="fhx-drop__ic"><i className="fas fa-right-from-bracket" aria-hidden="true" /></span>
+                        <span className="fhx-drop__text"><strong>{t("Log out")}</strong></span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <button
+                type="button"
+                className={`fhx-burger${drawer ? " is-open" : ""}`}
+                aria-label={t("Menu")}
+                aria-expanded={drawer}
+                onClick={() => setDrawer((v) => !v)}
+              >
+                <span /><span /><span />
+              </button>
             </div>
           </div>
         </div>
+      </header>
+
+      <div className={`fhx-drawer${drawer ? " is-open" : ""}`} aria-hidden={!drawer}>
+        <div className="fhx-drawer__backdrop" onClick={() => setDrawer(false)} />
+        <aside className="fhx-drawer__panel" role="dialog" aria-modal="true" aria-label={t("Menu")}>
+          <div className="fhx-drawer__head">
+            <Link className="fhx-brand" href="/" onClick={() => setDrawer(false)}>
+              <span className="fhx-brand__seal">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/Logo.png" alt="Fatiha.id" />
+              </span>
+              <span className="fhx-brand__text">
+                <strong>{t("Fathia")}</strong>
+                <small>FATIHA.ID</small>
+              </span>
+            </Link>
+            <button type="button" className="fhx-drawer__close" onClick={() => setDrawer(false)} aria-label={t("Close")}>
+              <i className="fas fa-xmark" aria-hidden="true" />
+            </button>
+          </div>
+
+          <div className="fhx-drawer__group">
+            <div className="fhx-drawer__title">
+              <i className="fas fa-compass" aria-hidden="true" />
+              {t("Navigate")}
+            </div>
+            <Link href="/" className={`fhx-dlink${isActive("/") ? " is-active" : ""}`} onClick={() => setDrawer(false)}>
+              <span className="fhx-dlink__ic"><i className="fas fa-house" aria-hidden="true" /></span>
+              <span>{t("Home")}</span>
+            </Link>
+            <Link href="/al-qerat" className={`fhx-dlink${isActive("/al-qerat") ? " is-active" : ""}`} onClick={() => setDrawer(false)}>
+              <span className="fhx-dlink__ic"><i className="fas fa-book-quran" aria-hidden="true" /></span>
+              <span>{t("Ten Recitations (Al-Qerat)")}</span>
+            </Link>
+            <Link href="/books" className={`fhx-dlink${isActive("/books") ? " is-active" : ""}`} onClick={() => setDrawer(false)}>
+              <span className="fhx-dlink__ic"><i className="fas fa-book-open-reader" aria-hidden="true" /></span>
+              <span>{t("Fatiha Library")}</span>
+            </Link>
+            <Link href="/blogs" className={`fhx-dlink${isActive("/blogs") ? " is-active" : ""}`} onClick={() => setDrawer(false)}>
+              <span className="fhx-dlink__ic"><i className="fas fa-newspaper" aria-hidden="true" /></span>
+              <span>{t("Fatiha Blog")}</span>
+            </Link>
+            <Link href="/marketplace" className={`fhx-dlink${isActive("/marketplace") ? " is-active" : ""}`} onClick={() => setDrawer(false)}>
+              <span className="fhx-dlink__ic"><i className="fas fa-store" aria-hidden="true" /></span>
+              <span>{t("Fatiha Marketplace")}</span>
+            </Link>
+          </div>
+
+          {isAuthed && !isAdmin && (
+            <div className="fhx-drawer__group">
+              <div className="fhx-drawer__title">
+                <i className="fas fa-star-and-crescent" aria-hidden="true" />
+                {t("Fatiha journey")}
+              </div>
+              {fatihaLinks.map((item) => (
+                <Link key={item.href} href={item.href} className="fhx-dlink" onClick={() => setDrawer(false)}>
+                  <span className="fhx-dlink__ic"><i className={`fas ${item.icon}`} aria-hidden="true" /></span>
+                  <span>{item.label}</span>
+                </Link>
+              ))}
+            </div>
+          )}
+
+          {isAuthed && !isAdmin && (
+            <div className="fhx-drawer__group">
+              <div className="fhx-drawer__title">
+                <i className="fas fa-award" aria-hidden="true" />
+                {t("MJAZ")}
+              </div>
+              {mjazLinks.map((item) => (
+                <Link key={item.href} href={item.href} className="fhx-dlink" onClick={() => setDrawer(false)}>
+                  <span className="fhx-dlink__ic"><i className={`fas ${item.icon}`} aria-hidden="true" /></span>
+                  <span>{item.label}</span>
+                </Link>
+              ))}
+            </div>
+          )}
+
+          {isAdmin && (
+            <div className="fhx-drawer__group">
+              <div className="fhx-drawer__title">
+                <i className="fas fa-shield-halved" aria-hidden="true" />
+                {t("Control center")}
+              </div>
+              {adminLinks.map((item) => (
+                <Link key={item.href} href={item.href} className="fhx-dlink" onClick={() => setDrawer(false)}>
+                  <span className="fhx-dlink__ic"><i className={`fas ${item.icon}`} aria-hidden="true" /></span>
+                  <span>{item.label}</span>
+                </Link>
+              ))}
+            </div>
+          )}
+
+          <div className="fhx-drawer__group">
+            <div className="fhx-drawer__title">
+              <i className="fas fa-language" aria-hidden="true" />
+              {t("Language")}
+            </div>
+            <button
+              type="button"
+              className="fhx-dlink"
+              onClick={() => { setDrawer(false); openLanguageModal(); }}
+            >
+              <span className="fhx-dlink__ic"><i className="fas fa-globe" aria-hidden="true" /></span>
+              <span style={{ flex: "1 1 auto" }}>{currentLangName}</span>
+              <i className="fas fa-chevron-down" aria-hidden="true" />
+            </button>
+          </div>
+
+          <div className="fhx-drawer__foot">
+            {isAuthed ? (
+              <>
+                <div className="fhx-drawer__user">
+                  <span className="fhx-dropdown__avatar"><i className="fas fa-user" aria-hidden="true" /></span>
+                  <span className="fhx-dropdown__meta">
+                    <strong>{user?.nameAr || user?.nameEn || t("profile")}</strong>
+                    <small>{user?.email}</small>
+                  </span>
+                </div>
+                <Link href="/profile" className="fhx-btn fhx-btn--emerald" onClick={() => setDrawer(false)}>
+                  <i className="fas fa-user-pen" aria-hidden="true" />
+                  {t("Update Profile")}
+                </Link>
+                <button type="button" className="fhx-btn fhx-btn--ghost" onClick={handleLogout}>
+                  <i className="fas fa-right-from-bracket" aria-hidden="true" />
+                  {t("Log out")}
+                </button>
+              </>
+            ) : (
+              <>
+                <Link href="/login" className="fhx-btn fhx-btn--emerald" onClick={() => setDrawer(false)}>
+                  <i className="fas fa-right-to-bracket" aria-hidden="true" />
+                  {t("Log in")}
+                </Link>
+                <Link href="/register" className="fhx-btn fhx-btn--gold" onClick={() => setDrawer(false)}>
+                  <i className="fas fa-user-plus" aria-hidden="true" />
+                  {t("Register")}
+                </Link>
+              </>
+            )}
+          </div>
+        </aside>
       </div>
-    </header>
+
+    </>
   );
 }
-
-const btnStyle: React.CSSProperties = {
-  width: "100%",
-  textAlign: "start",
-  background: "none",
-  border: "none",
-};

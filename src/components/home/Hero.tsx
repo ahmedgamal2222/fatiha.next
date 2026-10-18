@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useI18n } from "@/context/I18nContext";
 
-// شعار الفاتحة بكل الترجمات — يتبدّل تلقائياً كل 4 ثوانٍ
+// رسالة المنصة بكل اللغات — تتبدّل تلقائياً كل 5 ثوانٍ
 const HERO_TEXTS = [
   "نهدف إلى إجازة مليون شخص حول العالم بسورة الفاتحة: قراءةً وفهماً",
   "We aim to certify one million people around the world in Surah Al-Fatiha: reading and understanding.",
@@ -20,54 +20,108 @@ const HERO_TEXTS = [
   "Kami bertujuan untuk mensertifikasi satu juta orang di seluruh dunia dalam Surah Al-Fatihah: membaca dan memahami.",
 ];
 
+/** الواجهة الرئيسية: هيرو «مصحفي» فاخر بقوس محراب وتوهّج ذهبي. */
 export function Hero() {
   const { t, openLanguageModal } = useI18n();
-  const { isAuthed, user } = useAuth();
-  const isAdmin = user?.role === "Admin";
-  const [heroIndex, setHeroIndex] = useState(0);
+  const { isAuthed, isAdmin } = useAuth();
+  const [index, setIndex] = useState(0);
 
   useEffect(() => {
-    const id = setInterval(() => setHeroIndex((i) => (i + 1) % HERO_TEXTS.length), 4000);
+    if (typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
+      return;
+    }
+    const id = setInterval(() => setIndex((i) => (i + 1) % HERO_TEXTS.length), 5000);
     return () => clearInterval(id);
   }, []);
 
   return (
-    <section className="fh-hero">
-      <div className="fh-hero__bg" style={{ backgroundImage: "url('/image1.jpg')" }} />
-      <div className="fh-hero__overlay" />
+    <section className="fhx-hero">
+      <div className="fhx-hero__bg" aria-hidden="true" />
+      <div className="fhx-hero__veil" aria-hidden="true" />
+      <div className="fhx-hero__pattern" aria-hidden="true" />
 
-      <div className="fh-hero__inner">
-        <span className="fh-hero__badge">
-          <i className="fas fa-certificate"></i>
-          {t("Fatiha.ID: Your Gateway to Quranic Mastery")}
-        </span>
+      <div className="fhx-shell fhx-hero__innr">
+        <div className="fhx-hero__copy">
+          <span className="fhx-hero__eyebrow">
+            <span className="fhx-ic"><i className="fas fa-mosque" aria-hidden="true" /></span>
+            {t("Fatiha.ID: Your Gateway to Quranic Mastery")}
+          </span>
 
-        <h1 className="fh-hero__title" key={heroIndex}>
-          {HERO_TEXTS[heroIndex]}
-        </h1>
+          <p className="fhx-hero__bismillah">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</p>
 
-        <div className="fh-hero__actions">
-          {isAuthed && !isAdmin && (
-            <Link href="/fatiha-requests/new" className="fh-btn fh-btn--primary">
-              <i className="fas fa-file-signature"></i>
-              {t("Apply for Fatiha")}
+          <h1 className="fhx-hero__title" key={index}>{HERO_TEXTS[index]}</h1>
+
+          <div className="fhx-hero__rule" aria-hidden="true"><span /></div>
+
+          <p className="fhx-hero__sub">
+            {t(
+              "Recite Surah Al-Fatiha with precision, understand its meanings, and earn a certified Ijazah from anywhere in the world."
+            )}
+          </p>
+
+          <div className="fhx-hero__cta">
+            {!isAuthed && (
+              <Link href="/login" className="fhx-btn fhx-btn--gold">
+                <i className="fas fa-right-to-bracket" aria-hidden="true" />
+                {t("Login to Apply for Fatiha")}
+              </Link>
+            )}
+            {isAuthed && !isAdmin && (
+              <Link href="/fatiha-requests/new" className="fhx-btn fhx-btn--gold">
+                <i className="fas fa-file-signature" aria-hidden="true" />
+                {t("Apply for Fatiha")}
+              </Link>
+            )}
+            {isAdmin && (
+              <Link href="/admin" className="fhx-btn fhx-btn--gold">
+                <i className="fas fa-gauge-high" aria-hidden="true" />
+                {t("Admin Panel")}
+              </Link>
+            )}
+
+            <Link href="/al-qerat" className="fhx-btn fhx-btn--ghost">
+              <i className="fas fa-headphones-simple" aria-hidden="true" />
+              {t("Listen to the Ten Qiraat")}
             </Link>
-          )}
-          {!isAuthed && (
-            <Link href="/login" className="fh-btn fh-btn--primary">
-              <i className="fas fa-right-to-bracket"></i>
-              {t("Login to Apply for Fatiha")}
-            </Link>
-          )}
-          <button type="button" className="fh-btn fh-btn--ghost" onClick={openLanguageModal}>
-            <i className="fas fa-globe"></i>
-            {t("Languages")}
-          </button>
+
+            <button type="button" className="fhx-btn fhx-btn--ghost" onClick={openLanguageModal}>
+              <i className="fas fa-globe" aria-hidden="true" />
+              {t("Languages")}
+            </button>
+          </div>
+
+          <div className="fhx-hero__meta">
+            <span className="fhx-hero__meta-item">
+              <span className="fhx-ic"><i className="fas fa-book-quran" aria-hidden="true" /></span>
+              {t("Ten Qiraat")}
+            </span>
+            <span className="fhx-hero__meta-item">
+              <span className="fhx-ic"><i className="fas fa-certificate" aria-hidden="true" /></span>
+              {t("Certified Ijazah")}
+            </span>
+            <span className="fhx-hero__meta-item">
+              <span className="fhx-ic"><i className="fas fa-globe" aria-hidden="true" /></span>
+              {t("Worldwide")}
+            </span>
+          </div>
+        </div>
+
+        <div className="fhx-arch-wrap" aria-hidden="true">
+          <div className="fhx-arch">
+            <span className="fhx-arch__kicker">{t("Mother of the Book")}</span>
+            <h2 className="fhx-arch__title">الفَاتِحَة</h2>
+            <div className="fhx-arch__divider"><i className="fas fa-star" /></div>
+            <p className="fhx-arch__verse">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</p>
+            <p className="fhx-arch__note">
+              {t("The Opening of the Book — seven verses recited in every prayer.")}
+            </p>
+            <span className="fhx-arch__seal"><i className="fas fa-kaaba" /></span>
+          </div>
         </div>
       </div>
 
-      <a href="#fh-stats" className="fh-hero__scroll" aria-label="scroll">
-        <i className="fas fa-chevron-down"></i>
+      <a href="#fh-stats" className="fhx-hero__scroll" aria-label={t("Scroll down")}>
+        <i className="fas fa-chevron-down" aria-hidden="true" />
       </a>
     </section>
   );
