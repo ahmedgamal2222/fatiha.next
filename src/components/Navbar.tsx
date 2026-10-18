@@ -165,7 +165,7 @@ export function Navbar() {
             <nav className="fhx-nav" aria-label={t("Main navigation")}>
               <Link href="/" className={`fhx-nav__link${isActive("/") ? " is-active" : ""}`} aria-current={isActive("/") ? "page" : undefined}>
                 <span className="fhx-nav__ic"><i className="fas fa-house" aria-hidden="true" /></span>
-                <span className="fhx-nav__label">{lang === "ar" ? "الرئيسة" : t("Home")}</span>
+                <span className="fhx-nav__label">{t("Home")}</span>
               </Link>
 
               {isAuthed && !isAdmin && (
@@ -378,7 +378,7 @@ export function Navbar() {
             </div>
             <Link href="/" className={`fhx-dlink${isActive("/") ? " is-active" : ""}`} onClick={() => setDrawer(false)}>
               <span className="fhx-dlink__ic"><i className="fas fa-house" aria-hidden="true" /></span>
-              <span>{lang === "ar" ? "الرئيسة" : t("Home")}</span>
+              <span>{t("Home")}</span>
             </Link>
             <Link href="/al-qerat" className={`fhx-dlink${isActive("/al-qerat") ? " is-active" : ""}`} onClick={() => setDrawer(false)}>
               <span className="fhx-dlink__ic"><i className="fas fa-book-quran" aria-hidden="true" /></span>

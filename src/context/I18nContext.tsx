@@ -32,7 +32,7 @@ const TRANSLATION_API = `${API_BASE}/api/Language/GetTranslation`;
 
 // احتياطي محلي لبعض المفاتيح الأساسية عند تعذّر تحميل الترجمة
 const FALLBACK: Record<string, Partial<Record<Lang, string>>> = {
-  Home: { ar: "الرئيسة", en: "Home" },
+  Home: { ar: "الرئيسية", en: "Home" },
   "Log in": { ar: "تسجيل الدخول", en: "Log in" },
   Register: { ar: "إنشاء حساب", en: "Register" },
   "Log out": { ar: "تسجيل الخروج", en: "Log out" },
@@ -256,11 +256,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 
   const toggle = useCallback(() => setLang(lang === "ar" ? "en" : "ar"), [lang, setLang]);
 
-  const t = useCallback((key: string) => {
-    // ضمان التسمية المطلوبة للصفحة الرئيسة حتى مع قاموس خادم قديم
-    if (key === "Home" && lang === "ar") return "الرئيسة";
-    return dict[key] ?? FALLBACK[key]?.[lang] ?? key;
-  }, [dict, lang]);
+  const t = useCallback((key: string) => dict[key] ?? FALLBACK[key]?.[lang] ?? key, [dict, lang]);
 
   return (
     <Ctx.Provider
