@@ -173,6 +173,26 @@ const FALLBACK: Record<string, Partial<Record<Lang, string>>> = {
     ar: "منصة عالمية لتلاوة سورة الفاتحة بإتقان، وفهم معانيها، والحصول على إجازة موثّقة في إحدى القراءات العشر.",
     en: "A global platform to recite Surah Al-Fatiha accurately, understand its meanings, and earn a certified Ijazah in one of the ten Qiraat.",
   },
+  "Explore curated books and resources about Surah Al-Fatiha, its meanings, and the ten Qiraat.": {
+    ar: "استكشف كتباً وموارد مختارة عن سورة الفاتحة ومعانيها والقراءات العشر.",
+    en: "Explore curated books and resources about Surah Al-Fatiha, its meanings, and the ten Qiraat.",
+  },
+  Book: { ar: "كتاب", en: "Book" },
+  "Back to Library": { ar: "العودة إلى المكتبة", en: "Back to Library" },
+  "Insights and reflections on Surah Al-Fatiha, its meanings, and the Quranic sciences.": {
+    ar: "مقالات وتأملات حول سورة الفاتحة ومعانيها وعلوم القرآن الكريم.",
+    en: "Insights and reflections on Surah Al-Fatiha, its meanings, and the Quranic sciences.",
+  },
+  "Discover books, gifts, and resources that support your journey with Surah Al-Fatiha.": {
+    ar: "اكتشف كتباً وهدايا وموارد تدعم رحلتك مع سورة الفاتحة.",
+    en: "Discover books, gifts, and resources that support your journey with Surah Al-Fatiha.",
+  },
+  "Search Blogs": { ar: "ابحث في المدونة", en: "Search Blogs" },
+  "Buy now": { ar: "اشترِ الآن", en: "Buy now" },
+  "Back to Blog": { ar: "العودة إلى المدونة", en: "Back to Blog" },
+  "Back to Marketplace": { ar: "العودة إلى المتجر", en: "Back to Marketplace" },
+  Product: { ar: "منتج", en: "Product" },
+  Price: { ar: "السعر", en: "Price" },
 };
 
 interface I18nCtx {

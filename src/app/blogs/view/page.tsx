@@ -1,8 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { api } from "@/lib/api";
+import { api, fileUrl } from "@/lib/api";
 import { useI18n } from "@/context/I18nContext";
 
 interface Blog {
@@ -26,48 +27,100 @@ function BlogDetail() {
       setLoading(false);
       return;
     }
-    api
-      .get<Blog>(`/api/blogs/${id}`, false)
+    api.get<Blog>(`/api/blogs/${id}`, false)
       .then((r) => setBlog(r.data ?? null))
       .catch(() => setBlog(null))
       .finally(() => setLoading(false));
   }, [id]);
 
-  if (loading) return <div className="container py-5 min-vh-100">{t("Loading...")}</div>;
-  if (!blog) return <div className="container py-5 min-vh-100">{t("No data")}</div>;
+  if (loading) {
+    return (
+      <div className="fh-page">
+        <div className="fh-container" style={{ paddingTop: 40 }}>
+          <div className="fh-empty">
+            <i className="fas fa-spinner fa-spin" aria-hidden="true" />
+            <p className="mb-0">{t("Loading...")}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!blog) {
+    return (
+      <div className="fh-page">
+        <header className="fh-page__header">
+          <div className="fh-container">
+            <span className="fh-page__icon"><i className="fas fa-newspaper" aria-hidden="true" /></span>
+            <h1 className="fh-page__title">{t("No data")}</h1>
+          </div>
+        </header>
+        <div className="fh-container">
+          <Link href="/blogs" className="btn btn-primary">
+            <i className="fas fa-arrow-right fhx-back-icon" aria-hidden="true" />
+            {t("Back to Blog")}
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const cover = fileUrl(blog.coverImage);
 
   return (
-    <div className="container py-5 min-vh-100 bg-light">
-      <div className="mx-auto" style={{ maxWidth: 760 }}>
-        <article className="card shadow-sm border-0 rounded-4">
-          {blog.coverImage ? (
-            /* eslint-disable-next-line @next/next/no-img-element */
-            <img src={blog.coverImage} alt={blog.title} className="card-img-top rounded-top-4" style={{ maxHeight: 380, objectFit: "cover" }} />
+    <div className="fh-page">
+      <header className="fh-page__header">
+        <div className="fh-container">
+          <span className="fh-page__icon"><i className="fas fa-newspaper" aria-hidden="true" /></span>
+          <h1 className="fh-page__title">{blog.title}</h1>
+          <p className="fh-page__subtitle">
+            <i className="fas fa-eye" aria-hidden="true" />
+            {" "}{blog.reads} {t("Reads")}
+          </p>
+        </div>
+      </header>
+
+      <div className="fh-container">
+        <article className="fhx-article">
+          {cover ? (
+            <div className="fhx-article__cover">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={cover} alt={blog.title} />
+            </div>
           ) : null}
-          <div className="card-body p-4 p-md-5">
-            <h1 className="fw-bold text-primary">{blog.title}</h1>
-            <p className="text-muted small">
-              <i className="fas fa-eye me-1"></i>
-              {blog.reads} {t("Reads")}
-            </p>
-            <hr />
-            <div dangerouslySetInnerHTML={{ __html: blog.body }} />
-            {blog.images && blog.images.length > 0 && (
-              <div className="row g-3 mt-4">
-                {blog.images.map((src, i) => (
-                  <div className="col-6 col-md-4" key={i}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={src}
-                      alt=""
-                      className="w-100 rounded-3 border"
-                      style={{ height: 150, objectFit: "cover", cursor: "pointer" }}
-                      onClick={() => window.open(src, "_blank")}
-                    />
-                  </div>
-                ))}
+
+          <div className="fh-card">
+            <div className="fh-card__body fhx-article__body">
+              <div className="fhx-article__content" dangerouslySetInnerHTML={{ __html: blog.body }} />
+
+              {blog.images && blog.images.length > 0 && (
+                <div className="fhx-article__gallery">
+                  {blog.images.map((src, i) => {
+                    const thumb = fileUrl(src);
+                    if (!thumb) return null;
+                    return (
+                      <button
+                        type="button"
+                        key={`${src}-${i}`}
+                        className="fhx-book-detail__thumb"
+                        onClick={() => window.open(thumb, "_blank")}
+                        aria-label={t("View Details")}
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={thumb} alt="" loading="lazy" />
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
+              <div className="fhx-article__foot">
+                <Link href="/blogs" className="btn btn-outline-primary">
+                  <i className="fas fa-arrow-right fhx-back-icon" aria-hidden="true" />
+                  {t("Back to Blog")}
+                </Link>
               </div>
-            )}
+            </div>
           </div>
         </article>
       </div>
@@ -77,7 +130,7 @@ function BlogDetail() {
 
 export default function BlogDetailPage() {
   return (
-    <Suspense fallback={<div className="container py-5 min-vh-100" />}>
+    <Suspense fallback={<div className="fh-page" />}>
       <BlogDetail />
     </Suspense>
   );

@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
-import { api } from "@/lib/api";
+import { api, fileUrl } from "@/lib/api";
 import { useI18n } from "@/context/I18nContext";
 
 interface Book {
@@ -16,6 +17,7 @@ interface Book {
   images?: string[];
 }
 
+/** مكتبة الفاتحة — بنفس هوية الموقع (عاجي/زمردي/ذهبي). */
 export default function BooksPage() {
   const { t } = useI18n();
   const [items, setItems] = useState<Book[]>([]);
@@ -39,49 +41,76 @@ export default function BooksPage() {
   }
 
   return (
-    <div className="container py-5 min-vh-100 bg-light">
-      <h2 className="fw-bold text-primary mb-4">{t("Fatiha Library")}</h2>
+    <div className="fh-page">
+      <header className="fh-page__header">
+        <div className="fh-container">
+          <span className="fh-page__icon"><i className="fas fa-book-open-reader" aria-hidden="true" /></span>
+          <h1 className="fh-page__title">{t("Fatiha Library")}</h1>
+          <p className="fh-page__subtitle">
+            {t("Explore curated books and resources about Surah Al-Fatiha, its meanings, and the ten Qiraat.")}
+          </p>
+        </div>
+      </header>
 
-      {loading ? (
-        <p className="text-muted">{t("Loading...")}</p>
-      ) : items.length === 0 ? (
-        <div className="text-center py-5 text-muted">
-          <i className="fas fa-book fa-3x mb-3"></i>
-          <p>{t("No books available at the moment.")}</p>
-        </div>
-      ) : (
-        <div className="row g-4">
-          {items.map((b) => (
-            <div className="col-12 col-sm-6 col-lg-3" key={b.id}>
-              <div className="card h-100 shadow-sm border-0 rounded-4">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={b.cover || "/hero-img.jpg"}
-                  alt={b.title}
-                  className="card-img-top rounded-top-4"
-                  style={{ height: 240, objectFit: "cover" }}
-                />
-                <div className="card-body d-flex flex-column">
-                  <h5 className="card-title fw-bold text-truncate">{b.title}</h5>
-                  <p className="card-text text-muted small mb-3">
-                    {b.publisher || b.author || ""} {b.year ? `(${b.year})` : ""}
-                  </p>
-                  <div className="mt-auto d-flex justify-content-between align-items-center">
-                    <span className="small text-muted">
-                      <i className="fas fa-eye me-1"></i>
-                      {b.visits} · <i className="fas fa-download me-1"></i>
-                      {b.downloads}
+      <div className="fh-container">
+        {loading ? (
+          <div className="fh-empty">
+            <i className="fas fa-spinner fa-spin" aria-hidden="true" />
+            <p className="mb-0">{t("Loading...")}</p>
+          </div>
+        ) : items.length === 0 ? (
+          <div className="fh-empty">
+            <i className="fas fa-book" aria-hidden="true" />
+            <p className="mb-0">{t("No books available at the moment.")}</p>
+          </div>
+        ) : (
+          <div className="fhx-books">
+            {items.map((b) => {
+              const cover = fileUrl(b.cover) ?? "/hero-img.jpg";
+              const meta = [b.author, b.publisher, b.year ? String(b.year) : ""].filter(Boolean).join(" · ");
+              return (
+                <article className="fhx-book" key={b.id}>
+                  <Link href={`/books/view?id=${b.id}`} className="fhx-book__cover" aria-label={b.title}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={cover} alt={b.title} loading="lazy" />
+                    <span className="fhx-book__spine" aria-hidden="true" />
+                    <span className="fhx-book__badge">
+                      <i className="fas fa-book" aria-hidden="true" />
+                      {t("Book")}
                     </span>
-                    <button className="btn btn-primary btn-sm" onClick={() => download(b.id)}>
-                      {t("View Details")}
-                    </button>
+                  </Link>
+
+                  <div className="fhx-book__body">
+                    <h2 className="fhx-book__title">{b.title}</h2>
+                    {meta ? <p className="fhx-book__meta">{meta}</p> : null}
+
+                    <div className="fhx-book__stats">
+                      <span><i className="fas fa-eye" aria-hidden="true" />{b.visits}</span>
+                      <span><i className="fas fa-download" aria-hidden="true" />{b.downloads}</span>
+                    </div>
+
+                    <div className="fhx-book__actions">
+                      <Link href={`/books/view?id=${b.id}`} className="btn btn-primary btn-sm flex-grow-1">
+                        <i className="fas fa-book-open" aria-hidden="true" />
+                        {t("View Details")}
+                      </Link>
+                      <button
+                        type="button"
+                        className="btn btn-outline-primary btn-sm"
+                        onClick={() => download(b.id)}
+                        title={t("Download")}
+                        aria-label={t("Download")}
+                      >
+                        <i className="fas fa-download" aria-hidden="true" />
+                      </button>
+                    </div>
                   </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+                </article>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

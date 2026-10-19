@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { api } from "@/lib/api";
+import { api, fileUrl } from "@/lib/api";
 import { useI18n } from "@/context/I18nContext";
 
 interface Product {
@@ -17,58 +17,101 @@ interface Product {
   marketCategoryId: number;
 }
 
+function money(value: number) {
+  return value.toLocaleString(undefined, { maximumFractionDigits: 2 });
+}
+
+/** متجر الفاتحة — بطاقات منتجات بنفس هوية الموقع. */
 export default function MarketplacePage() {
   const { t } = useI18n();
   const [items, setItems] = useState<Product[]>([]);
+  const [cats, setCats] = useState<Record<number, string>>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api
-      .get<Product[]>("/api/marketplace", false)
+    api.get<Product[]>("/api/marketplace", false)
       .then((r) => setItems(r.data ?? []))
       .catch(() => setItems([]))
       .finally(() => setLoading(false));
+    api.get<Array<{ id: number; name: string }>>("/api/marketplace/categories", false)
+      .then((r) => {
+        const map: Record<number, string> = {};
+        (r.data ?? []).forEach((c) => { map[c.id] = c.name; });
+        setCats(map);
+      })
+      .catch(() => setCats({}));
   }, []);
 
   return (
-    <div className="container py-5 min-vh-100 bg-light">
-      <h2 className="fw-bold text-primary mb-4">{t("Fatiha Marketplace")}</h2>
-
-      {loading ? (
-        <p className="text-muted">{t("Loading...")}</p>
-      ) : items.length === 0 ? (
-        <div className="text-center py-5 text-muted">
-          <i className="fas fa-store fa-3x mb-3"></i>
-          <p>{t("No products available at the moment.")}</p>
+    <div className="fh-page">
+      <header className="fh-page__header">
+        <div className="fh-container">
+          <span className="fh-page__icon"><i className="fas fa-store" aria-hidden="true" /></span>
+          <h1 className="fh-page__title">{t("Fatiha Marketplace")}</h1>
+          <p className="fh-page__subtitle">
+            {t("Discover books, gifts, and resources that support your journey with Surah Al-Fatiha.")}
+          </p>
         </div>
-      ) : (
-        <div className="row g-4">
-          {items.map((p) => (
-            <div className="col-12 col-sm-6 col-lg-3" key={p.id}>
-              <Link href={`/marketplace/view?id=${p.id}`} className="text-decoration-none">
-                <div className="card h-100 shadow-sm border-0 rounded-4">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={p.imageUrl || "/cta.jpg"}
-                    alt={p.title}
-                    className="card-img-top rounded-top-4"
-                    style={{ height: 200, objectFit: "cover" }}
-                  />
-                  <div className="card-body d-flex flex-column">
-                    <h5 className="card-title fw-bold text-truncate text-dark">{p.title}</h5>
-                    {(p.shortDescription || p.description) && (
-                      <p className="card-text text-muted small mb-3">{(p.shortDescription || p.description || "").slice(0, 80)}</p>
+      </header>
+
+      <div className="fh-container">
+        {loading ? (
+          <div className="fh-empty">
+            <i className="fas fa-spinner fa-spin" aria-hidden="true" />
+            <p className="mb-0">{t("Loading...")}</p>
+          </div>
+        ) : items.length === 0 ? (
+          <div className="fh-empty">
+            <i className="fas fa-store" aria-hidden="true" />
+            <p className="mb-0">{t("No products available at the moment.")}</p>
+          </div>
+        ) : (
+          <div className="fhx-products">
+            {items.map((p) => {
+              const img = fileUrl(p.imageUrl) ?? "/cta.jpg";
+              const hasDiscount = p.discountedPrice != null && p.discountedPrice < p.price;
+              const current = hasDiscount ? Number(p.discountedPrice) : p.price;
+              const discount = hasDiscount ? Math.round((1 - current / p.price) * 100) : 0;
+              return (
+                <article className="fhx-product" key={p.id}>
+                  <Link href={`/marketplace/view?id=${p.id}`} className="fhx-product__media" aria-label={p.title}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={img} alt={p.title} loading="lazy" />
+                    <span className="fhx-product__badge">
+                      <i className="fas fa-store" aria-hidden="true" />
+                      {t("Product")}
+                    </span>
+                    {discount > 0 && <span className="fhx-product__off">-{discount}%</span>}
+                  </Link>
+
+                  <div className="fhx-product__body">
+                    {cats[p.marketCategoryId] && (
+                      <span className="fhx-product__cat">{cats[p.marketCategoryId]}</span>
                     )}
-                    <div className="mt-auto fw-bold text-primary fs-5">
-                      {p.price} {p.currencyCode || "USD"}
+                    <h2 className="fhx-product__title">
+                      <Link href={`/marketplace/view?id=${p.id}`}>{p.title}</Link>
+                    </h2>
+                    {(p.shortDescription || p.description) && (
+                      <p className="fhx-product__desc">{(p.shortDescription || p.description)?.slice(0, 90)}</p>
+                    )}
+
+                    <div className="fhx-product__foot">
+                      <div className="fhx-product__price">
+                        <strong>{money(current)} {p.currencyCode || "USD"}</strong>
+                        {hasDiscount && <s>{money(p.price)}</s>}
+                      </div>
+                      <Link href={`/marketplace/view?id=${p.id}`} className="btn btn-primary btn-sm">
+                        <i className="fas fa-bag-shopping" aria-hidden="true" />
+                        {t("View Details")}
+                      </Link>
                     </div>
                   </div>
-                </div>
-              </Link>
-            </div>
-          ))}
-        </div>
-      )}
+                </article>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

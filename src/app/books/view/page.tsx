@@ -1,8 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { api } from "@/lib/api";
+import { api, fileUrl } from "@/lib/api";
 import { useI18n } from "@/context/I18nContext";
 
 interface Book {
@@ -31,7 +32,10 @@ function BookDetail() {
       setLoading(false);
       return;
     }
-    api.get<Book>(`/api/books/${id}`, false).then((r) => setB(r.data ?? null)).catch(() => setB(null)).finally(() => setLoading(false));
+    api.get<Book>(`/api/books/${id}`, false)
+      .then((r) => setB(r.data ?? null))
+      .catch(() => setB(null))
+      .finally(() => setLoading(false));
   }, [id]);
 
   async function download() {
@@ -44,37 +48,104 @@ function BookDetail() {
     }
   }
 
-  if (loading) return <div className="container py-5 min-vh-100">{t("Loading...")}</div>;
-  if (!b) return <div className="container py-5 min-vh-100">{t("Book not found")}</div>;
+  if (loading) {
+    return (
+      <div className="fh-page">
+        <div className="fh-container" style={{ paddingTop: 40 }}>
+          <div className="fh-empty">
+            <i className="fas fa-spinner fa-spin" aria-hidden="true" />
+            <p className="mb-0">{t("Loading...")}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!b) {
+    return (
+      <div className="fh-page">
+        <header className="fh-page__header">
+          <div className="fh-container">
+            <span className="fh-page__icon"><i className="fas fa-book-circle-question" aria-hidden="true" /></span>
+            <h1 className="fh-page__title">{t("Book not found")}</h1>
+          </div>
+        </header>
+        <div className="fh-container">
+          <Link href="/books" className="btn btn-primary">
+            <i className="fas fa-arrow-right fhx-back-icon" aria-hidden="true" />
+            {t("Back to Library")}
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const cover = fileUrl(b.cover) ?? "/hero-img.jpg";
+  const meta = [b.author, b.publisher, b.year ? String(b.year) : ""].filter(Boolean).join(" · ");
 
   return (
-    <div className="container py-5 min-vh-100 bg-light">
-      <div className="row g-4">
-        <div className="col-lg-4">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={b.cover || "/hero-img.jpg"} alt={b.title} className="img-fluid rounded-4 shadow-sm w-100" style={{ objectFit: "cover" }} />
+    <div className="fh-page">
+      <header className="fh-page__header">
+        <div className="fh-container">
+          <span className="fh-page__icon"><i className="fas fa-book-open" aria-hidden="true" /></span>
+          <h1 className="fh-page__title">{b.title}</h1>
+          {meta ? <p className="fh-page__subtitle">{meta}</p> : null}
         </div>
-        <div className="col-lg-8">
-          <h1 className="fw-bold text-primary">{b.title}</h1>
-          <p className="text-muted mb-2">
-            {b.author} {b.publisher ? `· ${b.publisher}` : ""} {b.year ? `(${b.year})` : ""}
-          </p>
-          <p className="small text-muted">
-            <i className="fas fa-eye me-1"></i>{b.visits} · <i className="fas fa-download me-1"></i>{b.downloads}
-          </p>
-          {b.images && b.images.length > 0 && (
-            <div className="d-flex gap-2 mt-3 flex-wrap">
-              {b.images.map((src, i) => (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img key={i} src={src} alt="" width={78} height={78} className="rounded-3 border" style={{ objectFit: "cover" }} onClick={() => window.open(src, "_blank")} />
-              ))}
+      </header>
+
+      <div className="fh-container">
+        <div className="fhx-book-detail">
+          <div className="fhx-book-detail__cover">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={cover} alt={b.title} />
+            <span className="fhx-book__spine" aria-hidden="true" />
+          </div>
+
+          <div className="fh-card fhx-book-detail__panel">
+            <div className="fh-card__body">
+              <div className="fhx-book-detail__stats">
+                <span><i className="fas fa-eye" aria-hidden="true" />{b.visits}</span>
+                <span><i className="fas fa-download" aria-hidden="true" />{b.downloads}</span>
+                <span><i className="fas fa-book" aria-hidden="true" />{t("Book")}</span>
+              </div>
+
+              {b.images && b.images.length > 0 && (
+                <div className="fhx-book-detail__gallery">
+                  {b.images.map((src, i) => {
+                    const thumb = fileUrl(src);
+                    if (!thumb) return null;
+                    return (
+                      <button
+                        type="button"
+                        key={`${src}-${i}`}
+                        onClick={() => window.open(thumb, "_blank")}
+                        className="fhx-book-detail__thumb"
+                        aria-label={t("View Details")}
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={thumb} alt="" loading="lazy" />
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
+              {b.description ? (
+                <p className="fhx-book-detail__desc">{b.description}</p>
+              ) : null}
+
+              <div className="fhx-book-detail__actions">
+                <button type="button" className="btn btn-primary" onClick={download}>
+                  <i className="fas fa-download" aria-hidden="true" />
+                  {t("Download / View")}
+                </button>
+                <Link href="/books" className="btn btn-outline-primary">
+                  <i className="fas fa-arrow-right fhx-back-icon" aria-hidden="true" />
+                  {t("Back to Library")}
+                </Link>
+              </div>
             </div>
-          )}
-          {b.description && <p style={{ whiteSpace: "pre-wrap" }}>{b.description}</p>}
-          <button className="btn btn-primary mt-3" onClick={download}>
-            <i className="fas fa-download me-2"></i>
-            {t("Download / View")}
-          </button>
+          </div>
         </div>
       </div>
     </div>
@@ -83,7 +154,7 @@ function BookDetail() {
 
 export default function BookDetailsPage() {
   return (
-    <Suspense fallback={<div className="container py-5 min-vh-100" />}>
+    <Suspense fallback={<div className="fh-page" />}>
       <BookDetail />
     </Suspense>
   );
